@@ -31,9 +31,6 @@ class PublishingLibraryConventionPlugin : Plugin<Project> {
                 extensions.configure<PublishingExtension> {
                     repositories {
                         maven {
-                            setUrl("https://repository.map.naver.com/archive/maven")
-                        }
-                        maven {
                             val props = Properties().apply {
                                 load(rootProject.file("github.properties").inputStream())
                             }

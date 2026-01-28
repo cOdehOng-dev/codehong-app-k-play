@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.codehong.android.application.compose)
+    alias(libs.plugins.secrets.gradle.plugin)
 }
 
 android {
@@ -8,15 +9,16 @@ android {
     defaultConfig {
         applicationId = project.properties["APP_ID"].toString()
         versionName = project.properties["VERSION_NAME"].toString()
+
     }
 }
 
-dependencies {
+secrets {
+    propertiesFileName = "secrets.properties"
+}
 
-//    debugImplementation(project(":Widget"))
-//    implementation(project(":Widget"))
-//    implementation(codehonglibs.widget)
-//    implementation("com.codehong.library:widget:2.5.6")
+dependencies {
+    implementation(codehonglibs.widget)
 
     implementation(libs.androidx.multidex)
     implementation(libs.androidx.fragment.ktx)
@@ -55,6 +57,14 @@ dependencies {
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.haze)
     implementation(libs.naver.map.compose)
+    implementation(libs.naver.map.location)
+    implementation(libs.naver.map.sdk)
+    implementation(libs.play.services.location)
+
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.exoplayer.hls)
+    implementation(libs.androidx.media3.datasource)
 
 
     debugImplementation(libs.androidx.compose.tooling)

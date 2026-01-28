@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.jetbrains.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.compose.compiler) apply false
+    alias(libs.plugins.secrets.gradle.plugin) apply false
 }
 
 buildscript {

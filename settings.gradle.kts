@@ -20,6 +20,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven("https://repository.map.naver.com/archive/maven")
+
         maven {
             url = uri(githubProperties.getProperty("url"))
             credentials {
@@ -27,7 +29,6 @@ dependencyResolutionManagement {
                 password = githubProperties.getProperty("token")
             }
         }
-        maven("https://repository.map.naver.com/archive/maven")
     }
     versionCatalogs {
 //        create("libs") {

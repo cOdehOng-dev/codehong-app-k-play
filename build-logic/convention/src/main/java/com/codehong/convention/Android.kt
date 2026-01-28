@@ -79,6 +79,7 @@ internal fun Project.configureBuildTypes(
         when (extensionType) {
             ExtensionType.APPLICATION -> {
                 extensions.configure<ApplicationExtension> {
+                    val naverClientId = project.getStringProperty("NAVER_CLIENT_ID", "")
                     buildTypes {
                         debug {
                             isMinifyEnabled = false
@@ -94,6 +95,11 @@ internal fun Project.configureBuildTypes(
                                     enabled = false
                                 }
                             }
+                            buildConfigField(
+                                "String",
+                                "NAVER_CLIENT_ID",
+                                "\"$naverClientId\""
+                            )
                         }
                         release {
                             isMinifyEnabled = true
@@ -102,6 +108,12 @@ internal fun Project.configureBuildTypes(
 //                                commonExtension.getDefaultProguardFile("proguard-android-optimize.txt"),
 //                                "proguard-rules.pro"
 //                            )
+
+                            buildConfigField(
+                                "String",
+                                "NAVER_CLIENT_ID",
+                                "\"$naverClientId\""
+                            )
                             proguardFile("proguard-rules.pro")
                         }
                     }
@@ -110,6 +122,7 @@ internal fun Project.configureBuildTypes(
             ExtensionType.LIBRARY -> {
                 extensions.configure<LibraryExtension> {
                     val versionName = project.getStringProperty("VERSION_NAME", "")
+                    val naverClientId = project.getStringProperty("NAVER_CLIENT_ID", "")
 
                     buildTypes {
                         debug {
@@ -123,6 +136,11 @@ internal fun Project.configureBuildTypes(
                                 "VERSION_NAME",
                                 "\"$versionName\""
                             )
+                            buildConfigField(
+                                "String",
+                                "NAVER_CLIENT_ID",
+                                "\"$naverClientId\""
+                            )
                             tasks.whenTaskAdded {
                                 if (name == "lint") {
                                     enabled = false
@@ -131,6 +149,11 @@ internal fun Project.configureBuildTypes(
                         }
                         release {
                             isMinifyEnabled = false
+                            buildConfigField(
+                                "String",
+                                "NAVER_CLIENT_ID",
+                                "\"$naverClientId\""
+                            )
                             buildConfigField(
                                 "String",
                                 "VERSION_NAME",
