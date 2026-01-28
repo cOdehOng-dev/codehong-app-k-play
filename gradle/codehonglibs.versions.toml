@@ -1,0 +1,10 @@
+[versions]
+widget = "0.0.3.24-20250618.163944-SNAPSHOT"
+
+[plugins]
+
+[libraries]
+widget = { group = "com.codehong.library", name = "widget", version.ref = "widget" }
+
+[bundles]
+
