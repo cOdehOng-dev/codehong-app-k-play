@@ -1,6 +1,7 @@
 package com.codehong.app.kplay.main
 
 import androidx.lifecycle.viewModelScope
+import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.base.BaseViewModel
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.library.network.debug.TimberUtil
@@ -27,6 +28,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             TimberUtil.d("test here call api")
             performanceUseCase.getPerformanceList(
+                service = BuildConfig.KOKOR_CLIENT_ID,
                 startDate = "20260101",
                 endDate = "20260630",
                 currentPage = "1",

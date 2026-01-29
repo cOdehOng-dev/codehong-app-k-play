@@ -18,6 +18,7 @@ class PerformanceRepositoryImpl @Inject constructor(
 ) : PerformanceRepository {
 
     override fun getPerformanceList(
+        service: String,
         startDate: String,
         endDate: String,
         currentPage: String,
@@ -28,6 +29,7 @@ class PerformanceRepositoryImpl @Inject constructor(
         kidState: String?
     ): Flow<CallStatus<List<PerformanceInfoItem>?>> = flow {
         remote.getPerformanceList(
+            service,
             startDate,
             endDate,
             currentPage,

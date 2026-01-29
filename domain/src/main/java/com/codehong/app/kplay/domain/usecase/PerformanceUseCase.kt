@@ -12,6 +12,7 @@ class PerformanceUseCase @Inject constructor(
 ) {
 
     fun getPerformanceList(
+        service: String,
         startDate: String,
         endDate: String,
         currentPage: String,
@@ -22,6 +23,7 @@ class PerformanceUseCase @Inject constructor(
         kidState: String? = null
     ): Flow<List<PerformanceInfoItem>?> = flow {
         repository.getPerformanceList(
+            service,
             startDate,
             endDate,
             currentPage,

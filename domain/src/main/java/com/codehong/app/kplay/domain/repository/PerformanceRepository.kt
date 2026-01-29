@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface PerformanceRepository {
 
     fun getPerformanceList(
+        service: String,
         startDate: String,
         endDate: String,
         currentPage: String,

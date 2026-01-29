@@ -14,6 +14,7 @@ class PerformanceRemoteDataSource @Inject constructor(
 ) {
 
     fun getPerformanceList(
+        service: String,
         startDate: String,
         endDate: String,
         currentPage: String,
@@ -25,7 +26,7 @@ class PerformanceRemoteDataSource @Inject constructor(
     ): Flow<PerformanceListResponseDto> = flow {
         TimberUtil.e("test here pass !!")
         emit(kopisApiService.getPerformanceList(
-            service = "3260a56d2230459f83092198140f545c", // TODO API Key 관리 필요
+            service = service, // TODO API Key 관리 필요
             startDate = startDate,
             endDate = endDate,
             currentPage = currentPage,
