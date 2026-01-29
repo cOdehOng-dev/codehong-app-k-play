@@ -24,6 +24,7 @@ secrets {
 
 dependencies {
     implementation(codehonglibs.widget)
+    implementation(project(":data"))
     implementation(project(":domain"))
 
     implementation(libs.androidx.core.ktx)

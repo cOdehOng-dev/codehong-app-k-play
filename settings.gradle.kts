@@ -1,5 +1,7 @@
 import java.util.Properties
 
+
+
 val githubProperties = Properties().apply {
     load(file("github.properties").inputStream())
 }
@@ -48,4 +50,4 @@ dependencyResolutionManagement {
 rootProject.name = "codehong-app-k-play"
 include(":app")
 include(":domain")
-//include(":Widget")
+include(":data")
