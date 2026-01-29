@@ -1,7 +1,5 @@
 import java.util.Properties
 
-
-
 val githubProperties = Properties().apply {
     load(file("github.properties").inputStream())
 }

@@ -24,6 +24,7 @@ secrets {
 
 dependencies {
     implementation(codehonglibs.widget)
+    implementation(codehonglibs.network)
     implementation(project(":data"))
     implementation(project(":domain"))
 

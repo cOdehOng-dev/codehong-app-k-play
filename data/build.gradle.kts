@@ -10,6 +10,8 @@ android {
 dependencies {
     implementation(project(":domain"))
 
+    implementation(codehonglibs.network)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

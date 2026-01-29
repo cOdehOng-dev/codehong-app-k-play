@@ -7,7 +7,8 @@ android {
     namespace = "com.codehong.app.kplay.domain"
 }
 dependencies {
-    // coroutines
+    implementation(codehonglibs.network)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
