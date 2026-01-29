@@ -1,16 +1,21 @@
 import java.util.Properties
 
-
-
-
 val githubProperties = Properties().apply {
     load(file("github.properties").inputStream())
 }
 
 pluginManagement {
-    includeBuild("build-logic")
+    includeBuild("code-hong-submodule-build-logic/build-logic")
+
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenLocal()
         mavenCentral()
         gradlePluginPortal()
     }
@@ -31,18 +36,16 @@ dependencyResolutionManagement {
         }
     }
     versionCatalogs {
-//        create("libs") {
-//            from(files("gradle/libs.versions.toml"))
-//        }
+        create("libs") {
+            from(files("build-logic/gradle/libs.versions.toml"))
+        }
         create("codehonglibs") {
             from(files("gradle/codehonglibs.versions.toml"))
         }
     }
 }
 
-
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
 rootProject.name = "code-hong-app-k-play"
 include(":app")
+include(":domain")
 //include(":Widget")

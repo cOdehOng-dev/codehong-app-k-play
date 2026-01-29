@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.android.library) apply false
+//    alias(libs.plugins.codehong.android.test) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.jetbrains.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.compose.compiler) apply false
@@ -11,6 +12,6 @@ plugins {
 
 buildscript {
     dependencies {
-        classpath(libs.android.maven.gradle.plugin)
+//        classpath(libs.android.maven.gradle.plugin)
     }
 }
