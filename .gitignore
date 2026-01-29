@@ -17,4 +17,5 @@ local.properties
 github.properties
 secrets.properties
 
-.idea
+/.idea
+.idea/misc.xml
