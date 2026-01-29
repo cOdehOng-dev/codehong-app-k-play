@@ -42,6 +42,8 @@ dependencies {
     implementation(libs.naver.map.location)
     implementation(libs.naver.map.sdk)
 
+    implementation(libs.coil.compose)
+
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.exoplayer.hls)

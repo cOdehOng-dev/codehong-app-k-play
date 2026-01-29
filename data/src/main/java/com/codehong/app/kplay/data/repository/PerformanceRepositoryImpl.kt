@@ -6,6 +6,7 @@ import com.codehong.app.kplay.domain.model.CallStatus
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.repository.PerformanceRepository
 import com.codehong.library.network.debug.TimberUtil
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -41,6 +42,9 @@ class PerformanceRepositoryImpl @Inject constructor(
             TimberUtil.e("test here error 11 = $it")
             emit(CallStatus.Error(it))
         }.collect {
+            Gson().toJson(it)?.let { json ->
+                TimberUtil.d("test here response json = $json")
+            }
             TimberUtil.e("test here callback = $it")
             emit(CallStatus.Success(it.performances?.map { itemDto -> itemDto.asDomain() }))
         }

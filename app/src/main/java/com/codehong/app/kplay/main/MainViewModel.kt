@@ -17,8 +17,8 @@ class MainViewModel @Inject constructor(
 
     override fun handleEvents(event: MainEvent) {
         when (event) {
-            is MainEvent -> {
-                // Handle events here
+            is MainEvent.OnPerformanceClick -> {
+                setEffect { MainEffect.NavigateToDetail(event.item) }
             }
         }
     }
@@ -30,7 +30,7 @@ class MainViewModel @Inject constructor(
                 startDate = "20260101",
                 endDate = "20260630",
                 currentPage = "1",
-                rowsPerPage = "30"
+                rowsPerPage = "100"
             ).collect {
                 setState { copy(performanceList = it ?: emptyList()) }
             }
