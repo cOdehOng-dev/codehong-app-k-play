@@ -1,0 +1,3 @@
+[submodule "codehong-submodule-build-logic"]
+	path = codehong-submodule-build-logic
+	url = https://github.com/cOdehOng-dev/codehong-submodule-build-logic.git

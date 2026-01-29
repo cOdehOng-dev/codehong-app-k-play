@@ -5,7 +5,7 @@ val githubProperties = Properties().apply {
 }
 
 pluginManagement {
-    includeBuild("code-hong-submodule-build-logic/build-logic")
+    includeBuild("codehong-submodule-build-logic/build-logic")
 
     repositories {
         google {
@@ -37,7 +37,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            from(files("build-logic/gradle/libs.versions.toml"))
+            from(files("codehong-submodule-build-logic/gradle/libs.versions.toml"))
         }
         create("codehonglibs") {
             from(files("gradle/codehonglibs.versions.toml"))
