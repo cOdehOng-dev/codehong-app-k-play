@@ -45,7 +45,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "code-hong-app-k-play"
+rootProject.name = "codehong-app-k-play"
 include(":app")
 include(":domain")
 //include(":Widget")
