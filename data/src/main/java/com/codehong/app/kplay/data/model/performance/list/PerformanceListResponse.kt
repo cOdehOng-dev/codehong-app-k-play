@@ -1,14 +1,14 @@
-package com.codehong.app.kplay.data.model
+package com.codehong.app.kplay.data.model.performance.list
 
 import org.simpleframework.xml.ElementList
 import org.simpleframework.xml.Root
 
 @Root(name = "dbs", strict = false)
-data class PerformanceListResponseDto(
+data class PerformanceListResponse(
     @field:ElementList(
         entry = "db",
         inline = true,
         required = false
     )
-    var performances: List<PlayInfoItemDto>? = null
+    var performances: ArrayList<PerformanceItemDto>? = null
 )

@@ -1,10 +1,10 @@
-package com.codehong.app.kplay.data.model
+package com.codehong.app.kplay.data.model.performance.list
 
 import org.simpleframework.xml.Element
 import org.simpleframework.xml.Root
 
 @Root(name = "db", strict = false)
-data class PlayInfoItemDto(
+data class PerformanceItemDto(
 
     @field:Element(name = "mt20id", required = false)
     var id: String? = null,

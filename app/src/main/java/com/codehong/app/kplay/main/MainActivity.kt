@@ -19,15 +19,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +47,7 @@ import coil.compose.AsyncImage
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.ui.theme.CodehongappkplayTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -110,6 +116,30 @@ fun PerformanceListScreen(
             })
     }
 
+    val regions = remember(groupedPerformances) {
+        groupedPerformances.keys.toList()
+    }
+
+    val tabListState = rememberLazyListState()
+    val contentListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    val currentVisibleRegionIndex by remember {
+        derivedStateOf {
+            val firstVisibleItem = contentListState.firstVisibleItemIndex
+            (firstVisibleItem / 2).coerceIn(0, (regions.size - 1).coerceAtLeast(0))
+        }
+    }
+
+    LaunchedEffect(currentVisibleRegionIndex) {
+        if (regions.isNotEmpty()) {
+            tabListState.animateScrollToItem(
+                index = currentVisibleRegionIndex,
+                scrollOffset = -200
+            )
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -127,7 +157,23 @@ fun PerformanceListScreen(
                 )
             }
         } else {
+            RegionTabRow(
+                regions = regions,
+                selectedIndex = currentVisibleRegionIndex,
+                listState = tabListState,
+                onTabClick = { index ->
+                    coroutineScope.launch {
+                        tabListState.animateScrollToItem(
+                            index = index,
+                            scrollOffset = -200
+                        )
+                        contentListState.animateScrollToItem(index * 2)
+                    }
+                }
+            )
+
             LazyColumn(
+                state = contentListState,
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
                 groupedPerformances.forEach { (region, performanceList) ->
@@ -144,6 +190,54 @@ fun PerformanceListScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun RegionTabRow(
+    regions: List<String>,
+    selectedIndex: Int,
+    listState: LazyListState,
+    onTabClick: (Int) -> Unit
+) {
+    LazyRow(
+        state = listState,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFF2F2F7))
+            .padding(vertical = 12.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        itemsIndexed(regions) { index, region ->
+            RegionTab(
+                region = region,
+                isSelected = index == selectedIndex,
+                onClick = { onTabClick(index) }
+            )
+        }
+    }
+}
+
+@Composable
+fun RegionTab(
+    region: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(if (isSelected) Color.Black else Color.White)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = region,
+            fontSize = 14.sp,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (isSelected) Color.White else Color(0xFF8E8E93)
+        )
     }
 }
 

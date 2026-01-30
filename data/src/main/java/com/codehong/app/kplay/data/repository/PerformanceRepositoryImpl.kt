@@ -2,8 +2,10 @@ package com.codehong.app.kplay.data.repository
 
 import com.codehong.app.kplay.data.datasource.PerformanceRemoteDataSource
 import com.codehong.app.kplay.data.mapper.asDomain
+import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.CallStatus
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
 import com.codehong.app.kplay.domain.repository.PerformanceRepository
 import com.codehong.library.network.debug.TimberUtil
 import com.google.gson.Gson
@@ -17,6 +19,8 @@ class PerformanceRepositoryImpl @Inject constructor(
     private val remote: PerformanceRemoteDataSource
 ) : PerformanceRepository {
 
+    private val gson = Gson()
+
     override fun getPerformanceList(
         service: String,
         startDate: String,
@@ -24,7 +28,7 @@ class PerformanceRepositoryImpl @Inject constructor(
         currentPage: String,
         rowsPerPage: String,
         performanceState: String?,
-        cityCode: String?,
+        signGuCode: String?,
         signGuCodeSub: String?,
         kidState: String?
     ): Flow<CallStatus<List<PerformanceInfoItem>?>> = flow {
@@ -35,7 +39,7 @@ class PerformanceRepositoryImpl @Inject constructor(
             currentPage,
             rowsPerPage,
             performanceState,
-            cityCode,
+            signGuCode,
             signGuCodeSub,
             kidState
         ).onStart {
@@ -44,7 +48,7 @@ class PerformanceRepositoryImpl @Inject constructor(
             TimberUtil.e("test here error 11 = $it")
             emit(CallStatus.Error(it))
         }.collect {
-            Gson().toJson(it)?.let { json ->
+            gson.toJson(it)?.let { json ->
                 TimberUtil.d("test here response json = $json")
             }
             TimberUtil.e("test here callback = $it")
@@ -53,5 +57,46 @@ class PerformanceRepositoryImpl @Inject constructor(
     }.catch {
         TimberUtil.e("test here error 22 = $it")
         emit(CallStatus.Error(it))
+    }
+
+    override fun getPerformanceDetail(
+        serviceKey: String,
+        id: String
+    ): Flow<CallStatus<List<PerformanceDetail>?>> = flow {
+        remote.getPerformanceDetail(serviceKey, id)
+            .onStart {
+                emit(CallStatus.Loading)
+            }.catch { e ->
+                TimberUtil.e("test here getPerformanceDetail error 11 = $e")
+                emit(CallStatus.Error(e))
+            }.collect {
+                gson.toJson(it)?.let { json ->
+                    TimberUtil.d("test here getPerformanceDetail json = $json")
+                }
+                emit(CallStatus.Success(it.performances?.map { itemDto -> itemDto.asDomain() }))
+            }
+    }.catch { e ->
+        TimberUtil.e("test here getPerformanceDetail error 22 = $e")
+        emit(CallStatus.Error(e))
+    }
+
+    override fun getRankList(
+        serviceKey: String,
+        startDate: String,
+        endDate: String
+    ): Flow<CallStatus<List<BoxOfficeItem>?>> = flow {
+        remote.getBoxOffice(serviceKey, startDate, endDate)
+            .onStart {
+                emit(CallStatus.Loading)
+            }.catch { e ->
+                emit(CallStatus.Error(e))
+            }.collect {
+                gson.toJson(it)?.let { json ->
+                    TimberUtil.d("test here response json = $json")
+                }
+                emit(CallStatus.Success(it.boxOffices?.map { itemDto -> itemDto.asDomain() }))
+            }
+    }.catch { e ->
+        emit(CallStatus.Error(e))
     }
 }
