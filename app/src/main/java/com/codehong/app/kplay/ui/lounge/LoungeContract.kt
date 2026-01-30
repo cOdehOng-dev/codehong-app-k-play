@@ -4,14 +4,18 @@ import com.codehong.app.kplay.base.ViewEvent
 import com.codehong.app.kplay.base.ViewSideEffect
 import com.codehong.app.kplay.base.ViewState
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
+import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.GenreCode
+import com.codehong.app.kplay.domain.type.SignGuCode
 
 data class LoungeState(
     val selectedTab: BottomTab = BottomTab.HOME,
     val categories: List<GenreCode> = GenreCode.entries.toList(),
     val rankList: List<BoxOfficeItem> = emptyList(),
     val selectedRankTab: RankTab = RankTab.TOP_1_10,
-    val currentMonth: Int = 1
+    val currentMonth: Int = 1,
+    val myAreaList: List<PerformanceInfoItem> = emptyList(),
+    val selectedSignGuCode: SignGuCode = SignGuCode.SEOUL
 ) : ViewState
 
 sealed class LoungeEvent : ViewEvent {
@@ -19,12 +23,16 @@ sealed class LoungeEvent : ViewEvent {
     data class OnCategoryClick(val genreCode: GenreCode) : LoungeEvent()
     data class OnRankTabSelected(val rankTab: RankTab) : LoungeEvent()
     data class OnRankItemClick(val item: BoxOfficeItem) : LoungeEvent()
+    data object OnRefreshNearbyClick : LoungeEvent()
+    data class OnNearbyItemClick(val item: PerformanceInfoItem) : LoungeEvent()
+    data class OnSignGuCodeUpdated(val signGuCode: SignGuCode) : LoungeEvent()
 }
 
 sealed class LoungeEffect : ViewSideEffect {
     data class NavigateToCategory(val genreCode: GenreCode) : LoungeEffect()
     data class NavigateToPerformanceDetail(val performanceId: String) : LoungeEffect()
     data class ShowToast(val message: String) : LoungeEffect()
+    data object RequestLocationPermission : LoungeEffect()
 }
 
 enum class RankTab(

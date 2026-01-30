@@ -55,8 +55,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.codehong.app.kplay.R
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
+import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.GenreCode
+import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.library.widget.image.HongImageBuilder
 import com.codehong.library.widget.image.HongImageCompose
 
@@ -92,6 +95,12 @@ fun LoungeScreen(
         },
         onRankItemClick = { item ->
             viewModel.setEvent(LoungeEvent.OnRankItemClick(item))
+        },
+        onRefreshNearbyClick = {
+            viewModel.setEvent(LoungeEvent.OnRefreshNearbyClick)
+        },
+        onNearbyItemClick = { item ->
+            viewModel.setEvent(LoungeEvent.OnNearbyItemClick(item))
         }
     )
 }
@@ -102,7 +111,9 @@ private fun LoungeScreenContent(
     onTabSelected: (BottomTab) -> Unit,
     onCategoryClick: (GenreCode) -> Unit,
     onRankTabSelected: (RankTab) -> Unit,
-    onRankItemClick: (BoxOfficeItem) -> Unit
+    onRankItemClick: (BoxOfficeItem) -> Unit,
+    onRefreshNearbyClick: () -> Unit,
+    onNearbyItemClick: (PerformanceInfoItem) -> Unit
 ) {
     Scaffold(
         containerColor = BaeminBackground,
@@ -133,7 +144,9 @@ private fun LoungeScreenContent(
                     state = state,
                     onCategoryClick = onCategoryClick,
                     onRankTabSelected = onRankTabSelected,
-                    onRankItemClick = onRankItemClick
+                    onRankItemClick = onRankItemClick,
+                    onRefreshNearbyClick = onRefreshNearbyClick,
+                    onNearbyItemClick = onNearbyItemClick
                 )
                 BottomTab.SEARCH -> SearchContent()
                 BottomTab.BOOKMARK -> BookmarkContent()
@@ -445,7 +458,9 @@ private fun HomeContent(
     state: LoungeState,
     onCategoryClick: (GenreCode) -> Unit,
     onRankTabSelected: (RankTab) -> Unit,
-    onRankItemClick: (BoxOfficeItem) -> Unit
+    onRankItemClick: (BoxOfficeItem) -> Unit,
+    onRefreshNearbyClick: () -> Unit,
+    onNearbyItemClick: (PerformanceInfoItem) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -485,6 +500,17 @@ private fun HomeContent(
             CategoryGridNonLazy(
                 categories = state.categories,
                 onCategoryClick = onCategoryClick
+            )
+        }
+
+        // 내 주변 공연 섹션
+        item {
+            MyAreaSection(
+                currentMonth = state.currentMonth,
+                signGuCode = state.selectedSignGuCode,
+                myAreaList = state.myAreaList,
+                onRefreshClick = onRefreshNearbyClick,
+                onItemClick = onNearbyItemClick
             )
         }
 
@@ -618,6 +644,209 @@ private fun CategoryItem(
                 .padding(top = 6.dp)
                 .fillMaxWidth()
         )
+    }
+}
+
+// ===== 내 주변 공연 섹션 =====
+@Composable
+private fun MyAreaSection(
+    currentMonth: Int,
+    signGuCode: SignGuCode,
+    myAreaList: List<PerformanceInfoItem>,
+    onRefreshClick: () -> Unit,
+    onItemClick: (PerformanceInfoItem) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+    ) {
+        // 제목 영역
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${currentMonth}월 내 주변 공연",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = BaeminDarkGray
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0xFFF0F8F7))
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = signGuCode.displayName,
+                        fontSize = 12.sp,
+                        color = BaeminPrimary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            HongImageCompose(
+                HongImageBuilder()
+                    .width(15)
+                    .height(15)
+                    .imageInfo(R.drawable.ic_refresh)
+                    .onClick {
+                        onRefreshClick()
+                    }
+                    .applyOption()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 가로 스크롤 리스트
+        if (myAreaList.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "주변 공연 정보를 불러오는 중...",
+                    fontSize = 14.sp,
+                    color = BaeminGray
+                )
+            }
+        } else {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                itemsIndexed(
+                    items = myAreaList,
+                    key = { _, item -> item.id ?: item.hashCode() }
+                ) { _, item ->
+                    MyAreaItem(
+                        item = item,
+                        onClick = { onItemClick(item) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MyAreaItem(
+    item: PerformanceInfoItem,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .width(130.dp)
+            .clickable(onClick = onClick)
+    ) {
+        // 포스터 이미지
+        AsyncImage(
+            model = item.posterUrl,
+            contentDescription = item.name,
+            modifier = Modifier
+                .size(130.dp, 170.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 뱃지 (장르, 지역)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            if (!item.genre.isNullOrBlank()) {
+                SmallBadge(text = item.genre)
+            }
+            if (!item.area.isNullOrBlank()) {
+                SmallBadge(text = item.area)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // 공연명
+        Text(
+            text = item.name ?: "",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = BaeminDarkGray,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 장소명
+        Text(
+            text = item.placeName ?: "",
+            fontSize = 11.sp,
+            color = BaeminGray,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 공연 기간
+        val period = buildString {
+            item.startDate?.let { append(it) }
+            if (!item.startDate.isNullOrBlank() && !item.endDate.isNullOrBlank()) {
+                append(" ~ ")
+            }
+            item.endDate?.let { append(it) }
+        }
+        if (period.isNotBlank()) {
+            Text(
+                text = period,
+                fontSize = 10.sp,
+                color = BaeminPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun RefreshIcon(
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier) {
+        val strokeWidth = size.width * 0.1f
+        val radius = size.width * 0.35f
+        val center = Offset(size.width * 0.5f, size.height * 0.5f)
+
+        // 원형 화살표 (3/4 호)
+        drawArc(
+            color = color,
+            startAngle = -60f,
+            sweepAngle = 280f,
+            useCenter = false,
+            topLeft = Offset(center.x - radius, center.y - radius),
+            size = Size(radius * 2, radius * 2),
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+        )
+
+        // 화살표 머리
+        val arrowPath = Path().apply {
+            val arrowX = center.x + radius * kotlin.math.cos(Math.toRadians(-60.0)).toFloat()
+            val arrowY = center.y + radius * kotlin.math.sin(Math.toRadians(-60.0)).toFloat()
+
+            moveTo(arrowX - size.width * 0.12f, arrowY - size.width * 0.08f)
+            lineTo(arrowX, arrowY)
+            lineTo(arrowX + size.width * 0.08f, arrowY - size.width * 0.12f)
+        }
+        drawPath(arrowPath, color, style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
     }
 }
 
@@ -851,7 +1080,9 @@ private fun LoungeScreenPreview() {
         onTabSelected = {},
         onCategoryClick = {},
         onRankTabSelected = {},
-        onRankItemClick = {}
+        onRankItemClick = {},
+        onRefreshNearbyClick = {},
+        onNearbyItemClick = {}
     )
 }
 

@@ -26,4 +26,12 @@ object DateUtil {
         val lastDay = yearMonth.atEndOfMonth()
         return lastDay.format(yyyyMMddFormatter)
     }
+
+    fun getToday(): String {
+        return LocalDate.now(koreaZoneId).format(yyyyMMddFormatter)
+    }
+
+    fun getOneMonthLater(): String {
+        return LocalDate.now(koreaZoneId).plusMonths(1).format(yyyyMMddFormatter)
+    }
 }

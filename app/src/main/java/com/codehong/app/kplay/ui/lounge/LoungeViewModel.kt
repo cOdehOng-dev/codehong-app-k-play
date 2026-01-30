@@ -50,6 +50,21 @@ class LoungeViewModel @Inject constructor(
                     setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
                 }
             }
+            is LoungeEvent.OnRefreshNearbyClick -> {
+                Log.d(TAG, "Refresh nearby clicked")
+                setEffect { LoungeEffect.RequestLocationPermission }
+            }
+            is LoungeEvent.OnNearbyItemClick -> {
+                Log.d(TAG, "Nearby item clicked - id: ${event.item.id}")
+                event.item.id?.let {
+                    setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
+                }
+            }
+            is LoungeEvent.OnSignGuCodeUpdated -> {
+                Log.d(TAG, "SignGuCode updated: ${event.signGuCode.displayName}")
+                setState { copy(selectedSignGuCode = event.signGuCode) }
+                callMyAreaListApi(event.signGuCode.code)
+            }
         }
     }
 
@@ -71,6 +86,27 @@ class LoungeViewModel @Inject constructor(
                             currentMonth = DateUtil.getCurrentMonth()
                         )
                     }
+                }
+            }
+        }
+    }
+
+    fun callMyAreaListApi(myAreaCode: String = state.value.selectedSignGuCode.code) {
+        val startDate = DateUtil.getToday()
+        val endDate = DateUtil.getOneMonthLater()
+
+        viewModelScope.launch {
+            performanceUseCase.getPerformanceList(
+                service = BuildConfig.KOKOR_CLIENT_ID,
+                startDate = startDate,
+                endDate = endDate,
+                currentPage = "1",
+                rowsPerPage = "10",
+                signGuCode = myAreaCode,
+            ).collect { list ->
+                TimberUtil.d("My area list size: ${list?.size ?: 0}")
+                list?.let {
+                    setState { copy(myAreaList = it) }
                 }
             }
         }
