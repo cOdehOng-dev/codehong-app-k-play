@@ -61,9 +61,11 @@ class PerformanceUseCase @Inject constructor(
     fun getRankList(
         serviceKey: String,
         startDate: String,
-        endDate: String
+        endDate: String,
+        genreCode: String? = null,
+        area: String? = null
     ): Flow<List<BoxOfficeItem>?> = flow {
-        repository.getRankList(serviceKey, startDate, endDate).collect { status ->
+        repository.getRankList(serviceKey, startDate, endDate, genreCode, area).collect { status ->
             when (status) {
                 is CallStatus.Loading -> {}
                 is CallStatus.Success -> emit(status.responseData)

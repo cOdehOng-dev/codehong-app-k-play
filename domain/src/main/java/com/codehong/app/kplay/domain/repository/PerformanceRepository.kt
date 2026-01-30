@@ -29,6 +29,8 @@ interface PerformanceRepository {
     fun getRankList(
         serviceKey: String,
         startDate: String,
-        endDate: String
+        endDate: String,
+        genreCode: String?,
+        area: String?
     ): Flow<CallStatus<List<BoxOfficeItem>?>>
 }

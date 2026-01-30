@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.base.BaseViewModel
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
-import com.codehong.app.util.DateUtil
+import com.codehong.app.kplay.util.DateUtil
 import com.codehong.library.network.debug.TimberUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -16,13 +16,9 @@ private const val TAG = "LoungeViewModel"
 
 @HiltViewModel
 class LoungeViewModel @Inject constructor(
-    private val application: Application,
+    application: Application,
     private val performanceUseCase: PerformanceUseCase
-) : BaseViewModel<
-    LoungeEvent,
-    LoungeState,
-    LoungeEffect
->(application) {
+) : BaseViewModel<LoungeEvent, LoungeState, LoungeEffect>(application) {
 
     override fun createInitialState(): LoungeState {
         return LoungeState(
@@ -65,6 +61,17 @@ class LoungeViewModel @Inject constructor(
                 setState { copy(selectedSignGuCode = event.signGuCode) }
                 callMyAreaListApi(event.signGuCode.code)
             }
+            is LoungeEvent.OnGenreTabSelected -> {
+                Log.d(TAG, "Genre tab selected: ${event.genreCode.displayName}")
+                setState { copy(selectedGenreTab = event.genreCode) }
+                callGenreRankList(event.genreCode.code)
+            }
+            is LoungeEvent.OnGenreRankItemClick -> {
+                Log.d(TAG, "Genre rank item clicked - performanceId: ${event.item.performanceId}")
+                event.item.performanceId?.let {
+                    setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
+                }
+            }
         }
     }
 
@@ -91,7 +98,12 @@ class LoungeViewModel @Inject constructor(
         }
     }
 
-    fun callMyAreaListApi(myAreaCode: String = state.value.selectedSignGuCode.code) {
+    /**
+     * 내 주변 공연 검색 api
+     */
+    fun callMyAreaListApi(
+        myAreaCode: String = state.value.selectedSignGuCode.code
+    ) {
         val startDate = DateUtil.getToday()
         val endDate = DateUtil.getOneMonthLater()
 
@@ -107,6 +119,30 @@ class LoungeViewModel @Inject constructor(
                 TimberUtil.d("My area list size: ${list?.size ?: 0}")
                 list?.let {
                     setState { copy(myAreaList = it) }
+                }
+            }
+        }
+    }
+
+    /**
+     * 장르별 랭킹 리스트 api
+     */
+    fun callGenreRankList(
+        genreCode: String = state.value.selectedGenreTab.code
+    ) {
+        val startDate = DateUtil.getCurrentMonthFirstDay()
+        val endDate = DateUtil.getCurrentMonthLastDay()
+
+        viewModelScope.launch {
+            performanceUseCase.getRankList(
+                serviceKey = BuildConfig.KOKOR_CLIENT_ID,
+                startDate = startDate,
+                endDate = endDate,
+                genreCode = genreCode
+            ).collect { rankList ->
+                TimberUtil.d("test here getRankList = $rankList")
+                rankList?.let { list ->
+                    setState { copy(genreRankList = list) }
                 }
             }
         }

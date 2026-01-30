@@ -33,6 +33,8 @@ interface KopisApiService {
     suspend fun getBoxOffice(
         @Query("service") serviceKey: String,
         @Query("stdate") stdate: String,
-        @Query("eddate") eddate: String
+        @Query("eddate") eddate: String,
+        @Query("catecode") catecode: String? = null,
+        @Query("area") area: String? = null
     ): BoxOfficeResponse
 }

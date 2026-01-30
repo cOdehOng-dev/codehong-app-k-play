@@ -69,7 +69,6 @@ class PerformanceRepositoryImpl @Inject constructor(
             .onStart {
                 emit(CallStatus.Loading)
             }.catch { e ->
-                TimberUtil.e("test here getPerformanceDetail error 11 = $e")
                 emit(CallStatus.Error(e))
             }.collect {
                 gson.toJson(it)?.let { json ->
@@ -78,27 +77,31 @@ class PerformanceRepositoryImpl @Inject constructor(
                 emit(CallStatus.Success(it.performances?.map { itemDto -> itemDto.asDomain() }))
             }
     }.catch { e ->
-        TimberUtil.e("test here getPerformanceDetail error 22 = $e")
         emit(CallStatus.Error(e))
     }
 
     override fun getRankList(
         serviceKey: String,
         startDate: String,
-        endDate: String
+        endDate: String,
+        genreCode: String?,
+        area: String?
     ): Flow<CallStatus<List<BoxOfficeItem>?>> = flow {
-        remote.getBoxOffice(serviceKey, startDate, endDate)
+        TimberUtil.i("test here getRankList genreCode = $genreCode, startDate = $startDate, endDate = $endDate, area = $area")
+        remote.getBoxOffice(serviceKey, startDate, endDate, genreCode, area)
             .onStart {
                 emit(CallStatus.Loading)
             }.catch { e ->
+                TimberUtil.e("test here getRankList error 11 = $e")
                 emit(CallStatus.Error(e))
             }.collect {
                 gson.toJson(it)?.let { json ->
-                    TimberUtil.d("test here response json = $json")
+                    TimberUtil.d("test here getRankList json = $json")
                 }
                 emit(CallStatus.Success(it.boxOffices?.map { itemDto -> itemDto.asDomain() }))
             }
     }.catch { e ->
+        TimberUtil.e("test here getRankList error 11 = $e")
         emit(CallStatus.Error(e))
     }
 }

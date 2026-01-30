@@ -15,7 +15,9 @@ data class LoungeState(
     val selectedRankTab: RankTab = RankTab.TOP_1_10,
     val currentMonth: Int = 1,
     val myAreaList: List<PerformanceInfoItem> = emptyList(),
-    val selectedSignGuCode: SignGuCode = SignGuCode.SEOUL
+    val selectedSignGuCode: SignGuCode = SignGuCode.SEOUL,
+    val selectedGenreTab: GenreCode = GenreCode.THEATER,
+    val genreRankList: List<BoxOfficeItem> = emptyList()
 ) : ViewState
 
 sealed class LoungeEvent : ViewEvent {
@@ -26,6 +28,8 @@ sealed class LoungeEvent : ViewEvent {
     data object OnRefreshNearbyClick : LoungeEvent()
     data class OnNearbyItemClick(val item: PerformanceInfoItem) : LoungeEvent()
     data class OnSignGuCodeUpdated(val signGuCode: SignGuCode) : LoungeEvent()
+    data class OnGenreTabSelected(val genreCode: GenreCode) : LoungeEvent()
+    data class OnGenreRankItemClick(val item: BoxOfficeItem) : LoungeEvent()
 }
 
 sealed class LoungeEffect : ViewSideEffect {

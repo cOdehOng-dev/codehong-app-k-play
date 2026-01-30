@@ -1,5 +1,6 @@
 package com.codehong.app.kplay.ui.lounge
 
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -7,13 +8,16 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +27,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
@@ -33,9 +41,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,7 +69,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
+import coil.imageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.codehong.app.kplay.R
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
@@ -66,12 +81,13 @@ import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.library.widget.image.HongImageBuilder
 import com.codehong.library.widget.image.HongImageCompose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val TAG = "LoungeScreen"
 
 // 배민 스타일 컬러
-private val BaeminPrimary = Color(0xFF2AC1BC)
+private val BaeminPrimary = Color(0xFF2DB400) //Color(0xFF2AC1BC)
 private val BaeminBackground = Color.White
 private val BaeminGray = Color(0xFF999999)
 private val BaeminDarkGray = Color(0xFF333333)
@@ -106,6 +122,12 @@ fun LoungeScreen(
         },
         onNearbyItemClick = { item ->
             viewModel.setEvent(LoungeEvent.OnNearbyItemClick(item))
+        },
+        onGenreTabSelected = { genreCode ->
+            viewModel.setEvent(LoungeEvent.OnGenreTabSelected(genreCode))
+        },
+        onGenreRankItemClick = { item ->
+            viewModel.setEvent(LoungeEvent.OnGenreRankItemClick(item))
         }
     )
 }
@@ -118,14 +140,16 @@ private fun LoungeScreenContent(
     onRankTabSelected: (RankTab) -> Unit,
     onRankItemClick: (BoxOfficeItem) -> Unit,
     onRefreshNearbyClick: () -> Unit,
-    onNearbyItemClick: (PerformanceInfoItem) -> Unit
+    onNearbyItemClick: (PerformanceInfoItem) -> Unit,
+    onGenreTabSelected: (GenreCode) -> Unit,
+    onGenreRankItemClick: (BoxOfficeItem) -> Unit
 ) {
     Scaffold(
         containerColor = BaeminBackground,
         topBar = {
             LoungeHeader(
                 onSearchClick = {
-                    Log.d(TAG, "Search icon clicked")
+                    Log.d(TAG, "Search clicked")
                 },
                 onNotificationClick = {
                     Log.d(TAG, "Notification icon clicked")
@@ -151,7 +175,9 @@ private fun LoungeScreenContent(
                     onRankTabSelected = onRankTabSelected,
                     onRankItemClick = onRankItemClick,
                     onRefreshNearbyClick = onRefreshNearbyClick,
-                    onNearbyItemClick = onNearbyItemClick
+                    onNearbyItemClick = onNearbyItemClick,
+                    onGenreTabSelected = onGenreTabSelected,
+                    onGenreRankItemClick = onGenreRankItemClick
                 )
                 BottomTab.SEARCH -> SearchContent()
                 BottomTab.BOOKMARK -> BookmarkContent()
@@ -172,44 +198,44 @@ private fun LoungeHeader(
             .fillMaxWidth()
             .height(56.dp)
             .background(BaeminBackground)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = "K-Play",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = BaeminPrimary
-        )
-
+        // 검색바 (헤더 내)
         Row(
+            modifier = Modifier
+                .weight(1f)
+                .height(40.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color(0xFFF5F5F5))
+                .clickable(onClick = onSearchClick)
+                .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onSearchClick),
-                contentAlignment = Alignment.Center
-            ) {
-                SearchIcon(
-                    color = BaeminDarkGray,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onNotificationClick),
-                contentAlignment = Alignment.Center
-            ) {
-                NotificationIcon(
-                    color = BaeminDarkGray,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+            SearchIcon(color = BaeminPrimary, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "찾고 싶은 공연, 배우를 검색해보세요",
+                fontSize = 14.sp,
+                color = BaeminGray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        // 알림 아이콘
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .clickable(onClick = onNotificationClick),
+            contentAlignment = Alignment.Center
+        ) {
+            NotificationIcon(
+                color = BaeminDarkGray,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
@@ -458,6 +484,244 @@ private fun PersonIcon(
 }
 
 // ===== 홈 탭 콘텐츠 =====
+
+// 배너 고정 높이
+private val BannerHeight = 380.dp
+
+// ===== TOP 배너 (KREAM 스타일) =====
+@Composable
+private fun TopBannerSection(
+    bannerItems: List<BoxOfficeItem>,
+    onBannerClick: (BoxOfficeItem) -> Unit
+) {
+    val actualItemCount = bannerItems.size
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(BannerHeight)
+            .background(Color(0xFFF5F5F5))
+    ) {
+        if (bannerItems.isEmpty()) {
+            // 로딩 상태
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "인기 공연을 불러오는 중...",
+                    fontSize = 14.sp,
+                    color = BaeminGray
+                )
+            }
+        } else {
+            val pageCount = Int.MAX_VALUE
+            val initialPage = (pageCount / 2) - ((pageCount / 2) % actualItemCount)
+            val pagerState = rememberPagerState(
+                initialPage = initialPage,
+                pageCount = { pageCount }
+            )
+
+            // 자동 스크롤 (3초마다, 유저 터치 시 2초 후 재시작)
+            LaunchedEffect(pagerState) {
+                var lastInteractionTime = 0L
+
+                while (true) {
+                    val currentTime = System.currentTimeMillis()
+
+                    // 유저가 스크롤 중이면 마지막 상호작용 시간 갱신
+                    if (pagerState.isScrollInProgress) {
+                        lastInteractionTime = currentTime
+                        delay(100L)
+                        continue
+                    }
+
+                    // 마지막 상호작용 후 2초가 지났는지 확인
+                    val timeSinceLastInteraction = currentTime - lastInteractionTime
+                    if (lastInteractionTime > 0 && timeSinceLastInteraction < 2000L) {
+                        delay(100L)
+                        continue
+                    }
+
+                    // 3초 대기 후 다음 페이지로 스크롤
+                    delay(3000L)
+
+                    // 스크롤 중이 아닐 때만 자동 스크롤
+                    if (!pagerState.isScrollInProgress) {
+                        pagerState.animateScrollToPage(
+                            page = pagerState.currentPage + 1,
+                            animationSpec = tween(durationMillis = 500)
+                        )
+                    }
+                }
+            }
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                val actualIndex = page % actualItemCount
+                val item = bannerItems[actualIndex]
+
+                BannerItem(
+                    item = item,
+                    onClick = { onBannerClick(item) }
+                )
+            }
+
+            // 인디케이터 바 (하단) - 프로그레스 바 스타일
+            val currentIndex = pagerState.currentPage % actualItemCount
+            val progress = (currentIndex + 1).toFloat() / actualItemCount.toFloat()
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                // 배경 바
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .clip(RoundedCornerShape(1.5.dp))
+                        .background(Color.White.copy(alpha = 0.3f))
+                )
+                // 진행 바
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(progress)
+                        .height(3.dp)
+                        .clip(RoundedCornerShape(1.5.dp))
+                        .background(Color.White)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BannerItem(
+    item: BoxOfficeItem,
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
+    var textColor by remember { mutableStateOf(Color.White) }
+
+    // 이미지 밝기에 따른 텍스트 색상 결정
+    LaunchedEffect(item.posterUrl) {
+        item.posterUrl?.let { url ->
+            try {
+                val request = ImageRequest.Builder(context)
+                    .data(url)
+                    .allowHardware(false)
+                    .build()
+
+                val result = context.imageLoader.execute(request)
+                if (result is SuccessResult) {
+                    val bitmap = (result.drawable as? BitmapDrawable)?.bitmap
+                    bitmap?.let {
+                        val palette = Palette.from(it).generate()
+                        val dominantSwatch = palette.dominantSwatch
+                        dominantSwatch?.let { swatch ->
+                            val luminance = calculateLuminance(swatch.rgb)
+                            textColor = if (luminance > 0.5) Color.Black else Color.White
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to analyze image brightness", e)
+            }
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(onClick = onClick)
+    ) {
+        // 배경 이미지 (고화질, 전체 표시)
+        AsyncImage(
+            model = ImageRequest.Builder(context)
+                .data(item.posterUrl)
+                .crossfade(true)
+                .size(coil.size.Size.ORIGINAL)
+                .build(),
+            contentDescription = item.performanceName,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
+        )
+
+        // 그라데이션 오버레이 (하단)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.6f)
+                        ),
+                        startY = 300f
+                    )
+                )
+        )
+
+        // 텍스트 정보 (좌측 하단)
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 16.dp, bottom = 32.dp, end = 16.dp)
+        ) {
+            // 공연 이름 (크게)
+            Text(
+                text = item.performanceName ?: "",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = textColor,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // 공연장
+            Text(
+                text = item.placeName ?: "",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = textColor.copy(alpha = 0.9f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            // 기간 (startDate ~ endDate)
+            Text(
+                text = item.performancePeriod ?: "",
+                fontSize = 12.sp,
+                color = textColor.copy(alpha = 0.8f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+// 색상의 밝기(휘도) 계산
+private fun calculateLuminance(color: Int): Double {
+    val red = android.graphics.Color.red(color) / 255.0
+    val green = android.graphics.Color.green(color) / 255.0
+    val blue = android.graphics.Color.blue(color) / 255.0
+
+    val r = if (red <= 0.03928) red / 12.92 else Math.pow((red + 0.055) / 1.055, 2.4)
+    val g = if (green <= 0.03928) green / 12.92 else Math.pow((green + 0.055) / 1.055, 2.4)
+    val b = if (blue <= 0.03928) blue / 12.92 else Math.pow((blue + 0.055) / 1.055, 2.4)
+
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
 @Composable
 private fun HomeContent(
     state: LoungeState,
@@ -465,39 +729,24 @@ private fun HomeContent(
     onRankTabSelected: (RankTab) -> Unit,
     onRankItemClick: (BoxOfficeItem) -> Unit,
     onRefreshNearbyClick: () -> Unit,
-    onNearbyItemClick: (PerformanceInfoItem) -> Unit
+    onNearbyItemClick: (PerformanceInfoItem) -> Unit,
+    onGenreTabSelected: (GenreCode) -> Unit,
+    onGenreRankItemClick: (BoxOfficeItem) -> Unit
 ) {
+    val listState = rememberLazyListState()
+
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize()
     ) {
-        // 배너
+        // TOP 배너 (KREAM 스타일)
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp)
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFF0F8F7)),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "오늘의 추천 공연",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = BaeminPrimary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "뮤지컬, 연극, 콘서트 등 다양한 공연을 만나보세요",
-                        fontSize = 14.sp,
-                        color = BaeminGray
-                    )
+            TopBannerSection(
+                bannerItems = state.rankList.take(6),
+                onBannerClick = { item ->
+                    item.performanceId?.let { onRankItemClick(item) }
                 }
-            }
+            )
         }
 
         // 카테고리 그리드
@@ -516,6 +765,27 @@ private fun HomeContent(
                 myAreaList = state.myAreaList,
                 onRefreshClick = onRefreshNearbyClick,
                 onItemClick = onNearbyItemClick
+            )
+        }
+
+        // 내 주변 공연 전체보기 버튼
+        item {
+            ViewAllMyAreaPerformancesButton(
+                onClick = {
+                    // TODO: 내 주변 공연 전체보기 페이지 연결
+                    Log.d(TAG, "View All My Area Performances button clicked")
+                }
+            )
+        }
+
+        // 장르별 랭킹 섹션
+        item {
+            GenreRankSection(
+                categories = state.categories,
+                selectedGenreTab = state.selectedGenreTab,
+                genreRankList = state.genreRankList,
+                onGenreTabSelected = onGenreTabSelected,
+                onItemClick = onGenreRankItemClick
             )
         }
 
@@ -677,30 +947,16 @@ private fun MyAreaSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "${currentMonth}월 내 주변 공연",
+                text = "${currentMonth}월 ${signGuCode.displayName} 공연",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = BaeminDarkGray
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Color(0xFFF0F8F7))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-            ) {
-                Text(
-                    text = "${signGuCode.displayName} 기준",
-                    fontSize = 12.sp,
-                    color = BaeminPrimary,
-                    fontWeight = FontWeight.Medium
-                )
-            }
             Spacer(modifier = Modifier.width(3.dp))
-
             Box(
                 modifier = Modifier
                     .size(18.dp)
+                    .padding(top = 1.dp)
                     .graphicsLayer {
                         rotationZ = rotationAngle.value
                     }
@@ -743,14 +999,14 @@ private fun MyAreaSection(
                 )
             }
         } else {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .height(IntrinsicSize.Max)
+                    .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                itemsIndexed(
-                    items = myAreaList,
-                    key = { _, item -> item.id ?: item.hashCode() }
-                ) { _, item ->
+                myAreaList.forEach { item ->
                     MyAreaItem(
                         item = item,
                         onClick = { onItemClick(item) }
@@ -769,6 +1025,7 @@ private fun MyAreaItem(
     Column(
         modifier = Modifier
             .width(130.dp)
+            .fillMaxHeight()
             .clickable(onClick = onClick)
     ) {
         // 포스터 이미지
@@ -836,6 +1093,212 @@ private fun MyAreaItem(
     }
 }
 
+// ===== 장르별 랭킹 섹션 =====
+@Composable
+private fun GenreRankSection(
+    categories: List<GenreCode>,
+    selectedGenreTab: GenreCode,
+    genreRankList: List<BoxOfficeItem>,
+    onGenreTabSelected: (GenreCode) -> Unit,
+    onItemClick: (BoxOfficeItem) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+    ) {
+        // 제목
+        Text(
+            text = "장르별 랭킹이에요",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = BaeminDarkGray,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 장르 탭 (TabLayout)
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            itemsIndexed(
+                items = categories,
+                key = { _, item -> item.code }
+            ) { _, genreCode ->
+                GenreTabChip(
+                    text = genreCode.displayName,
+                    isSelected = genreCode == selectedGenreTab,
+                    onClick = { onGenreTabSelected(genreCode) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 장르별 랭킹 가로 리스트
+        if (genreRankList.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "랭킹 정보를 불러오는 중...",
+                    fontSize = 14.sp,
+                    color = BaeminGray
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .height(IntrinsicSize.Max)
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                genreRankList.take(10).forEachIndexed { index, item ->
+                    GenreRankItem(
+                        item = item,
+                        rank = index + 1,
+                        onClick = { onItemClick(item) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GenreTabChip(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                color = if (isSelected) BaeminPrimary else BaeminBackground
+            )
+            .border(
+                width = 1.dp,
+                color = BaeminPrimary,
+                shape = RoundedCornerShape(50)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = if (isSelected) Color.White else BaeminPrimary
+        )
+    }
+}
+
+@Composable
+private fun GenreRankItem(
+    item: BoxOfficeItem,
+    rank: Int,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .width(130.dp)
+            .fillMaxHeight()
+            .clickable(onClick = onClick)
+    ) {
+        // 포스터 이미지 + 순위 배지
+        Box {
+            AsyncImage(
+                model = item.posterUrl,
+                contentDescription = item.performanceName,
+                modifier = Modifier
+                    .size(130.dp, 170.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            // 순위 배지 (좌측 하단)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(6.dp)
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(
+                        when (rank) {
+                            1 -> GoldColor
+                            2 -> SilverColor
+                            3 -> BronzeColor
+                            else -> BaeminDarkGray.copy(alpha = 0.8f)
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "$rank",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 뱃지 (장르, 지역)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            if (!item.category.isNullOrBlank()) {
+                SmallBadge(text = item.category)
+            }
+            if (!item.area.isNullOrBlank()) {
+                SmallBadge(text = item.area)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // 공연명
+        Text(
+            text = item.performanceName ?: "",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = BaeminDarkGray,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 장소명
+        Text(
+            text = item.placeName ?: "",
+            fontSize = 11.sp,
+            color = BaeminGray,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 공연 기간
+        if (!item.performancePeriod.isNullOrBlank()) {
+            Text(
+                text = item.performancePeriod ?: "",
+                fontSize = 10.sp,
+                color = BaeminPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
 @Composable
 private fun RefreshIcon(
     color: Color,
@@ -867,6 +1330,37 @@ private fun RefreshIcon(
             lineTo(arrowX + size.width * 0.08f, arrowY - size.width * 0.12f)
         }
         drawPath(arrowPath, color, style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
+    }
+}
+
+@Composable
+private fun ViewAllMyAreaPerformancesButton(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .height(48.dp) // Fixed height for consistency
+            .clip(RoundedCornerShape(8.dp))
+            .border(1.dp, BaeminPrimary, RoundedCornerShape(8.dp))
+            .background(Color.White)
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "내 주변 공연 전체보기",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = BaeminPrimary
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        // Placeholder for arrow icon, ideally replace with an actual icon resource
+        Text(
+            text = ">", // Using text for now, can be replaced with an actual icon
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = BaeminPrimary
+        )
     }
 }
 
@@ -1102,7 +1596,9 @@ private fun LoungeScreenPreview() {
         onRankTabSelected = {},
         onRankItemClick = {},
         onRefreshNearbyClick = {},
-        onNearbyItemClick = {}
+        onNearbyItemClick = {},
+        onGenreTabSelected = {},
+        onGenreRankItemClick = {}
     )
 }
 

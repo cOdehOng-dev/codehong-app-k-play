@@ -52,10 +52,12 @@ class PerformanceRemoteDataSource @Inject constructor(
     fun getBoxOffice(
         serviceKey: String,
         startDate: String,
-        endDate: String
+        endDate: String,
+        catecode: String? = null,
+        area: String? = null
     ): Flow<BoxOfficeResponse> = flow {
         emit(
-            kopisApiService.getBoxOffice(serviceKey, startDate, endDate)
+            kopisApiService.getBoxOffice(serviceKey, startDate, endDate, catecode, area)
         ).also { TimberUtil.d("test here box office = $it") }
     }.flowOn(Dispatchers.IO)
 }
