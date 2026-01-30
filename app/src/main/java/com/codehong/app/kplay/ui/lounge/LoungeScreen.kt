@@ -1,6 +1,5 @@
 package com.codehong.app.kplay.ui.lounge
 
-import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -33,7 +32,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -43,10 +41,8 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,11 +65,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
-import coil.imageLoader
 import coil.request.ImageRequest
-import coil.request.SuccessResult
 import com.codehong.app.kplay.R
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
@@ -128,6 +121,12 @@ fun LoungeScreen(
         },
         onGenreRankItemClick = { item ->
             viewModel.setEvent(LoungeEvent.OnGenreRankItemClick(item))
+        },
+        onFestivalTabSelected = { signGuCode ->
+            viewModel.setEvent(LoungeEvent.OnFestivalTabSelected(signGuCode))
+        },
+        onFestivalItemClick = { item ->
+            viewModel.setEvent(LoungeEvent.OnFestivalItemClick(item))
         }
     )
 }
@@ -142,7 +141,9 @@ private fun LoungeScreenContent(
     onRefreshNearbyClick: () -> Unit,
     onNearbyItemClick: (PerformanceInfoItem) -> Unit,
     onGenreTabSelected: (GenreCode) -> Unit,
-    onGenreRankItemClick: (BoxOfficeItem) -> Unit
+    onGenreRankItemClick: (BoxOfficeItem) -> Unit,
+    onFestivalTabSelected: (SignGuCode) -> Unit,
+    onFestivalItemClick: (PerformanceInfoItem) -> Unit
 ) {
     Scaffold(
         containerColor = BaeminBackground,
@@ -177,7 +178,9 @@ private fun LoungeScreenContent(
                     onRefreshNearbyClick = onRefreshNearbyClick,
                     onNearbyItemClick = onNearbyItemClick,
                     onGenreTabSelected = onGenreTabSelected,
-                    onGenreRankItemClick = onGenreRankItemClick
+                    onGenreRankItemClick = onGenreRankItemClick,
+                    onFestivalTabSelected = onFestivalTabSelected,
+                    onFestivalItemClick = onFestivalItemClick
                 )
                 BottomTab.SEARCH -> SearchContent()
                 BottomTab.BOOKMARK -> BookmarkContent()
@@ -721,7 +724,9 @@ private fun HomeContent(
     onRefreshNearbyClick: () -> Unit,
     onNearbyItemClick: (PerformanceInfoItem) -> Unit,
     onGenreTabSelected: (GenreCode) -> Unit,
-    onGenreRankItemClick: (BoxOfficeItem) -> Unit
+    onGenreRankItemClick: (BoxOfficeItem) -> Unit,
+    onFestivalTabSelected: (SignGuCode) -> Unit,
+    onFestivalItemClick: (PerformanceInfoItem) -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -840,6 +845,17 @@ private fun HomeContent(
                     }
                 }
             }
+        }
+
+        // 축제 섹션
+        item {
+            FestivalSection(
+                festivalTabs = state.festivalTabs,
+                selectedFestivalTab = state.selectedFestivalTab,
+                festivalList = state.festivalList,
+                onFestivalTabSelected = onFestivalTabSelected,
+                onItemClick = onFestivalItemClick
+            )
         }
 
         // 하단 여백
@@ -1207,6 +1223,218 @@ private fun GenreRankSection(
                     )
                 }
             }
+        }
+    }
+}
+
+// ===== 축제 섹션 =====
+@Composable
+private fun FestivalSection(
+    festivalTabs: List<SignGuCode>,
+    selectedFestivalTab: SignGuCode,
+    festivalList: List<PerformanceInfoItem>,
+    onFestivalTabSelected: (SignGuCode) -> Unit,
+    onItemClick: (PerformanceInfoItem) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+    ) {
+        // 제목 + 더보기 버튼
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "지역 축제도 많아요",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = BaeminDarkGray
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        // TODO: 축제리스트 페이지 이동
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                ArrowRightIcon(
+                    color = BaeminGray,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 지역 탭 (TabLayout)
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            itemsIndexed(
+                items = festivalTabs,
+                key = { _, item -> item.code }
+            ) { _, signGuCode ->
+                FestivalTabChip(
+                    text = signGuCode.displayName,
+                    isSelected = signGuCode == selectedFestivalTab,
+                    onClick = { onFestivalTabSelected(signGuCode) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 탭 변경 시 스크롤 위치 초기화
+        val festivalScrollState = rememberScrollState()
+        LaunchedEffect(selectedFestivalTab) {
+            festivalScrollState.scrollTo(0)
+        }
+
+        // 축제 리스트
+        if (festivalList.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "축제 정보를 불러오는 중...",
+                    fontSize = 14.sp,
+                    color = BaeminGray
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(festivalScrollState)
+                    .height(IntrinsicSize.Max)
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                festivalList.forEach { item ->
+                    FestivalItem(
+                        item = item,
+                        onClick = { onItemClick(item) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FestivalTabChip(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                color = if (isSelected) BaeminPrimary else BaeminBackground
+            )
+            .border(
+                width = 1.dp,
+                color = BaeminPrimary,
+                shape = RoundedCornerShape(50)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = if (isSelected) Color.White else BaeminPrimary
+        )
+    }
+}
+
+@Composable
+private fun FestivalItem(
+    item: PerformanceInfoItem,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .width(130.dp)
+            .fillMaxHeight()
+            .clickable(onClick = onClick)
+    ) {
+        // 포스터 이미지
+        AsyncImage(
+            model = item.posterUrl,
+            contentDescription = item.name,
+            modifier = Modifier
+                .size(130.dp, 170.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 뱃지 (장르, 지역)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            if (!item.genre.isNullOrBlank()) {
+                SmallBadge(text = item.genre)
+            }
+            if (!item.area.isNullOrBlank()) {
+                SmallBadge(text = item.area)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // 공연명
+        Text(
+            text = item.name ?: "",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = BaeminDarkGray,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 장소명
+        Text(
+            text = item.placeName ?: "",
+            fontSize = 11.sp,
+            color = BaeminGray,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 공연 기간
+        val period = buildString {
+            item.startDate?.let { append(it) }
+            if (!item.startDate.isNullOrBlank() && !item.endDate.isNullOrBlank()) {
+                append(" ~ ")
+            }
+            item.endDate?.let { append(it) }
+        }
+        if (period.isNotBlank()) {
+            Text(
+                text = period,
+                fontSize = 10.sp,
+                color = BaeminPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -1735,7 +1963,9 @@ private fun LoungeScreenPreview() {
         onRefreshNearbyClick = {},
         onNearbyItemClick = {},
         onGenreTabSelected = {},
-        onGenreRankItemClick = {}
+        onGenreRankItemClick = {},
+        onFestivalItemClick = {},
+        onFestivalTabSelected = {}
     )
 }
 

@@ -79,14 +79,18 @@ class PerformanceUseCase @Inject constructor(
         startDate: String,
         endDate: String,
         currentPage: String,
-        rowsPerPage: String
+        rowsPerPage: String,
+        signGuCode: String? = null,
+        signGuCodeSub: String? = null
     ): Flow<List<PerformanceInfoItem>?> = flow {
         repository.getFestivalList(
             serviceKey,
             startDate,
             endDate,
             currentPage,
-            rowsPerPage
+            rowsPerPage,
+            signGuCode,
+            signGuCodeSub
         ).collect { status ->
             when (status) {
                 is CallStatus.Loading -> {}

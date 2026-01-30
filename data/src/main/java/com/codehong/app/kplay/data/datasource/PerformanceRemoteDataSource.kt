@@ -66,7 +66,9 @@ class PerformanceRemoteDataSource @Inject constructor(
         startDate: String,
         endDate: String,
         currentPage: String,
-        rowsPerPage: String
+        rowsPerPage: String,
+        signGuCode: String? = null,
+        signGuCodeSub: String? = null
     ): Flow<PerformanceListResponse> = flow {
         emit(
             kopisApiService.getFestivalList(
@@ -74,7 +76,9 @@ class PerformanceRemoteDataSource @Inject constructor(
                 startDate,
                 endDate,
                 currentPage,
-                rowsPerPage
+                rowsPerPage,
+                signGuCode,
+                signGuCodeSub
             )
         )
     }.flowOn(Dispatchers.IO)

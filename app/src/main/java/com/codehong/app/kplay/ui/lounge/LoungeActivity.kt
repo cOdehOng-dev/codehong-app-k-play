@@ -40,6 +40,7 @@ class LoungeActivity : ComponentActivity() {
 
         viewModel.callRankList()
         viewModel.callGenreRankList()
+        viewModel.callFestivalList(SignGuCode.SEOUL.code)
 
         // SharedPreferences에서 signGuCode를 읽어와 초기화
         val storedSignGuCodeName = sharedPreferences.getString(SIGN_GU_CODE_KEY, null)

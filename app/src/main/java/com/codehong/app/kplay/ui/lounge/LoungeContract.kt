@@ -19,6 +19,8 @@ data class LoungeState(
     val selectedGenreTab: GenreCode = GenreCode.THEATER,
     val genreRankList: List<BoxOfficeItem> = emptyList(),
     val festivalList: List<PerformanceInfoItem> = emptyList(),
+    val selectedFestivalTab: SignGuCode = SignGuCode.SEOUL,
+    val festivalTabs: List<SignGuCode> = SignGuCode.entries.toList()
 ) : ViewState
 
 sealed class LoungeEvent : ViewEvent {
@@ -31,6 +33,8 @@ sealed class LoungeEvent : ViewEvent {
     data class OnSignGuCodeUpdated(val signGuCode: SignGuCode) : LoungeEvent()
     data class OnGenreTabSelected(val genreCode: GenreCode) : LoungeEvent()
     data class OnGenreRankItemClick(val item: BoxOfficeItem) : LoungeEvent()
+    data class OnFestivalTabSelected(val signGuCode: SignGuCode) : LoungeEvent()
+    data class OnFestivalItemClick(val item: PerformanceInfoItem) : LoungeEvent()
 }
 
 sealed class LoungeEffect : ViewSideEffect {

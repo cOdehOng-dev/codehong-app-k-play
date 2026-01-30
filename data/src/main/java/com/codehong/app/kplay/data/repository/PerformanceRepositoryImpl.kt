@@ -110,14 +110,18 @@ class PerformanceRepositoryImpl @Inject constructor(
         startDate: String,
         endDate: String,
         currentPage: String,
-        rowsPerPage: String
+        rowsPerPage: String,
+        signGuCode: String?,
+        signGuCodeSub: String?
     ): Flow<CallStatus<List<PerformanceInfoItem>?>> = flow {
         remote.getFestivalList(
             serviceKey,
             startDate,
             endDate,
             currentPage,
-            rowsPerPage
+            rowsPerPage,
+            signGuCode,
+            signGuCodeSub
         ).onStart {
             emit(CallStatus.Loading)
         }.catch { e ->

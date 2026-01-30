@@ -39,6 +39,8 @@ interface PerformanceRepository {
         startDate: String,
         endDate: String,
         currentPage: String,
-        rowsPerPage: String
+        rowsPerPage: String,
+        signGuCode: String?,
+        signGuCodeSub: String?
     ): Flow<CallStatus<List<PerformanceInfoItem>?>>
 }

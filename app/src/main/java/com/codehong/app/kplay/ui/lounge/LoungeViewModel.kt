@@ -72,6 +72,17 @@ class LoungeViewModel @Inject constructor(
                     setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
                 }
             }
+            is LoungeEvent.OnFestivalTabSelected -> {
+                Log.d(TAG, "Festival tab selected: ${event.signGuCode.displayName}")
+                setState { copy(selectedFestivalTab = event.signGuCode) }
+                callFestivalList(event.signGuCode.code)
+            }
+            is LoungeEvent.OnFestivalItemClick -> {
+                Log.d(TAG, "Festival item clicked - id: ${event.item.id}")
+                event.item.id?.let {
+                    setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
+                }
+            }
         }
     }
 
@@ -148,7 +159,7 @@ class LoungeViewModel @Inject constructor(
         }
     }
 
-    fun callFestivalList() {
+    fun callFestivalList(signGuCode: String) {
         val startDate = DateUtil.getCurrentMonthFirstDay()
         val endDate = DateUtil.getCurrentMonthLastDay()
 
@@ -158,7 +169,8 @@ class LoungeViewModel @Inject constructor(
                 startDate = startDate,
                 endDate = endDate,
                 currentPage = "1",
-                rowsPerPage = "10"
+                rowsPerPage = "10",
+                signGuCode = signGuCode
             ).collect { festivalList ->
                 TimberUtil.d("Festival list size: ${festivalList?.size ?: 0}")
                 festivalList?.let { list ->
