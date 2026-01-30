@@ -1,6 +1,8 @@
 package com.codehong.app.kplay.ui.lounge
 
 import android.util.Log
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,6 +35,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +66,7 @@ import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.library.widget.image.HongImageBuilder
 import com.codehong.library.widget.image.HongImageCompose
+import kotlinx.coroutines.launch
 
 private const val TAG = "LoungeScreen"
 
@@ -656,6 +661,9 @@ private fun MyAreaSection(
     onRefreshClick: () -> Unit,
     onItemClick: (PerformanceInfoItem) -> Unit
 ) {
+    val rotationAngle = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -666,44 +674,56 @@ private fun MyAreaSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Text(
+                text = "${currentMonth}월 내 주변 공연",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = BaeminDarkGray
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color(0xFFF0F8F7))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
             ) {
                 Text(
-                    text = "${currentMonth}월 내 주변 공연",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = BaeminDarkGray
+                    text = "${signGuCode.displayName} 기준",
+                    fontSize = 12.sp,
+                    color = BaeminPrimary,
+                    fontWeight = FontWeight.Medium
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(Color(0xFFF0F8F7))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = signGuCode.displayName,
-                        fontSize = 12.sp,
-                        color = BaeminPrimary,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
             }
+            Spacer(modifier = Modifier.width(3.dp))
 
-            HongImageCompose(
-                HongImageBuilder()
-                    .width(15)
-                    .height(15)
-                    .imageInfo(R.drawable.ic_refresh)
-                    .onClick {
-                        onRefreshClick()
+            Box(
+                modifier = Modifier
+                    .size(18.dp)
+                    .graphicsLayer {
+                        rotationZ = rotationAngle.value
                     }
-                    .applyOption()
-            )
+                    .clickable(onClick = {
+                        onRefreshClick()
+                        coroutineScope.launch {
+                            rotationAngle.animateTo(
+                                targetValue = 360f,
+                                animationSpec = tween(durationMillis = 1000)
+                            )
+                            rotationAngle.snapTo(0f)
+                        }
+                    }),
+                contentAlignment = Alignment.Center
+            ) {
+                HongImageCompose(
+                    HongImageBuilder()
+                        .width(18)
+                        .height(18)
+                        .imageInfo(R.drawable.ic_refresh)
+                        .applyOption()
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))

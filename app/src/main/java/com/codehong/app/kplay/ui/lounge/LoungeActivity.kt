@@ -30,11 +30,29 @@ class LoungeActivity : ComponentActivity() {
         LocationServices.getFusedLocationProviderClient(this)
     }
 
+    private val sharedPreferences by lazy {
+        getSharedPreferences("KPlayPrefs", MODE_PRIVATE)
+    }
+    private val SIGN_GU_CODE_KEY = "sign_gu_code_key"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         viewModel.callRankList()
-        viewModel.callMyAreaListApi()
+
+        // SharedPreferences에서 signGuCode를 읽어와 초기화
+        val storedSignGuCodeName = sharedPreferences.getString(SIGN_GU_CODE_KEY, null)
+        val initialSignGuCode = if (storedSignGuCodeName != null) {
+            try {
+                SignGuCode.valueOf(storedSignGuCodeName)
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "Invalid SignGuCode stored: $storedSignGuCodeName, defaulting to SEOUL", e)
+                SignGuCode.SEOUL
+            }
+        } else {
+            SignGuCode.SEOUL // 저장된 값이 없으면 기본값으로 SEOUL 사용
+        }
+        viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(initialSignGuCode))
 
         setContent {
             val locationPermissionLauncher = rememberLauncherForActivityResult(
@@ -47,13 +65,12 @@ class LoungeActivity : ComponentActivity() {
                     Log.d(TAG, "Location permission granted")
                     getLocationAndUpdateSignGuCode()
                 } else {
-                    Log.d(TAG, "Location permission denied, using default SEOUL")
+                    Log.d(TAG, "Location permission denied")
                     Toast.makeText(
                         this@LoungeActivity,
-                        "위치 권한이 거부되어 서울 기준으로 조회합니다",
+                        "위치 권한이 거부되어 이전 설정 또는 서울 기준으로 조회합니다",
                         Toast.LENGTH_SHORT
                     ).show()
-                    viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(SignGuCode.SEOUL))
                 }
             }
 
@@ -114,7 +131,9 @@ class LoungeActivity : ComponentActivity() {
 
     private fun getLocationAndUpdateSignGuCode() {
         if (!hasLocationPermission()) {
-            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(SignGuCode.SEOUL))
+            val defaultSignGuCode = SignGuCode.SEOUL
+            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
+            sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
             return
         }
 
@@ -137,24 +156,35 @@ class LoungeActivity : ComponentActivity() {
 
                             val signGuCode = findSignGuCodeByName(adminArea)
                             viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(signGuCode))
+                            sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, signGuCode.name).apply()
                         } else {
-                            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(SignGuCode.SEOUL))
+                            val defaultSignGuCode = SignGuCode.SEOUL
+                            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
+                            sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
                         }
                     } catch (e: Exception) {
                         Log.e(TAG, "Geocoder error: ${e.message}")
-                        viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(SignGuCode.SEOUL))
+                        val defaultSignGuCode = SignGuCode.SEOUL
+                        viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
+                        sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
                     }
                 } else {
                     Log.d(TAG, "Location is null, using default SEOUL")
-                    viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(SignGuCode.SEOUL))
+                    val defaultSignGuCode = SignGuCode.SEOUL
+                    viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
+                    sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
                 }
             }.addOnFailureListener { e ->
                 Log.e(TAG, "Failed to get location: ${e.message}")
-                viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(SignGuCode.SEOUL))
+                val defaultSignGuCode = SignGuCode.SEOUL
+                viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
+                sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
             }
         } catch (e: SecurityException) {
             Log.e(TAG, "Security exception: ${e.message}")
-            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(SignGuCode.SEOUL))
+            val defaultSignGuCode = SignGuCode.SEOUL
+            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
+            sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
         }
     }
 
