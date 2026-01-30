@@ -22,7 +22,8 @@ class PerformanceUseCase @Inject constructor(
         performanceState: String? = null,
         signGuCode: String? = null,
         signGuCodeSub: String? = null,
-        kidState: String? = null
+        kidState: String? = null,
+        genreCode: String? = null
     ): Flow<List<PerformanceInfoItem>?> = flow {
         repository.getPerformanceList(
             service,
@@ -33,7 +34,8 @@ class PerformanceUseCase @Inject constructor(
             performanceState,
             signGuCode,
             signGuCodeSub,
-            kidState
+            kidState,
+            genreCode
         ).collect { status ->
             when (status) {
                 is CallStatus.Loading -> {}

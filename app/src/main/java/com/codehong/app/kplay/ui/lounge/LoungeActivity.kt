@@ -25,11 +25,10 @@ class LoungeActivity : ComponentActivity() {
                 viewModel.effect.collect { effect ->
                     when (effect) {
                         is LoungeEffect.NavigateToCategory -> {
-                            Toast.makeText(
+                            ActivityManager.openGenreList(
                                 this@LoungeActivity,
-                                "${effect.cateCode.displayName} 카테고리로 이동",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                                effect.genreCode.code
+                            )
                         }
                         is LoungeEffect.NavigateToPerformanceDetail -> {
                             ActivityManager.openPerformanceDetail(

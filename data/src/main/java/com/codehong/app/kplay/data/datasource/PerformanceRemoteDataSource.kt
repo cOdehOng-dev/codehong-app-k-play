@@ -24,7 +24,8 @@ class PerformanceRemoteDataSource @Inject constructor(
         performanceState: String? = null,
         signGuCode: String? = null,
         signGuCodeSub: String? = null,
-        kidState: String? = null
+        kidState: String? = null,
+        genreCode: String? = null
     ): Flow<PerformanceListResponse> = flow {
         TimberUtil.e("test here pass !!")
         emit(kopisApiService.getPerformanceList(
@@ -36,7 +37,8 @@ class PerformanceRemoteDataSource @Inject constructor(
             performanceState = performanceState,
             signGuCode = signGuCode,
             signGuCodeSub = signGuCodeSub,
-            kidState = kidState
+            kidState = kidState,
+            genreCode = genreCode
         ).also { TimberUtil.d("test here response = $it") })
     }.flowOn(Dispatchers.IO)
 

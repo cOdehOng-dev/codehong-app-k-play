@@ -1,6 +1,6 @@
 package com.codehong.app.kplay.domain.type
 
-enum class CateCode(
+enum class GenreCode(
     val code: String,
     val displayName: String,
     val iconResName: String
@@ -17,7 +17,7 @@ enum class CateCode(
     OPEN_RUN("OPEN", "오픈런", "ic_open_run");
 
     companion object {
-        fun String?.toCode(): CateCode? {
+        fun String?.toCode(): GenreCode? {
             return entries.find { it.code == this }
         }
     }

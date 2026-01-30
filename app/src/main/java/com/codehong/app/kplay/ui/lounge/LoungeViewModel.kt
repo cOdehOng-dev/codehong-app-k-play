@@ -37,8 +37,8 @@ class LoungeViewModel @Inject constructor(
                 setState { copy(selectedTab = event.tab) }
             }
             is LoungeEvent.OnCategoryClick -> {
-                Log.d(TAG, "Category clicked: ${event.cateCode.displayName} (code: ${event.cateCode.code})")
-                setEffect { LoungeEffect.NavigateToCategory(event.cateCode) }
+                Log.d(TAG, "Category clicked: ${event.genreCode.displayName} (code: ${event.genreCode.code})")
+                setEffect { LoungeEffect.NavigateToCategory(event.genreCode) }
             }
             is LoungeEvent.OnRankTabSelected -> {
                 Log.d(TAG, "Rank tab selected: ${event.rankTab.title}")

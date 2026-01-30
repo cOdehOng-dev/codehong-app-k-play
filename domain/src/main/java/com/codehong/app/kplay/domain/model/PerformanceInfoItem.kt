@@ -5,7 +5,7 @@ data class PerformanceInfoItem(
     var name: String? = null,
     var startDate: String? = null,
     var endDate: String? = null,
-    var facilityName: String? = null,
+    var placeName: String? = null,
     var posterUrl: String? = null,
     var area: String? = null,
     var genre: String? = null,

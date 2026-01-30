@@ -12,7 +12,7 @@ object PerformanceInfoMapper : DtoMapper<PerformanceItemDto?, PerformanceInfoIte
             name = dto.name,
             startDate = dto.startDate,
             endDate = dto.endDate,
-            facilityName = dto.facilityName,
+            placeName = dto.facilityName,
             posterUrl = dto.posterUrl,
             area = dto.area,
             genre = dto.genre,

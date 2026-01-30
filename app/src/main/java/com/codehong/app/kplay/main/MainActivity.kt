@@ -316,7 +316,7 @@ fun PerformanceListItem(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = item.facilityName ?: "",
+                    text = item.placeName ?: "",
                     fontSize = 13.sp,
                     color = Color(0xFF8E8E93),
                     maxLines = 1,

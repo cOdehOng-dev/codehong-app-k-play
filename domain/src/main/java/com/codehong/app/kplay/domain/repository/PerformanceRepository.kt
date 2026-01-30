@@ -17,7 +17,8 @@ interface PerformanceRepository {
         performanceState: String? = null,
         signGuCode: String? = null,
         signGuCodeSub: String? = null,
-        kidState: String? = null
+        kidState: String? = null,
+        genreCode: String? = null
     ): Flow<CallStatus<List<PerformanceInfoItem>?>>
 
     fun getPerformanceDetail(

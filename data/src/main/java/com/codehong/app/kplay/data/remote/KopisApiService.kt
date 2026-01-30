@@ -19,7 +19,8 @@ interface KopisApiService {
         @Query("prfstate") performanceState: String? = null,
         @Query("signgucode") signGuCode: String? = null,
         @Query("signgucodesub") signGuCodeSub: String? = null,
-        @Query("kidstate") kidState: String? = null
+        @Query("kidstate") kidState: String? = null,
+        @Query("shcate") genreCode: String? = null
     ): PerformanceListResponse
 
     @GET("/openApi/restful/pblprfr/{mt20id}")

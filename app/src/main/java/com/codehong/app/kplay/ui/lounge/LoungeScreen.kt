@@ -56,7 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
-import com.codehong.app.kplay.domain.type.CateCode
+import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.library.widget.image.HongImageBuilder
 import com.codehong.library.widget.image.HongImageCompose
 
@@ -100,7 +100,7 @@ fun LoungeScreen(
 private fun LoungeScreenContent(
     state: LoungeState,
     onTabSelected: (BottomTab) -> Unit,
-    onCategoryClick: (CateCode) -> Unit,
+    onCategoryClick: (GenreCode) -> Unit,
     onRankTabSelected: (RankTab) -> Unit,
     onRankItemClick: (BoxOfficeItem) -> Unit
 ) {
@@ -443,7 +443,7 @@ private fun PersonIcon(
 @Composable
 private fun HomeContent(
     state: LoungeState,
-    onCategoryClick: (CateCode) -> Unit,
+    onCategoryClick: (GenreCode) -> Unit,
     onRankTabSelected: (RankTab) -> Unit,
     onRankItemClick: (BoxOfficeItem) -> Unit
 ) {
@@ -539,8 +539,8 @@ private fun HomeContent(
 
 @Composable
 private fun CategoryGridNonLazy(
-    categories: List<CateCode>,
-    onCategoryClick: (CateCode) -> Unit
+    categories: List<GenreCode>,
+    onCategoryClick: (GenreCode) -> Unit
 ) {
     val rows = categories.chunked(5)
 
@@ -557,7 +557,7 @@ private fun CategoryGridNonLazy(
                 rowItems.forEach { cateCode ->
                     Box(modifier = Modifier.weight(1f)) {
                         CategoryItem(
-                            cateCode = cateCode,
+                            genreCode = cateCode,
                             onClick = { onCategoryClick(cateCode) }
                         )
                     }
@@ -574,13 +574,13 @@ private fun CategoryGridNonLazy(
 
 @Composable
 private fun CategoryItem(
-    cateCode: CateCode,
+    genreCode: GenreCode,
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
-    val iconResId = remember(cateCode) {
+    val iconResId = remember(genreCode) {
         context.resources.getIdentifier(
-            cateCode.iconResName,
+            genreCode.iconResName,
             "drawable",
             context.packageName
         )
@@ -607,7 +607,7 @@ private fun CategoryItem(
         }
 
         Text(
-            text = cateCode.displayName,
+            text = genreCode.displayName,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
             color = BaeminDarkGray,

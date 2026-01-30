@@ -30,7 +30,8 @@ class PerformanceRepositoryImpl @Inject constructor(
         performanceState: String?,
         signGuCode: String?,
         signGuCodeSub: String?,
-        kidState: String?
+        kidState: String?,
+        genreCode: String?,
     ): Flow<CallStatus<List<PerformanceInfoItem>?>> = flow {
         remote.getPerformanceList(
             service,
@@ -41,7 +42,8 @@ class PerformanceRepositoryImpl @Inject constructor(
             performanceState,
             signGuCode,
             signGuCodeSub,
-            kidState
+            kidState,
+            genreCode
         ).onStart {
             emit(CallStatus.Loading)
         }.catch {
