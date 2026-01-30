@@ -127,6 +127,9 @@ fun LoungeScreen(
         },
         onFestivalItemClick = { item ->
             viewModel.setEvent(LoungeEvent.OnFestivalItemClick(item))
+        },
+        onFestivalMoreClick = {
+            viewModel.setEvent(LoungeEvent.OnFestivalMoreClick)
         }
     )
 }
@@ -143,7 +146,8 @@ private fun LoungeScreenContent(
     onGenreTabSelected: (GenreCode) -> Unit,
     onGenreRankItemClick: (BoxOfficeItem) -> Unit,
     onFestivalTabSelected: (SignGuCode) -> Unit,
-    onFestivalItemClick: (PerformanceInfoItem) -> Unit
+    onFestivalItemClick: (PerformanceInfoItem) -> Unit,
+    onFestivalMoreClick: () -> Unit
 ) {
     Scaffold(
         containerColor = BaeminBackground,
@@ -180,7 +184,8 @@ private fun LoungeScreenContent(
                     onGenreTabSelected = onGenreTabSelected,
                     onGenreRankItemClick = onGenreRankItemClick,
                     onFestivalTabSelected = onFestivalTabSelected,
-                    onFestivalItemClick = onFestivalItemClick
+                    onFestivalItemClick = onFestivalItemClick,
+                    onFestivalMoreClick = onFestivalMoreClick
                 )
                 BottomTab.SEARCH -> SearchContent()
                 BottomTab.BOOKMARK -> BookmarkContent()
@@ -726,7 +731,8 @@ private fun HomeContent(
     onGenreTabSelected: (GenreCode) -> Unit,
     onGenreRankItemClick: (BoxOfficeItem) -> Unit,
     onFestivalTabSelected: (SignGuCode) -> Unit,
-    onFestivalItemClick: (PerformanceInfoItem) -> Unit
+    onFestivalItemClick: (PerformanceInfoItem) -> Unit,
+    onFestivalMoreClick: () -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -854,7 +860,8 @@ private fun HomeContent(
                 selectedFestivalTab = state.selectedFestivalTab,
                 festivalList = state.festivalList,
                 onFestivalTabSelected = onFestivalTabSelected,
-                onItemClick = onFestivalItemClick
+                onItemClick = onFestivalItemClick,
+                onMoreClick = onFestivalMoreClick
             )
         }
 
@@ -1234,7 +1241,8 @@ private fun FestivalSection(
     selectedFestivalTab: SignGuCode,
     festivalList: List<PerformanceInfoItem>,
     onFestivalTabSelected: (SignGuCode) -> Unit,
-    onItemClick: (PerformanceInfoItem) -> Unit
+    onItemClick: (PerformanceInfoItem) -> Unit,
+    onMoreClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -1260,9 +1268,7 @@ private fun FestivalSection(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .clickable {
-                        // TODO: 축제리스트 페이지 이동
-                    },
+                    .clickable(onClick = onMoreClick),
                 contentAlignment = Alignment.Center
             ) {
                 ArrowRightIcon(
@@ -1965,7 +1971,8 @@ private fun LoungeScreenPreview() {
         onGenreTabSelected = {},
         onGenreRankItemClick = {},
         onFestivalItemClick = {},
-        onFestivalTabSelected = {}
+        onFestivalTabSelected = {},
+        onFestivalMoreClick = {}
     )
 }
 

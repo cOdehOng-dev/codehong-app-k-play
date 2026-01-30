@@ -83,6 +83,10 @@ class LoungeViewModel @Inject constructor(
                     setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
                 }
             }
+            is LoungeEvent.OnFestivalMoreClick -> {
+                Log.d(TAG, "Festival more clicked")
+                setEffect { LoungeEffect.NavigateToFestivalList }
+            }
         }
     }
 

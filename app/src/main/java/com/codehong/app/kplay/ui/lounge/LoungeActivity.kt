@@ -110,6 +110,9 @@ class LoungeActivity : ComponentActivity() {
                                 )
                             }
                         }
+                        is LoungeEffect.NavigateToFestivalList -> {
+                            ActivityManager.openFestivalList(this@LoungeActivity)
+                        }
                     }
                 }
             }

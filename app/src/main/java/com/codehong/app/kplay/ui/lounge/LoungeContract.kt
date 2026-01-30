@@ -35,6 +35,7 @@ sealed class LoungeEvent : ViewEvent {
     data class OnGenreRankItemClick(val item: BoxOfficeItem) : LoungeEvent()
     data class OnFestivalTabSelected(val signGuCode: SignGuCode) : LoungeEvent()
     data class OnFestivalItemClick(val item: PerformanceInfoItem) : LoungeEvent()
+    data object OnFestivalMoreClick : LoungeEvent()
 }
 
 sealed class LoungeEffect : ViewSideEffect {
@@ -42,6 +43,7 @@ sealed class LoungeEffect : ViewSideEffect {
     data class NavigateToPerformanceDetail(val performanceId: String) : LoungeEffect()
     data class ShowToast(val message: String) : LoungeEffect()
     data object RequestLocationPermission : LoungeEffect()
+    data object NavigateToFestivalList : LoungeEffect()
 }
 
 enum class RankTab(
