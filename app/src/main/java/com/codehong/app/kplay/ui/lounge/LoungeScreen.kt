@@ -334,6 +334,24 @@ private fun SearchIcon(
 }
 
 @Composable
+private fun ArrowRightIcon(
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier) {
+        val strokeWidth = size.width * 0.12f
+
+        // > 모양 화살표
+        val arrowPath = Path().apply {
+            moveTo(size.width * 0.35f, size.height * 0.2f)
+            lineTo(size.width * 0.65f, size.height * 0.5f)
+            lineTo(size.width * 0.35f, size.height * 0.8f)
+        }
+        drawPath(arrowPath, color, style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
+    }
+}
+
+@Composable
 private fun NotificationIcon(
     color: Color,
     modifier: Modifier = Modifier
@@ -606,34 +624,6 @@ private fun BannerItem(
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
-    var textColor by remember { mutableStateOf(Color.White) }
-
-    // 이미지 밝기에 따른 텍스트 색상 결정
-    LaunchedEffect(item.posterUrl) {
-        item.posterUrl?.let { url ->
-            try {
-                val request = ImageRequest.Builder(context)
-                    .data(url)
-                    .allowHardware(false)
-                    .build()
-
-                val result = context.imageLoader.execute(request)
-                if (result is SuccessResult) {
-                    val bitmap = (result.drawable as? BitmapDrawable)?.bitmap
-                    bitmap?.let {
-                        val palette = Palette.from(it).generate()
-                        val dominantSwatch = palette.dominantSwatch
-                        dominantSwatch?.let { swatch ->
-                            val luminance = calculateLuminance(swatch.rgb)
-                            textColor = if (luminance > 0.5) Color.Black else Color.White
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to analyze image brightness", e)
-            }
-        }
-    }
 
     Box(
         modifier = Modifier
@@ -678,7 +668,7 @@ private fun BannerItem(
                 text = item.performanceName ?: "",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = textColor,
+                color = Color.White,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -690,7 +680,7 @@ private fun BannerItem(
                 text = item.placeName ?: "",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = textColor.copy(alpha = 0.9f),
+                color = Color.White.copy(alpha = 0.9f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -701,7 +691,7 @@ private fun BannerItem(
             Text(
                 text = item.performancePeriod ?: "",
                 fontSize = 12.sp,
-                color = textColor.copy(alpha = 0.8f),
+                color = Color.White.copy(alpha = 0.8f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -808,26 +798,47 @@ private fun HomeContent(
             )
         }
 
-        // 순위 리스트
-        val filteredRankList = state.rankList.filter { item ->
-            val rank = item.rank?.toIntOrNull() ?: 0
-            rank in state.selectedRankTab.startRank..state.selectedRankTab.endRank
-        }
+        // 순위 리스트 (가로 스크롤)
+        item {
+            val filteredRankList = state.rankList.filter { item ->
+                val rank = item.rank?.toIntOrNull() ?: 0
+                rank in state.selectedRankTab.startRank..state.selectedRankTab.endRank
+            }
 
-        itemsIndexed(
-            items = filteredRankList,
-            key = { _, item -> item.performanceId ?: item.hashCode() }
-        ) { index, item ->
-            RankListItem(
-                item = item,
-                onClick = { onRankItemClick(item) }
-            )
-            if (index < filteredRankList.lastIndex) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    thickness = 1.dp,
-                    color = Color(0xFFEEEEEE)
-                )
+            // 탭 변경 시 스크롤 위치 초기화
+            val rankScrollState = rememberScrollState()
+            LaunchedEffect(state.selectedRankTab) {
+                rankScrollState.scrollTo(0)
+            }
+
+            if (filteredRankList.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(280.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "순위 정보를 불러오는 중...",
+                        fontSize = 14.sp,
+                        color = BaeminGray
+                    )
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(rankScrollState)
+                        .height(IntrinsicSize.Max)
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    filteredRankList.forEach { item ->
+                        HorizontalRankItem(
+                            item = item,
+                            onClick = { onRankItemClick(item) }
+                        )
+                    }
+                }
             }
         }
 
@@ -1107,14 +1118,36 @@ private fun GenreRankSection(
             .fillMaxWidth()
             .padding(vertical = 16.dp)
     ) {
-        // 제목
-        Text(
-            text = "장르별 랭킹이에요",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = BaeminDarkGray,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+        // 제목 + 더보기 버튼
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "장르별 랭킹이에요",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = BaeminDarkGray
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        // TODO: 장르 랭킹 리스트 화면 이동
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                ArrowRightIcon(
+                    color = BaeminGray,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -1138,6 +1171,12 @@ private fun GenreRankSection(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // 탭 변경 시 스크롤 위치 초기화
+        val genreScrollState = rememberScrollState()
+        LaunchedEffect(selectedGenreTab) {
+            genreScrollState.scrollTo(0)
+        }
+
         // 장르별 랭킹 가로 리스트
         if (genreRankList.isEmpty()) {
             Box(
@@ -1155,7 +1194,7 @@ private fun GenreRankSection(
         } else {
             Row(
                 modifier = Modifier
-                    .horizontalScroll(rememberScrollState())
+                    .horizontalScroll(genreScrollState)
                     .height(IntrinsicSize.Max)
                     .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -1208,6 +1247,104 @@ private fun GenreRankItem(
     rank: Int,
     onClick: () -> Unit
 ) {
+    Column(
+        modifier = Modifier
+            .width(130.dp)
+            .fillMaxHeight()
+            .clickable(onClick = onClick)
+    ) {
+        // 포스터 이미지 + 순위 배지
+        Box {
+            AsyncImage(
+                model = item.posterUrl,
+                contentDescription = item.performanceName,
+                modifier = Modifier
+                    .size(130.dp, 170.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            // 순위 배지 (좌측 하단)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(6.dp)
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(
+                        when (rank) {
+                            1 -> GoldColor
+                            2 -> SilverColor
+                            3 -> BronzeColor
+                            else -> BaeminDarkGray.copy(alpha = 0.8f)
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "$rank",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 뱃지 (장르, 지역)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            if (!item.category.isNullOrBlank()) {
+                SmallBadge(text = item.category)
+            }
+            if (!item.area.isNullOrBlank()) {
+                SmallBadge(text = item.area)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // 공연명
+        Text(
+            text = item.performanceName ?: "",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = BaeminDarkGray,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 장소명
+        Text(
+            text = item.placeName ?: "",
+            fontSize = 11.sp,
+            color = BaeminGray,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 공연 기간
+        if (!item.performancePeriod.isNullOrBlank()) {
+            Text(
+                text = item.performancePeriod ?: "",
+                fontSize = 10.sp,
+                color = BaeminPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun HorizontalRankItem(
+    item: BoxOfficeItem,
+    onClick: () -> Unit
+) {
+    val rank = item.rank?.toIntOrNull() ?: 0
+
     Column(
         modifier = Modifier
             .width(130.dp)

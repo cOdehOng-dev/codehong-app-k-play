@@ -104,4 +104,31 @@ class PerformanceRepositoryImpl @Inject constructor(
         TimberUtil.e("test here getRankList error 11 = $e")
         emit(CallStatus.Error(e))
     }
+
+    override fun getFestivalList(
+        serviceKey: String,
+        startDate: String,
+        endDate: String,
+        currentPage: String,
+        rowsPerPage: String
+    ): Flow<CallStatus<List<PerformanceInfoItem>?>> = flow {
+        remote.getFestivalList(
+            serviceKey,
+            startDate,
+            endDate,
+            currentPage,
+            rowsPerPage
+        ).onStart {
+            emit(CallStatus.Loading)
+        }.catch { e ->
+            emit(CallStatus.Error(e))
+        }.collect {
+            gson.toJson(it)?.let { json ->
+                TimberUtil.d("test here getFestivalList json = $json")
+            }
+            emit(CallStatus.Success(it.performances?.map { itemDto -> itemDto.asDomain() }))
+        }
+    }.catch { e ->
+        emit(CallStatus.Error(e))
+    }
 }

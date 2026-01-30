@@ -17,7 +17,8 @@ data class LoungeState(
     val myAreaList: List<PerformanceInfoItem> = emptyList(),
     val selectedSignGuCode: SignGuCode = SignGuCode.SEOUL,
     val selectedGenreTab: GenreCode = GenreCode.THEATER,
-    val genreRankList: List<BoxOfficeItem> = emptyList()
+    val genreRankList: List<BoxOfficeItem> = emptyList(),
+    val festivalList: List<PerformanceInfoItem> = emptyList(),
 ) : ViewState
 
 sealed class LoungeEvent : ViewEvent {

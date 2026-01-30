@@ -37,4 +37,13 @@ interface KopisApiService {
         @Query("catecode") catecode: String? = null,
         @Query("area") area: String? = null
     ): BoxOfficeResponse
+
+    @GET("/openApi/restful/prffest")
+    suspend fun getFestivalList(
+        @Query("service") serviceKey: String,
+        @Query("stdate") startDate: String,
+        @Query("eddate") endDate: String,
+        @Query("cpage") currentPage: String,
+        @Query("rows") rowsPerPage: String
+    ): PerformanceListResponse
 }

@@ -147,4 +147,24 @@ class LoungeViewModel @Inject constructor(
             }
         }
     }
+
+    fun callFestivalList() {
+        val startDate = DateUtil.getCurrentMonthFirstDay()
+        val endDate = DateUtil.getCurrentMonthLastDay()
+
+        viewModelScope.launch {
+            performanceUseCase.getFestivalList(
+                serviceKey = BuildConfig.KOKOR_CLIENT_ID,
+                startDate = startDate,
+                endDate = endDate,
+                currentPage = "1",
+                rowsPerPage = "10"
+            ).collect { festivalList ->
+                TimberUtil.d("Festival list size: ${festivalList?.size ?: 0}")
+                festivalList?.let { list ->
+                    setState { copy(festivalList = list) }
+                }
+            }
+        }
+    }
 }

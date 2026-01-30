@@ -73,4 +73,26 @@ class PerformanceUseCase @Inject constructor(
             }
         }
     }
+
+    fun getFestivalList(
+        serviceKey: String,
+        startDate: String,
+        endDate: String,
+        currentPage: String,
+        rowsPerPage: String
+    ): Flow<List<PerformanceInfoItem>?> = flow {
+        repository.getFestivalList(
+            serviceKey,
+            startDate,
+            endDate,
+            currentPage,
+            rowsPerPage
+        ).collect { status ->
+            when (status) {
+                is CallStatus.Loading -> {}
+                is CallStatus.Success -> emit(status.responseData)
+                else -> emit(null)
+            }
+        }
+    }
 }

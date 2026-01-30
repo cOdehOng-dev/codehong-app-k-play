@@ -33,4 +33,12 @@ interface PerformanceRepository {
         genreCode: String?,
         area: String?
     ): Flow<CallStatus<List<BoxOfficeItem>?>>
+
+    fun getFestivalList(
+        serviceKey: String,
+        startDate: String,
+        endDate: String,
+        currentPage: String,
+        rowsPerPage: String
+    ): Flow<CallStatus<List<PerformanceInfoItem>?>>
 }
