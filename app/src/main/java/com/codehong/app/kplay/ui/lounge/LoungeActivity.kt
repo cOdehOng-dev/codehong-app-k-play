@@ -41,6 +41,8 @@ class LoungeActivity : ComponentActivity() {
         viewModel.callRankList()
         viewModel.callGenreRankList()
         viewModel.callFestivalList(SignGuCode.SEOUL.code)
+        viewModel.callAwardedPerformanceList(SignGuCode.SEOUL.code)
+        viewModel.callLocalList(SignGuCode.SEOUL.code)
 
         // SharedPreferences에서 signGuCode를 읽어와 초기화
         val storedSignGuCodeName = sharedPreferences.getString(SIGN_GU_CODE_KEY, null)
@@ -112,6 +114,22 @@ class LoungeActivity : ComponentActivity() {
                         }
                         is LoungeEffect.NavigateToFestivalList -> {
                             ActivityManager.openFestivalList(this@LoungeActivity)
+                        }
+                        is LoungeEffect.NavigateToAwardedList -> {
+                            // TODO: 수상작 리스트 페이지 이동
+                            Log.d(TAG, "Navigate to awarded list")
+                        }
+                        is LoungeEffect.NavigateToGenreRankList -> {
+                            ActivityManager.openGenreRankList(
+                                this@LoungeActivity,
+                                effect.genreCode.code
+                            )
+                        }
+                        is LoungeEffect.NavigateToLocalList -> {
+                            ActivityManager.openPerformanceList(
+                                this@LoungeActivity,
+                                effect.signGuCode.code
+                            )
                         }
                     }
                 }

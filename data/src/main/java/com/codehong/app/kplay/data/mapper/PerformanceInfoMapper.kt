@@ -17,7 +17,8 @@ object PerformanceInfoMapper : DtoMapper<PerformanceItemDto?, PerformanceInfoIte
             area = dto.area,
             genre = dto.genre,
             openRun = dto.openRun,
-            state = dto.state
+            state = dto.state,
+            awards = dto.awards?.split("&lt;br&gt;")?.firstOrNull()
         )
     }
 }

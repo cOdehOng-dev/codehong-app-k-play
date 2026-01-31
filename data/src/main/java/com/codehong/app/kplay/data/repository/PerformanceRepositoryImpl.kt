@@ -135,4 +135,37 @@ class PerformanceRepositoryImpl @Inject constructor(
     }.catch { e ->
         emit(CallStatus.Error(e))
     }
+
+    override fun getAwardedPerformanceList(
+        serviceKey: String,
+        startDate: String,
+        endDate: String,
+        currentPage: String,
+        rowsPerPage: String,
+        signGuCode: String?,
+        signGuCodeSub: String?
+    ): Flow<CallStatus<List<PerformanceInfoItem>?>> = flow {
+        remote.getAwardedPerformanceList(
+            serviceKey,
+            startDate,
+            endDate,
+            currentPage,
+            rowsPerPage,
+            signGuCode,
+            signGuCodeSub
+        ).onStart {
+            emit(CallStatus.Loading)
+        }.catch { e ->
+            TimberUtil.e("test here getAwardedPerformanceList error 11 = $e")
+            emit(CallStatus.Error(e))
+        }.collect {
+            gson.toJson(it)?.let { json ->
+                TimberUtil.d("test here getAwardedPerformanceList json = $json")
+            }
+            emit(CallStatus.Success(it.performances?.map { itemDto -> itemDto.asDomain() }))
+        }
+    }.catch { e ->
+        TimberUtil.e("test here getAwardedPerformanceList error 11 = $e")
+        emit(CallStatus.Error(e))
+    }
 }

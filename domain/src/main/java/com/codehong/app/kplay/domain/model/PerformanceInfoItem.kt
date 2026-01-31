@@ -1,14 +1,15 @@
 package com.codehong.app.kplay.domain.model
 
 data class PerformanceInfoItem(
-    var id: String? = null,
-    var name: String? = null,
-    var startDate: String? = null,
-    var endDate: String? = null,
-    var placeName: String? = null,
-    var posterUrl: String? = null,
-    var area: String? = null,
-    var genre: String? = null,
-    var openRun: String? = null,
-    var state: String? = null
+    val id: String? = null,
+    val name: String? = null,
+    val startDate: String? = null,
+    val endDate: String? = null,
+    val placeName: String? = null,
+    val posterUrl: String? = null,
+    val area: String? = null,
+    val genre: String? = null,
+    val openRun: String? = null,
+    val state: String? = null,
+    val awards: String? = null
 )

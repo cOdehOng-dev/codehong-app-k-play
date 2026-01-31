@@ -82,4 +82,26 @@ class PerformanceRemoteDataSource @Inject constructor(
             )
         )
     }.flowOn(Dispatchers.IO)
+
+    fun getAwardedPerformanceList(
+        serviceKey: String,
+        startDate: String,
+        endDate: String,
+        currentPage: String,
+        rowsPerPage: String,
+        signGuCode: String? = null,
+        signGuCodeSub: String? = null
+    ): Flow<PerformanceListResponse> = flow {
+        emit(
+            kopisApiService.getAwardedPerformanceList(
+                serviceKey,
+                startDate,
+                endDate,
+                currentPage,
+                rowsPerPage,
+                signGuCode,
+                signGuCodeSub
+            )
+        )
+    }.flowOn(Dispatchers.IO)
 }

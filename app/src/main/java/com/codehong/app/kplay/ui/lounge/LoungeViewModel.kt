@@ -72,6 +72,10 @@ class LoungeViewModel @Inject constructor(
                     setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
                 }
             }
+            is LoungeEvent.OnGenreRankMoreClick -> {
+                Log.d(TAG, "Genre rank more clicked - selectedGenreTab: ${state.value.selectedGenreTab.code}")
+                setEffect { LoungeEffect.NavigateToGenreRankList(state.value.selectedGenreTab) }
+            }
             is LoungeEvent.OnFestivalTabSelected -> {
                 Log.d(TAG, "Festival tab selected: ${event.signGuCode.displayName}")
                 setState { copy(selectedFestivalTab = event.signGuCode) }
@@ -86,6 +90,37 @@ class LoungeViewModel @Inject constructor(
             is LoungeEvent.OnFestivalMoreClick -> {
                 Log.d(TAG, "Festival more clicked")
                 setEffect { LoungeEffect.NavigateToFestivalList }
+            }
+            is LoungeEvent.OnAwardedTabSelected -> {
+                Log.d(TAG, "Awarded tab selected: ${event.signGuCode.displayName}")
+                setState { copy(selectedAwardedTab = event.signGuCode) }
+                callAwardedPerformanceList(event.signGuCode.code)
+            }
+            is LoungeEvent.OnAwardedItemClick -> {
+                Log.d(TAG, "Awarded item clicked - id: ${event.item.id}")
+                event.item.id?.let {
+                    setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
+                }
+            }
+            is LoungeEvent.OnAwardedMoreClick -> {
+                Log.d(TAG, "Awarded more clicked")
+                // TODO: 수상작 리스트 페이지 이동
+                setEffect { LoungeEffect.NavigateToAwardedList }
+            }
+            is LoungeEvent.OnLocalTabSelected -> {
+                Log.d(TAG, "Local tab selected: ${event.signGuCode.displayName}")
+                setState { copy(selectedLocalTab = event.signGuCode) }
+                callLocalList(event.signGuCode.code)
+            }
+            is LoungeEvent.OnLocalItemClick -> {
+                Log.d(TAG, "Local item clicked - id: ${event.item.id}")
+                event.item.id?.let {
+                    setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
+                }
+            }
+            is LoungeEvent.OnLocalMoreClick -> {
+                Log.d(TAG, "Local more clicked - selectedLocalTab: ${state.value.selectedLocalTab.code}")
+                setEffect { LoungeEffect.NavigateToLocalList(state.value.selectedLocalTab) }
             }
         }
     }
@@ -140,6 +175,32 @@ class LoungeViewModel @Inject constructor(
     }
 
     /**
+     * 지역별 공연 리스트 api
+     */
+    fun callLocalList(
+        areaCode: String = state.value.selectedLocalTab.code
+    ) {
+        val startDate = DateUtil.getCurrentMonthFirstDay()
+        val endDate = DateUtil.getCurrentMonthLastDay()
+
+        viewModelScope.launch {
+            performanceUseCase.getPerformanceList(
+                service = BuildConfig.KOKOR_CLIENT_ID,
+                startDate = startDate,
+                endDate = endDate,
+                currentPage = "1",
+                rowsPerPage = "10",
+                signGuCode = areaCode,
+            ).collect { list ->
+                TimberUtil.d("Local list size: ${list?.size ?: 0}")
+                list?.let {
+                    setState { copy(localList = it) }
+                }
+            }
+        }
+    }
+
+    /**
      * 장르별 랭킹 리스트 api
      */
     fun callGenreRankList(
@@ -179,6 +240,27 @@ class LoungeViewModel @Inject constructor(
                 TimberUtil.d("Festival list size: ${festivalList?.size ?: 0}")
                 festivalList?.let { list ->
                     setState { copy(festivalList = list) }
+                }
+            }
+        }
+    }
+
+    fun callAwardedPerformanceList(signGuCode: String) {
+        val startDate = DateUtil.getCurrentMonthFirstDay()
+        val endDate = DateUtil.getCurrentMonthLastDay()
+
+        viewModelScope.launch {
+            performanceUseCase.getAwardedPerformanceList(
+                serviceKey = BuildConfig.KOKOR_CLIENT_ID,
+                startDate = startDate,
+                endDate = endDate,
+                currentPage = "1",
+                rowsPerPage = "10",
+                signGuCode = signGuCode
+            ).collect { awardedList ->
+                TimberUtil.d("Awarded performance list size: ${awardedList?.size ?: 0}")
+                awardedList?.let { list ->
+                    setState { copy(awardedList = list) }
                 }
             }
         }

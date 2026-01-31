@@ -20,7 +20,13 @@ data class LoungeState(
     val genreRankList: List<BoxOfficeItem> = emptyList(),
     val festivalList: List<PerformanceInfoItem> = emptyList(),
     val selectedFestivalTab: SignGuCode = SignGuCode.SEOUL,
-    val festivalTabs: List<SignGuCode> = SignGuCode.entries.toList()
+    val festivalTabs: List<SignGuCode> = SignGuCode.entries.toList(),
+    val awardedList: List<PerformanceInfoItem> = emptyList(),
+    val selectedAwardedTab: SignGuCode = SignGuCode.SEOUL,
+    val awardedTabs: List<SignGuCode> = SignGuCode.entries.toList(),
+    val localList: List<PerformanceInfoItem> = emptyList(),
+    val selectedLocalTab: SignGuCode = SignGuCode.SEOUL,
+    val localTabs: List<SignGuCode> = SignGuCode.entries.toList()
 ) : ViewState
 
 sealed class LoungeEvent : ViewEvent {
@@ -33,9 +39,16 @@ sealed class LoungeEvent : ViewEvent {
     data class OnSignGuCodeUpdated(val signGuCode: SignGuCode) : LoungeEvent()
     data class OnGenreTabSelected(val genreCode: GenreCode) : LoungeEvent()
     data class OnGenreRankItemClick(val item: BoxOfficeItem) : LoungeEvent()
+    data object OnGenreRankMoreClick : LoungeEvent()
     data class OnFestivalTabSelected(val signGuCode: SignGuCode) : LoungeEvent()
     data class OnFestivalItemClick(val item: PerformanceInfoItem) : LoungeEvent()
     data object OnFestivalMoreClick : LoungeEvent()
+    data class OnAwardedTabSelected(val signGuCode: SignGuCode) : LoungeEvent()
+    data class OnAwardedItemClick(val item: PerformanceInfoItem) : LoungeEvent()
+    data object OnAwardedMoreClick : LoungeEvent()
+    data class OnLocalTabSelected(val signGuCode: SignGuCode) : LoungeEvent()
+    data class OnLocalItemClick(val item: PerformanceInfoItem) : LoungeEvent()
+    data object OnLocalMoreClick : LoungeEvent()
 }
 
 sealed class LoungeEffect : ViewSideEffect {
@@ -44,6 +57,9 @@ sealed class LoungeEffect : ViewSideEffect {
     data class ShowToast(val message: String) : LoungeEffect()
     data object RequestLocationPermission : LoungeEffect()
     data object NavigateToFestivalList : LoungeEffect()
+    data object NavigateToAwardedList : LoungeEffect()
+    data class NavigateToGenreRankList(val genreCode: GenreCode) : LoungeEffect()
+    data class NavigateToLocalList(val signGuCode: SignGuCode) : LoungeEffect()
 }
 
 enum class RankTab(

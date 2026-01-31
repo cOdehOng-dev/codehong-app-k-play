@@ -43,4 +43,14 @@ interface PerformanceRepository {
         signGuCode: String?,
         signGuCodeSub: String?
     ): Flow<CallStatus<List<PerformanceInfoItem>?>>
+
+    fun getAwardedPerformanceList(
+        serviceKey: String,
+        startDate: String,
+        endDate: String,
+        currentPage: String,
+        rowsPerPage: String,
+        signGuCode: String? = null,
+        signGuCodeSub: String? = null
+    ): Flow<CallStatus<List<PerformanceInfoItem>?>>
 }

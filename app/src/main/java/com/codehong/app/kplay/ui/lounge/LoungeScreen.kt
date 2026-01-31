@@ -122,6 +122,9 @@ fun LoungeScreen(
         onGenreRankItemClick = { item ->
             viewModel.setEvent(LoungeEvent.OnGenreRankItemClick(item))
         },
+        onGenreRankMoreClick = {
+            viewModel.setEvent(LoungeEvent.OnGenreRankMoreClick)
+        },
         onFestivalTabSelected = { signGuCode ->
             viewModel.setEvent(LoungeEvent.OnFestivalTabSelected(signGuCode))
         },
@@ -130,6 +133,24 @@ fun LoungeScreen(
         },
         onFestivalMoreClick = {
             viewModel.setEvent(LoungeEvent.OnFestivalMoreClick)
+        },
+        onAwardedTabSelected = { signGuCode ->
+            viewModel.setEvent(LoungeEvent.OnAwardedTabSelected(signGuCode))
+        },
+        onAwardedItemClick = { item ->
+            viewModel.setEvent(LoungeEvent.OnAwardedItemClick(item))
+        },
+        onAwardedMoreClick = {
+            viewModel.setEvent(LoungeEvent.OnAwardedMoreClick)
+        },
+        onLocalTabSelected = { signGuCode ->
+            viewModel.setEvent(LoungeEvent.OnLocalTabSelected(signGuCode))
+        },
+        onLocalItemClick = { item ->
+            viewModel.setEvent(LoungeEvent.OnLocalItemClick(item))
+        },
+        onLocalMoreClick = {
+            viewModel.setEvent(LoungeEvent.OnLocalMoreClick)
         }
     )
 }
@@ -145,9 +166,16 @@ private fun LoungeScreenContent(
     onNearbyItemClick: (PerformanceInfoItem) -> Unit,
     onGenreTabSelected: (GenreCode) -> Unit,
     onGenreRankItemClick: (BoxOfficeItem) -> Unit,
+    onGenreRankMoreClick: () -> Unit,
     onFestivalTabSelected: (SignGuCode) -> Unit,
     onFestivalItemClick: (PerformanceInfoItem) -> Unit,
-    onFestivalMoreClick: () -> Unit
+    onFestivalMoreClick: () -> Unit,
+    onAwardedTabSelected: (SignGuCode) -> Unit,
+    onAwardedItemClick: (PerformanceInfoItem) -> Unit,
+    onAwardedMoreClick: () -> Unit,
+    onLocalTabSelected: (SignGuCode) -> Unit,
+    onLocalItemClick: (PerformanceInfoItem) -> Unit,
+    onLocalMoreClick: () -> Unit
 ) {
     Scaffold(
         containerColor = BaeminBackground,
@@ -183,9 +211,16 @@ private fun LoungeScreenContent(
                     onNearbyItemClick = onNearbyItemClick,
                     onGenreTabSelected = onGenreTabSelected,
                     onGenreRankItemClick = onGenreRankItemClick,
+                    onGenreRankMoreClick = onGenreRankMoreClick,
                     onFestivalTabSelected = onFestivalTabSelected,
                     onFestivalItemClick = onFestivalItemClick,
-                    onFestivalMoreClick = onFestivalMoreClick
+                    onFestivalMoreClick = onFestivalMoreClick,
+                    onAwardedTabSelected = onAwardedTabSelected,
+                    onAwardedItemClick = onAwardedItemClick,
+                    onAwardedMoreClick = onAwardedMoreClick,
+                    onLocalTabSelected = onLocalTabSelected,
+                    onLocalItemClick = onLocalItemClick,
+                    onLocalMoreClick = onLocalMoreClick
                 )
                 BottomTab.SEARCH -> SearchContent()
                 BottomTab.BOOKMARK -> BookmarkContent()
@@ -730,9 +765,16 @@ private fun HomeContent(
     onNearbyItemClick: (PerformanceInfoItem) -> Unit,
     onGenreTabSelected: (GenreCode) -> Unit,
     onGenreRankItemClick: (BoxOfficeItem) -> Unit,
+    onGenreRankMoreClick: () -> Unit,
     onFestivalTabSelected: (SignGuCode) -> Unit,
     onFestivalItemClick: (PerformanceInfoItem) -> Unit,
-    onFestivalMoreClick: () -> Unit
+    onFestivalMoreClick: () -> Unit,
+    onAwardedTabSelected: (SignGuCode) -> Unit,
+    onAwardedItemClick: (PerformanceInfoItem) -> Unit,
+    onAwardedMoreClick: () -> Unit,
+    onLocalTabSelected: (SignGuCode) -> Unit,
+    onLocalItemClick: (PerformanceInfoItem) -> Unit,
+    onLocalMoreClick: () -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -779,6 +821,18 @@ private fun HomeContent(
             )
         }
 
+        // 지역별 공연 섹션
+        item {
+            LocalSection(
+                localTabs = state.localTabs,
+                selectedLocalTab = state.selectedLocalTab,
+                localList = state.localList,
+                onLocalTabSelected = onLocalTabSelected,
+                onItemClick = onLocalItemClick,
+                onMoreClick = onLocalMoreClick
+            )
+        }
+
         // 장르별 랭킹 섹션
         item {
             GenreRankSection(
@@ -786,7 +840,8 @@ private fun HomeContent(
                 selectedGenreTab = state.selectedGenreTab,
                 genreRankList = state.genreRankList,
                 onGenreTabSelected = onGenreTabSelected,
-                onItemClick = onGenreRankItemClick
+                onItemClick = onGenreRankItemClick,
+                onMoreClick = onGenreRankMoreClick
             )
         }
 
@@ -862,6 +917,18 @@ private fun HomeContent(
                 onFestivalTabSelected = onFestivalTabSelected,
                 onItemClick = onFestivalItemClick,
                 onMoreClick = onFestivalMoreClick
+            )
+        }
+
+        // 수상작 섹션
+        item {
+            AwardedSection(
+                awardedTabs = state.awardedTabs,
+                selectedAwardedTab = state.selectedAwardedTab,
+                awardedList = state.awardedList,
+                onAwardedTabSelected = onAwardedTabSelected,
+                onItemClick = onAwardedItemClick,
+                onMoreClick = onAwardedMoreClick
             )
         }
 
@@ -980,8 +1047,9 @@ private fun MyAreaSection(
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // signGuCode.displayName
             Text(
-                text = "${currentMonth}월 ${signGuCode.displayName} 공연",
+                text = "${currentMonth}월 내 주변 공연",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = BaeminDarkGray
@@ -1127,6 +1195,217 @@ private fun MyAreaItem(
     }
 }
 
+// ===== 지역별 공연 섹션 =====
+@Composable
+private fun LocalSection(
+    localTabs: List<SignGuCode>,
+    selectedLocalTab: SignGuCode,
+    localList: List<PerformanceInfoItem>,
+    onLocalTabSelected: (SignGuCode) -> Unit,
+    onItemClick: (PerformanceInfoItem) -> Unit,
+    onMoreClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+    ) {
+        // 제목 + 더보기 버튼
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "지역별 공연이에요",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = BaeminDarkGray
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .clickable(onClick = onMoreClick),
+                contentAlignment = Alignment.Center
+            ) {
+                ArrowRightIcon(
+                    color = BaeminGray,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 지역 탭 (TabLayout)
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            itemsIndexed(
+                items = localTabs,
+                key = { _, item -> "local_${item.code}" }
+            ) { _, signGuCode ->
+                LocalTabChip(
+                    text = signGuCode.displayName,
+                    isSelected = signGuCode == selectedLocalTab,
+                    onClick = { onLocalTabSelected(signGuCode) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 탭 변경 시 스크롤 위치 초기화
+        val localScrollState = rememberScrollState()
+        LaunchedEffect(selectedLocalTab) {
+            localScrollState.scrollTo(0)
+        }
+
+        // 지역별 공연 리스트
+        if (localList.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "지역별 공연 정보를 불러오는 중...",
+                    fontSize = 14.sp,
+                    color = BaeminGray
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(localScrollState)
+                    .height(IntrinsicSize.Max)
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                localList.forEach { item ->
+                    LocalItem(
+                        item = item,
+                        onClick = { onItemClick(item) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LocalTabChip(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                color = if (isSelected) BaeminPrimary else BaeminBackground
+            )
+            .border(
+                width = 1.dp,
+                color = BaeminPrimary,
+                shape = RoundedCornerShape(50)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = if (isSelected) Color.White else BaeminPrimary
+        )
+    }
+}
+
+@Composable
+private fun LocalItem(
+    item: PerformanceInfoItem,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .width(130.dp)
+            .fillMaxHeight()
+            .clickable(onClick = onClick)
+    ) {
+        // 포스터 이미지
+        AsyncImage(
+            model = item.posterUrl,
+            contentDescription = item.name,
+            modifier = Modifier
+                .size(130.dp, 170.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 뱃지 (장르, 지역)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            if (!item.genre.isNullOrBlank()) {
+                SmallBadge(text = item.genre)
+            }
+            if (!item.area.isNullOrBlank()) {
+                SmallBadge(text = item.area)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // 공연명
+        Text(
+            text = item.name ?: "",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = BaeminDarkGray,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 장소명
+        Text(
+            text = item.placeName ?: "",
+            fontSize = 11.sp,
+            color = BaeminGray,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 공연 기간
+        val period = buildString {
+            item.startDate?.let { append(it) }
+            if (!item.startDate.isNullOrBlank() && !item.endDate.isNullOrBlank()) {
+                append(" ~ ")
+            }
+            item.endDate?.let { append(it) }
+        }
+        if (period.isNotBlank()) {
+            Text(
+                text = period,
+                fontSize = 10.sp,
+                color = BaeminPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
 // ===== 장르별 랭킹 섹션 =====
 @Composable
 private fun GenreRankSection(
@@ -1134,7 +1413,8 @@ private fun GenreRankSection(
     selectedGenreTab: GenreCode,
     genreRankList: List<BoxOfficeItem>,
     onGenreTabSelected: (GenreCode) -> Unit,
-    onItemClick: (BoxOfficeItem) -> Unit
+    onItemClick: (BoxOfficeItem) -> Unit,
+    onMoreClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -1160,9 +1440,7 @@ private fun GenreRankSection(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .clickable {
-                        // TODO: 장르 랭킹 리스트 화면 이동
-                    },
+                    .clickable(onClick = onMoreClick),
                 contentAlignment = Alignment.Center
             ) {
                 ArrowRightIcon(
@@ -1439,6 +1717,234 @@ private fun FestivalItem(
                 fontSize = 10.sp,
                 color = BaeminPrimary,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+// ===== 수상작 섹션 =====
+@Composable
+private fun AwardedSection(
+    awardedTabs: List<SignGuCode>,
+    selectedAwardedTab: SignGuCode,
+    awardedList: List<PerformanceInfoItem>,
+    onAwardedTabSelected: (SignGuCode) -> Unit,
+    onItemClick: (PerformanceInfoItem) -> Unit,
+    onMoreClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+    ) {
+        // 제목 + 더보기 버튼
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "수상작은 어때요?",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = BaeminDarkGray
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .clickable(onClick = {
+                        // TODO: 수상작 리스트 페이지 이동
+                        onMoreClick()
+                    }),
+                contentAlignment = Alignment.Center
+            ) {
+                ArrowRightIcon(
+                    color = BaeminGray,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 지역 탭 (TabLayout)
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            itemsIndexed(
+                items = awardedTabs,
+                key = { _, item -> "awarded_${item.code}" }
+            ) { _, signGuCode ->
+                AwardedTabChip(
+                    text = signGuCode.displayName,
+                    isSelected = signGuCode == selectedAwardedTab,
+                    onClick = { onAwardedTabSelected(signGuCode) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 탭 변경 시 스크롤 위치 초기화
+        val awardedScrollState = rememberScrollState()
+        LaunchedEffect(selectedAwardedTab) {
+            awardedScrollState.scrollTo(0)
+        }
+
+        // 수상작 리스트
+        if (awardedList.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "수상작 정보를 불러오는 중...",
+                    fontSize = 14.sp,
+                    color = BaeminGray
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(awardedScrollState)
+                    .height(IntrinsicSize.Max)
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                awardedList.forEach { item ->
+                    AwardedItem(
+                        item = item,
+                        onClick = { onItemClick(item) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AwardedTabChip(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                color = if (isSelected) BaeminPrimary else BaeminBackground
+            )
+            .border(
+                width = 1.dp,
+                color = BaeminPrimary,
+                shape = RoundedCornerShape(50)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = if (isSelected) Color.White else BaeminPrimary
+        )
+    }
+}
+
+@Composable
+private fun AwardedItem(
+    item: PerformanceInfoItem,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .width(130.dp)
+            .fillMaxHeight()
+            .clickable(onClick = onClick)
+    ) {
+        // 포스터 이미지
+        AsyncImage(
+            model = item.posterUrl,
+            contentDescription = item.name,
+            modifier = Modifier
+                .size(130.dp, 170.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 뱃지 (장르, 지역)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            if (!item.genre.isNullOrBlank()) {
+                SmallBadge(text = item.genre)
+            }
+            if (!item.area.isNullOrBlank()) {
+                SmallBadge(text = item.area)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // 공연명
+        Text(
+            text = item.name ?: "",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = BaeminDarkGray,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 장소명
+        Text(
+            text = item.placeName ?: "",
+            fontSize = 11.sp,
+            color = BaeminGray,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // 공연 기간
+        val period = buildString {
+            item.startDate?.let { append(it) }
+            if (!item.startDate.isNullOrBlank() && !item.endDate.isNullOrBlank()) {
+                append(" ~ ")
+            }
+            item.endDate?.let { append(it) }
+        }
+        if (period.isNotBlank()) {
+            Text(
+                text = period,
+                fontSize = 10.sp,
+                color = BaeminPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        // 수상 정보
+        if (!item.awards.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = item.awards ?: "",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                color = BaeminGray,
+                lineHeight = 12.sp,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
         }
@@ -1970,9 +2476,16 @@ private fun LoungeScreenPreview() {
         onNearbyItemClick = {},
         onGenreTabSelected = {},
         onGenreRankItemClick = {},
+        onGenreRankMoreClick = {},
         onFestivalItemClick = {},
         onFestivalTabSelected = {},
-        onFestivalMoreClick = {}
+        onFestivalMoreClick = {},
+        onAwardedTabSelected = {},
+        onAwardedItemClick = {},
+        onAwardedMoreClick = {},
+        onLocalTabSelected = {},
+        onLocalItemClick = {},
+        onLocalMoreClick = {}
     )
 }
 

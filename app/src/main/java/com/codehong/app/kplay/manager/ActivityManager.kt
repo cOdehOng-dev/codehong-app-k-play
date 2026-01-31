@@ -6,7 +6,11 @@ import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.ui.festival.FestivalListActivity
 import com.codehong.app.kplay.ui.genre.list.GenreListActivity
 import com.codehong.app.kplay.ui.genre.list.GenreListViewModel
+import com.codehong.app.kplay.ui.genre.rank.GenreRankListActivity
+import com.codehong.app.kplay.ui.genre.rank.GenreRankListViewModel
 import com.codehong.app.kplay.ui.performance.detail.PerformanceDetailActivity
+import com.codehong.app.kplay.ui.performance.list.PerformanceListActivity
+import com.codehong.app.kplay.ui.performance.list.PerformanceListViewModel
 
 object ActivityManager {
 
@@ -38,12 +42,45 @@ object ActivityManager {
         context.startActivity(intent)
     }
 
-    fun openFestivalList(context: Context?) {
+    fun openFestivalList(
+        context: Context?,
+        signGuCode: String? = null
+    ) {
         if (context == null) {
             return
         }
 
-        val intent = Intent(context, FestivalListActivity::class.java)
+        val intent = Intent(context, FestivalListActivity::class.java).apply {
+            signGuCode?.let { putExtra(Consts.SIGN_GU_CODE, it) }
+        }
+        context.startActivity(intent)
+    }
+
+    fun openGenreRankList(
+        context: Context?,
+        genreCode: String?
+    ) {
+        if (context == null || genreCode.isNullOrEmpty()) {
+            return
+        }
+
+        val intent = Intent(context, GenreRankListActivity::class.java).apply {
+            putExtra(GenreRankListViewModel.EXTRA_GENRE_CODE, genreCode)
+        }
+        context.startActivity(intent)
+    }
+
+    fun openPerformanceList(
+        context: Context?,
+        signGuCode: String? = null
+    ) {
+        if (context == null) {
+            return
+        }
+
+        val intent = Intent(context, PerformanceListActivity::class.java).apply {
+            signGuCode?.let { putExtra(PerformanceListViewModel.EXTRA_SIGN_GU_CODE, it) }
+        }
         context.startActivity(intent)
     }
 }

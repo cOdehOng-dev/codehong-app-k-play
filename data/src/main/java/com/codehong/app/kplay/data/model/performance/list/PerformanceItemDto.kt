@@ -34,5 +34,8 @@ data class PerformanceItemDto(
     var openRun: String? = null,
 
     @field:Element(name = "prfstate", required = false)
-    var state: String? = null
+    var state: String? = null,
+
+    @field:Element(name = "awards", required = false)
+    var awards: String? = null
 )

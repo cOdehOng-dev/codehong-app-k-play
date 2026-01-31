@@ -99,4 +99,30 @@ class PerformanceUseCase @Inject constructor(
             }
         }
     }
+
+    fun getAwardedPerformanceList(
+        serviceKey: String,
+        startDate: String,
+        endDate: String,
+        currentPage: String,
+        rowsPerPage: String,
+        signGuCode: String? = null,
+        signGuCodeSub: String? = null
+    ): Flow<List<PerformanceInfoItem>?> = flow {
+        repository.getAwardedPerformanceList(
+            serviceKey,
+            startDate,
+            endDate,
+            currentPage,
+            rowsPerPage,
+            signGuCode,
+            signGuCodeSub
+        ).collect { status ->
+            when (status) {
+                is CallStatus.Loading -> {}
+                is CallStatus.Success -> emit(status.responseData)
+                else -> emit(null)
+            }
+        }
+    }
 }

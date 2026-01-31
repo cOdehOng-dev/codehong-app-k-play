@@ -103,6 +103,11 @@ private fun GenreListScreenContent(
         }
     }
 
+    // 탭 변경 시 스크롤 위치 초기화
+    LaunchedEffect(state.selectedSignGuCode) {
+        listState.scrollToItem(0)
+    }
+
     Scaffold(
         containerColor = BaeminBackground,
         topBar = {

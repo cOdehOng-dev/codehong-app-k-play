@@ -48,4 +48,15 @@ interface KopisApiService {
         @Query("signgucode") signGuCode: String? = null,
         @Query("signgucodesub") signGuCodeSub: String? = null
     ): PerformanceListResponse
+
+    @GET("/openApi/restful/prfawad")
+    suspend fun getAwardedPerformanceList(
+        @Query("service") serviceKey: String,
+        @Query("stdate") startDate: String,
+        @Query("eddate") endDate: String,
+        @Query("cpage") currentPage: String,
+        @Query("rows") rowsPerPage: String,
+        @Query("signgucode") signGuCode: String? = null,
+        @Query("signgucodesub") signGuCodeSub: String? = null
+    ): PerformanceListResponse
 }
