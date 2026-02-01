@@ -499,7 +499,7 @@ private fun AwardBadges(awards: String?) {
         .split(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE))
         .map { it.trim() }
         .filter { it.isNotBlank() }
-        .take(2) // 최대 2개까지만 표시
+        .take(2)
 
     if (awardList.isEmpty()) return
 
