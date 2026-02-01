@@ -63,7 +63,7 @@ class LoungeViewModel @Inject constructor(
             }
             is LoungeEvent.OnGenreTabSelected -> {
                 Log.d(TAG, "Genre tab selected: ${event.genreCode.displayName}")
-                setState { copy(selectedGenreTab = event.genreCode) }
+                setState { copy(selectedGenreTab = event.genreCode, isGenreRankLoaded = false, genreRankList = emptyList()) }
                 callGenreRankList(event.genreCode.code)
             }
             is LoungeEvent.OnGenreRankItemClick -> {
@@ -78,7 +78,7 @@ class LoungeViewModel @Inject constructor(
             }
             is LoungeEvent.OnFestivalTabSelected -> {
                 Log.d(TAG, "Festival tab selected: ${event.signGuCode.displayName}")
-                setState { copy(selectedFestivalTab = event.signGuCode) }
+                setState { copy(selectedFestivalTab = event.signGuCode, isFestivalLoaded = false, festivalList = emptyList()) }
                 callFestivalList(event.signGuCode.code)
             }
             is LoungeEvent.OnFestivalItemClick -> {
@@ -93,7 +93,7 @@ class LoungeViewModel @Inject constructor(
             }
             is LoungeEvent.OnAwardedTabSelected -> {
                 Log.d(TAG, "Awarded tab selected: ${event.signGuCode.displayName}")
-                setState { copy(selectedAwardedTab = event.signGuCode) }
+                setState { copy(selectedAwardedTab = event.signGuCode, isAwardedLoaded = false, awardedList = emptyList()) }
                 callAwardedPerformanceList(event.signGuCode.code)
             }
             is LoungeEvent.OnAwardedItemClick -> {
@@ -109,7 +109,7 @@ class LoungeViewModel @Inject constructor(
             }
             is LoungeEvent.OnLocalTabSelected -> {
                 Log.d(TAG, "Local tab selected: ${event.signGuCode.displayName}")
-                setState { copy(selectedLocalTab = event.signGuCode) }
+                setState { copy(selectedLocalTab = event.signGuCode, isLocalLoaded = false, localList = emptyList()) }
                 callLocalList(event.signGuCode.code)
             }
             is LoungeEvent.OnLocalItemClick -> {
@@ -126,8 +126,8 @@ class LoungeViewModel @Inject constructor(
     }
 
     fun callRankList() {
-        val startDate = DateUtil.getCurrentMonthFirstDay()
-        val endDate = DateUtil.getCurrentMonthLastDay()
+        val startDate = DateUtil.getPreviousMonthFirstDay()
+        val endDate = DateUtil.getPreviousMonthLastDay()
 
         viewModelScope.launch {
             performanceUseCase.getRankList(
@@ -167,9 +167,7 @@ class LoungeViewModel @Inject constructor(
                 signGuCode = myAreaCode,
             ).collect { list ->
                 TimberUtil.d("My area list size: ${list?.size ?: 0}")
-                list?.let {
-                    setState { copy(myAreaList = it) }
-                }
+                setState { copy(myAreaList = list ?: emptyList(), isMyAreaLoaded = true) }
             }
         }
     }
@@ -180,8 +178,8 @@ class LoungeViewModel @Inject constructor(
     fun callLocalList(
         areaCode: String = state.value.selectedLocalTab.code
     ) {
-        val startDate = DateUtil.getCurrentMonthFirstDay()
-        val endDate = DateUtil.getCurrentMonthLastDay()
+        val startDate = DateUtil.getPreviousMonthFirstDay()
+        val endDate = DateUtil.getPreviousMonthLastDay()
 
         viewModelScope.launch {
             performanceUseCase.getPerformanceList(
@@ -193,9 +191,7 @@ class LoungeViewModel @Inject constructor(
                 signGuCode = areaCode,
             ).collect { list ->
                 TimberUtil.d("Local list size: ${list?.size ?: 0}")
-                list?.let {
-                    setState { copy(localList = it) }
-                }
+                setState { copy(localList = list ?: emptyList(), isLocalLoaded = true) }
             }
         }
     }
@@ -206,8 +202,8 @@ class LoungeViewModel @Inject constructor(
     fun callGenreRankList(
         genreCode: String = state.value.selectedGenreTab.code
     ) {
-        val startDate = DateUtil.getCurrentMonthFirstDay()
-        val endDate = DateUtil.getCurrentMonthLastDay()
+        val startDate = DateUtil.getPreviousMonthFirstDay()
+        val endDate = DateUtil.getPreviousMonthLastDay()
 
         viewModelScope.launch {
             performanceUseCase.getRankList(
@@ -217,16 +213,14 @@ class LoungeViewModel @Inject constructor(
                 genreCode = genreCode
             ).collect { rankList ->
                 TimberUtil.d("test here getRankList = $rankList")
-                rankList?.let { list ->
-                    setState { copy(genreRankList = list) }
-                }
+                setState { copy(genreRankList = rankList ?: emptyList(), isGenreRankLoaded = true) }
             }
         }
     }
 
     fun callFestivalList(signGuCode: String) {
-        val startDate = DateUtil.getCurrentMonthFirstDay()
-        val endDate = DateUtil.getCurrentMonthLastDay()
+        val startDate = DateUtil.getPreviousMonthFirstDay()
+        val endDate = DateUtil.getPreviousMonthLastDay()
 
         viewModelScope.launch {
             performanceUseCase.getFestivalList(
@@ -238,16 +232,14 @@ class LoungeViewModel @Inject constructor(
                 signGuCode = signGuCode
             ).collect { festivalList ->
                 TimberUtil.d("Festival list size: ${festivalList?.size ?: 0}")
-                festivalList?.let { list ->
-                    setState { copy(festivalList = list) }
-                }
+                setState { copy(festivalList = festivalList ?: emptyList(), isFestivalLoaded = true) }
             }
         }
     }
 
     fun callAwardedPerformanceList(signGuCode: String) {
-        val startDate = DateUtil.getCurrentMonthFirstDay()
-        val endDate = DateUtil.getCurrentMonthLastDay()
+        val startDate = DateUtil.getPreviousMonthFirstDay()
+        val endDate = DateUtil.getPreviousMonthLastDay()
 
         viewModelScope.launch {
             performanceUseCase.getAwardedPerformanceList(
@@ -259,9 +251,7 @@ class LoungeViewModel @Inject constructor(
                 signGuCode = signGuCode
             ).collect { awardedList ->
                 TimberUtil.d("Awarded performance list size: ${awardedList?.size ?: 0}")
-                awardedList?.let { list ->
-                    setState { copy(awardedList = list) }
-                }
+                setState { copy(awardedList = awardedList ?: emptyList(), isAwardedLoaded = true) }
             }
         }
     }

@@ -5,7 +5,7 @@ enum class SignGuCode(
     val displayName: String,
     val subList: List<Pair<String, String>>
 ) {
-    SEOUL("11", "서울특별시", listOf(
+    SEOUL("11", "서울", listOf(
         "1111" to "서울특별시종로구",
         "1114" to "서울특별시중구",
         "1117" to "서울특별시용산구",
@@ -32,7 +32,7 @@ enum class SignGuCode(
         "1171" to "서울특별시송파구",
         "1174" to "서울특별시강동구"
     )),
-    BUSAN("26", "부산광역시", listOf(
+    BUSAN("26", "부산", listOf(
         "2600" to "부산광역시",
         "2611" to "부산광역시중구",
         "2614" to "부산광역시서구",
@@ -51,7 +51,7 @@ enum class SignGuCode(
         "2653" to "부산광역시사상구",
         "2671" to "부산광역시기장군"
     )),
-    DAEGU("27", "대구광역시", listOf(
+    DAEGU("27", "대구", listOf(
         "2700" to "대구광역시",
         "2711" to "대구광역시중구",
         "2714" to "대구광역시동구",
@@ -62,7 +62,7 @@ enum class SignGuCode(
         "2729" to "대구광역시달서구",
         "2771" to "대구광역시달성군"
     )),
-    INCHEON("28", "인천광역시", listOf(
+    INCHEON("28", "인천", listOf(
         "2800" to "인천광역시",
         "2811" to "인천광역시중구",
         "2814" to "인천광역시동구",
@@ -75,7 +75,7 @@ enum class SignGuCode(
         "2871" to "인천광역시강화군",
         "2872" to "인천광역시옹진군"
     )),
-    GWANGJU("29", "광주광역시", listOf(
+    GWANGJU("29", "광주", listOf(
         "2900" to "광주광역시",
         "2911" to "광주광역시동구",
         "2914" to "광주광역시서구",
@@ -83,7 +83,7 @@ enum class SignGuCode(
         "2917" to "광주광역시북구",
         "2920" to "광주광역시광산구"
     )),
-    DAEJEON("30", "대전광역시", listOf(
+    DAEJEON("30", "대전", listOf(
         "3000" to "대전광역시",
         "3011" to "대전광역시동구",
         "3014" to "대전광역시중구",
@@ -91,7 +91,7 @@ enum class SignGuCode(
         "3020" to "대전광역시유성구",
         "3023" to "대전광역시대덕구"
     )),
-    ULSAN("31", "울산광역시", listOf(
+    ULSAN("31", "울산", listOf(
         "3100" to "울산광역시",
         "3111" to "울산광역시중구",
         "3114" to "울산광역시남구",
@@ -99,11 +99,11 @@ enum class SignGuCode(
         "3120" to "울산광역시북구",
         "3171" to "울산광역시울주군"
     )),
-    SEJONG("36", "세종특별자치시", listOf(
+    SEJONG("36", "세종", listOf(
         "3600" to "세종특별자치시",
         "3611" to "세종특별자치시"
     )),
-    GYEONGGI("41", "경기도", listOf(
+    GYEONGGI("41", "경기", listOf(
         "4100" to "경기도",
         "4111" to "경기도수원시",
         "4113" to "경기도성남시",
@@ -137,7 +137,7 @@ enum class SignGuCode(
         "4182" to "경기도가평군",
         "4183" to "경기도양평군"
     )),
-    GANGWON("51", "강원특별자치도", listOf(
+    GANGWON("51", "강원", listOf(
         "5100" to "강원특별자치도",
         "5111" to "강원특별자치도춘천시",
         "5113" to "강원특별자치도원주시",
@@ -158,7 +158,7 @@ enum class SignGuCode(
         "5182" to "강원특별자치도고성군",
         "5183" to "강원특별자치도양양군"
     )),
-    CHUNGBUK("43", "충청북도", listOf(
+    CHUNGBUK("43", "충북", listOf(
         "4300" to "충청북도",
         "4311" to "충청북도청주시",
         "4313" to "충청북도충주시",
@@ -172,7 +172,7 @@ enum class SignGuCode(
         "4377" to "충청북도음성군",
         "4380" to "충청북도단양군"
     )),
-    CHUNGNAM("44", "충청남도", listOf(
+    CHUNGNAM("44", "충남", listOf(
         "4400" to "충청남도",
         "4413" to "충청남도천안시",
         "4415" to "충청남도공주시",
@@ -190,7 +190,7 @@ enum class SignGuCode(
         "4481" to "충청남도예산군",
         "4482" to "충청남도태안군"
     )),
-    JEONBUK("45", "전라북도", listOf(
+    JEONBUK("45", "전북", listOf(
         "4500" to "전라북도",
         "4511" to "전라북도전주시",
         "4513" to "전라북도군산시",
@@ -207,7 +207,7 @@ enum class SignGuCode(
         "4579" to "전라북도고창군",
         "4580" to "전라북도부안군"
     )),
-    JEONNAM("46", "전라남도", listOf(
+    JEONNAM("46", "전남", listOf(
         "4600" to "전라남도",
         "4611" to "전라남도목포시",
         "4613" to "전라남도여수시",
@@ -232,7 +232,7 @@ enum class SignGuCode(
         "4690" to "전라남도진도군",
         "4691" to "전라남도신안군"
     )),
-    GYEONGBUK("47", "경상북도", listOf(
+    GYEONGBUK("47", "경북", listOf(
         "4700" to "경상북도",
         "4711" to "경상북도포항시",
         "4713" to "경상북도경주시",
@@ -258,7 +258,7 @@ enum class SignGuCode(
         "4793" to "경상북도울진군",
         "4794" to "경상북도울릉군"
     )),
-    GYEONGNAM("48", "경상남도", listOf(
+    GYEONGNAM("48", "경남", listOf(
         "4800" to "경상남도",
         "4812" to "경상남도창원시",
         "4817" to "경상남도진주시",
@@ -279,7 +279,7 @@ enum class SignGuCode(
         "4888" to "경상남도거창군",
         "4889" to "경상남도합천군"
     )),
-    JEJU("50", "제주특별자치도", listOf(
+    JEJU("50", "제주", listOf(
         "5000" to "제주특별자치도",
         "5011" to "제주특별자치도제주시",
         "5013" to "제주특별자치도서귀포시"

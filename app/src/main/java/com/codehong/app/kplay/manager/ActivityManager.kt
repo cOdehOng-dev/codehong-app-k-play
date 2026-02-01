@@ -3,6 +3,7 @@ package com.codehong.app.kplay.manager
 import android.content.Context
 import android.content.Intent
 import com.codehong.app.kplay.domain.Consts
+import com.codehong.app.kplay.ui.award.AwardListActivity
 import com.codehong.app.kplay.ui.festival.FestivalListActivity
 import com.codehong.app.kplay.ui.genre.list.GenreListActivity
 import com.codehong.app.kplay.ui.genre.list.GenreListViewModel
@@ -81,6 +82,17 @@ object ActivityManager {
         val intent = Intent(context, PerformanceListActivity::class.java).apply {
             signGuCode?.let { putExtra(PerformanceListViewModel.EXTRA_SIGN_GU_CODE, it) }
         }
+        context.startActivity(intent)
+    }
+
+    fun openAwardList(
+        context: Context?
+    ) {
+        if (context == null) {
+            return
+        }
+
+        val intent = Intent(context, AwardListActivity::class.java)
         context.startActivity(intent)
     }
 }

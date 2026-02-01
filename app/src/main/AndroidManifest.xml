@@ -44,6 +44,8 @@
         <activity android:name=".ui.genre.rank.GenreRankListActivity"/>
 
         <activity android:name=".ui.festival.FestivalListActivity"/>
+
+        <activity android:name=".ui.award.AwardListActivity"/>
     </application>
 
 </manifest>

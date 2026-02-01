@@ -7,11 +7,17 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.app.kplay.manager.ActivityManager
@@ -59,6 +65,18 @@ class LoungeActivity : ComponentActivity() {
         viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(initialSignGuCode))
 
         setContent {
+            var backPressedTime by remember { mutableStateOf(0L) }
+            val context = LocalContext.current
+
+            BackHandler {
+                if (System.currentTimeMillis() - backPressedTime < 2000) {
+                    finish()
+                } else {
+                    backPressedTime = System.currentTimeMillis()
+                    Toast.makeText(context, "한 번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
             val locationPermissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
             ) { permissions ->
@@ -116,8 +134,8 @@ class LoungeActivity : ComponentActivity() {
                             ActivityManager.openFestivalList(this@LoungeActivity)
                         }
                         is LoungeEffect.NavigateToAwardedList -> {
-                            // TODO: 수상작 리스트 페이지 이동
-                            Log.d(TAG, "Navigate to awarded list")
+                            // 수상작 리스트 페이지 이동
+                            ActivityManager.openAwardList(this@LoungeActivity)
                         }
                         is LoungeEffect.NavigateToGenreRankList -> {
                             ActivityManager.openGenreRankList(

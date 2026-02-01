@@ -806,6 +806,7 @@ private fun HomeContent(
                 currentMonth = state.currentMonth,
                 signGuCode = state.selectedSignGuCode,
                 myAreaList = state.myAreaList,
+                isLoaded = state.isMyAreaLoaded,
                 onRefreshClick = onRefreshNearbyClick,
                 onItemClick = onNearbyItemClick
             )
@@ -827,6 +828,7 @@ private fun HomeContent(
                 localTabs = state.localTabs,
                 selectedLocalTab = state.selectedLocalTab,
                 localList = state.localList,
+                isLoaded = state.isLocalLoaded,
                 onLocalTabSelected = onLocalTabSelected,
                 onItemClick = onLocalItemClick,
                 onMoreClick = onLocalMoreClick
@@ -839,6 +841,7 @@ private fun HomeContent(
                 categories = state.categories,
                 selectedGenreTab = state.selectedGenreTab,
                 genreRankList = state.genreRankList,
+                isLoaded = state.isGenreRankLoaded,
                 onGenreTabSelected = onGenreTabSelected,
                 onItemClick = onGenreRankItemClick,
                 onMoreClick = onGenreRankMoreClick
@@ -914,6 +917,7 @@ private fun HomeContent(
                 festivalTabs = state.festivalTabs,
                 selectedFestivalTab = state.selectedFestivalTab,
                 festivalList = state.festivalList,
+                isLoaded = state.isFestivalLoaded,
                 onFestivalTabSelected = onFestivalTabSelected,
                 onItemClick = onFestivalItemClick,
                 onMoreClick = onFestivalMoreClick
@@ -926,6 +930,7 @@ private fun HomeContent(
                 awardedTabs = state.awardedTabs,
                 selectedAwardedTab = state.selectedAwardedTab,
                 awardedList = state.awardedList,
+                isLoaded = state.isAwardedLoaded,
                 onAwardedTabSelected = onAwardedTabSelected,
                 onItemClick = onAwardedItemClick,
                 onMoreClick = onAwardedMoreClick
@@ -1029,6 +1034,7 @@ private fun MyAreaSection(
     currentMonth: Int,
     signGuCode: SignGuCode,
     myAreaList: List<PerformanceInfoItem>,
+    isLoaded: Boolean,
     onRefreshClick: () -> Unit,
     onItemClick: (PerformanceInfoItem) -> Unit
 ) {
@@ -1095,7 +1101,7 @@ private fun MyAreaSection(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "주변 공연 정보를 불러오는 중...",
+                    text = if (isLoaded) "주변 공연 정보가 없습니다" else "주변 공연 정보를 불러오는 중...",
                     fontSize = 14.sp,
                     color = BaeminGray
                 )
@@ -1201,6 +1207,7 @@ private fun LocalSection(
     localTabs: List<SignGuCode>,
     selectedLocalTab: SignGuCode,
     localList: List<PerformanceInfoItem>,
+    isLoaded: Boolean,
     onLocalTabSelected: (SignGuCode) -> Unit,
     onItemClick: (PerformanceInfoItem) -> Unit,
     onMoreClick: () -> Unit
@@ -1276,7 +1283,7 @@ private fun LocalSection(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "지역별 공연 정보를 불러오는 중...",
+                    text = if (isLoaded) "해당 지역의 공연 정보가 없습니다" else "지역별 공연 정보를 불러오는 중...",
                     fontSize = 14.sp,
                     color = BaeminGray
                 )
@@ -1412,6 +1419,7 @@ private fun GenreRankSection(
     categories: List<GenreCode>,
     selectedGenreTab: GenreCode,
     genreRankList: List<BoxOfficeItem>,
+    isLoaded: Boolean,
     onGenreTabSelected: (GenreCode) -> Unit,
     onItemClick: (BoxOfficeItem) -> Unit,
     onMoreClick: () -> Unit
@@ -1487,7 +1495,7 @@ private fun GenreRankSection(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "랭킹 정보를 불러오는 중...",
+                    text = if (isLoaded) "해당 장르의 랭킹 정보가 없습니다" else "랭킹 정보를 불러오는 중...",
                     fontSize = 14.sp,
                     color = BaeminGray
                 )
@@ -1518,6 +1526,7 @@ private fun FestivalSection(
     festivalTabs: List<SignGuCode>,
     selectedFestivalTab: SignGuCode,
     festivalList: List<PerformanceInfoItem>,
+    isLoaded: Boolean,
     onFestivalTabSelected: (SignGuCode) -> Unit,
     onItemClick: (PerformanceInfoItem) -> Unit,
     onMoreClick: () -> Unit
@@ -1593,7 +1602,7 @@ private fun FestivalSection(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "축제 정보를 불러오는 중...",
+                    text = if (isLoaded) "해당 지역의 축제 정보가 없습니다" else "축제 정보를 불러오는 중...",
                     fontSize = 14.sp,
                     color = BaeminGray
                 )
@@ -1729,6 +1738,7 @@ private fun AwardedSection(
     awardedTabs: List<SignGuCode>,
     selectedAwardedTab: SignGuCode,
     awardedList: List<PerformanceInfoItem>,
+    isLoaded: Boolean,
     onAwardedTabSelected: (SignGuCode) -> Unit,
     onItemClick: (PerformanceInfoItem) -> Unit,
     onMoreClick: () -> Unit
@@ -1807,7 +1817,7 @@ private fun AwardedSection(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "수상작 정보를 불러오는 중...",
+                    text = if (isLoaded) "해당 지역의 수상작 정보가 없습니다" else "수상작 정보를 불러오는 중...",
                     fontSize = 14.sp,
                     color = BaeminGray
                 )
