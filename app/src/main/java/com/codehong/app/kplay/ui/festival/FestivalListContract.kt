@@ -1,10 +1,10 @@
 package com.codehong.app.kplay.ui.festival
 
-import com.codehong.app.kplay.base.ViewEvent
-import com.codehong.app.kplay.base.ViewSideEffect
-import com.codehong.app.kplay.base.ViewState
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.library.architecture.mvi.ViewEvent
+import com.codehong.library.architecture.mvi.ViewSideEffect
+import com.codehong.library.architecture.mvi.ViewState
 
 data class FestivalListState(
     val selectedSignGuCode: SignGuCode = SignGuCode.SEOUL,

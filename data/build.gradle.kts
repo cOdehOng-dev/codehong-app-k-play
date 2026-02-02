@@ -11,6 +11,8 @@ dependencies {
     implementation(project(":domain"))
 
     implementation(codehonglibs.network)
+    implementation(codehonglibs.architecture)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

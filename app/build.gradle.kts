@@ -23,10 +23,12 @@ secrets {
 }
 
 dependencies {
-    implementation(codehonglibs.widget)
-    implementation(codehonglibs.network)
     implementation(project(":data"))
     implementation(project(":domain"))
+
+    implementation(codehonglibs.widget)
+    implementation(codehonglibs.network)
+    implementation(codehonglibs.architecture)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -1,10 +1,10 @@
 package com.codehong.app.kplay.ui.performance.detail
 
-import com.codehong.app.kplay.base.ViewEvent
-import com.codehong.app.kplay.base.ViewSideEffect
-import com.codehong.app.kplay.base.ViewState
 import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
 import com.codehong.app.kplay.domain.model.performance.detail.TicketingSite
+import com.codehong.library.architecture.mvi.ViewEvent
+import com.codehong.library.architecture.mvi.ViewSideEffect
+import com.codehong.library.architecture.mvi.ViewState
 
 data class PerformanceDetailState(
     val performanceDetail: PerformanceDetail? = null,

@@ -1,10 +1,10 @@
 package com.codehong.app.kplay.ui.genre.rank
 
-import com.codehong.app.kplay.base.ViewEvent
-import com.codehong.app.kplay.base.ViewSideEffect
-import com.codehong.app.kplay.base.ViewState
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.type.GenreCode
+import com.codehong.library.architecture.mvi.ViewEvent
+import com.codehong.library.architecture.mvi.ViewSideEffect
+import com.codehong.library.architecture.mvi.ViewState
 
 data class GenreRankListState(
     val initialGenreCode: GenreCode = GenreCode.THEATER,

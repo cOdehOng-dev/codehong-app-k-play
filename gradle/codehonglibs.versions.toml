@@ -1,12 +1,16 @@
 [versions]
 widget = "0.0.3.24-20260130.100840-SNAPSHOT"
-network = "0.0.1-20260129.150019-SNAPSHOT"
+network = "0.0.1-20260202.155533-SNAPSHOT"
+util = "0.0.1-20260202.160105-SNAPSHOT"
+architecture = "0.0.1-20260202.155955-SNAPSHOT"
 
 [plugins]
 
 [libraries]
 widget = { group = "com.codehong.library", name = "widget", version.ref = "widget" }
 network = { group = "com.codehong.library", name = "network", version.ref = "network" }
+util = { group = "com.codehong.library", name = "util", version.ref = "util" }
+architecture = { group = "com.codehong.library", name = "architecture", version.ref = "architecture" }
 
 [bundles]
 

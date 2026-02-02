@@ -4,9 +4,9 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
-import com.codehong.app.kplay.base.BaseViewModel
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.app.kplay.util.DateUtil
+import com.codehong.library.architecture.mvi.BaseViewModel
 import com.codehong.library.network.debug.TimberUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
