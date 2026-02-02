@@ -12,6 +12,7 @@ dependencies {
 
     implementation(codehonglibs.network)
     implementation(codehonglibs.architecture)
+    implementation(codehonglibs.util)
 
 
     testImplementation(libs.junit)

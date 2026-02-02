@@ -29,6 +29,7 @@ dependencies {
     implementation(codehonglibs.widget)
     implementation(codehonglibs.network)
     implementation(codehonglibs.architecture)
+    implementation(codehonglibs.util)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

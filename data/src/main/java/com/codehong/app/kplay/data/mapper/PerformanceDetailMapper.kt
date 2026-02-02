@@ -3,6 +3,7 @@ package com.codehong.app.kplay.data.mapper
 import com.codehong.app.kplay.data.model.performance.detail.PerformanceDetailDto
 import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
 import com.codehong.app.kplay.domain.model.performance.detail.TicketingSite
+import com.codehong.library.util.DtoMapper
 
 object PerformanceDetailMapper : DtoMapper<PerformanceDetailDto?, PerformanceDetail> {
     override fun asDomain(dto: PerformanceDetailDto?): PerformanceDetail {

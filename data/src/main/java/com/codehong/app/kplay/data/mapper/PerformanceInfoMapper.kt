@@ -2,6 +2,7 @@ package com.codehong.app.kplay.data.mapper
 
 import com.codehong.app.kplay.data.model.performance.list.PerformanceItemDto
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.library.util.DtoMapper
 
 object PerformanceInfoMapper : DtoMapper<PerformanceItemDto?, PerformanceInfoItem> {
     override fun asDomain(dto: PerformanceItemDto?): PerformanceInfoItem {
