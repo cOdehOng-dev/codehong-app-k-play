@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.codehong.android.hilt)
     alias(libs.plugins.codehong.android.room)
     alias(libs.plugins.secrets.gradle.plugin)
+    alias(libs.plugins.codehong.android.network)
 }
 
 android {

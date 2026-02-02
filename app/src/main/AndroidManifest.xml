@@ -23,7 +23,6 @@
             android:name="com.naver.maps.map.NCP_KEY_ID"
             android:value="${NAVER_CLIENT_ID}" />
 
-
         <activity
             android:name=".ui.lounge.LoungeActivity"
             android:exported="true">
