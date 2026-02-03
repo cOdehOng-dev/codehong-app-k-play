@@ -1,6 +1,5 @@
 package com.codehong.app.kplay.ui.lounge
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -27,10 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -63,27 +59,27 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import com.codehong.app.kplay.R
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.ui.BottomTab
+import com.codehong.app.kplay.ui.lounge.screen.ArrowRightIcon
+import com.codehong.app.kplay.ui.lounge.screen.LoungeHeaderContent
+import com.codehong.app.kplay.ui.lounge.screen.RankTab
+import com.codehong.app.kplay.ui.lounge.screen.TopBannerSection
+import com.codehong.library.network.debug.TimberUtil
+import com.codehong.library.widget.R
 import com.codehong.library.widget.image.HongImageBuilder
 import com.codehong.library.widget.image.HongImageCompose
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private const val TAG = "LoungeScreen"
-
-// 배민 스타일 컬러
-private val BaeminPrimary = Color(0xFF2DB400) //Color(0xFF2AC1BC)
-private val BaeminBackground = Color.White
-private val BaeminGray = Color(0xFF999999)
-private val BaeminDarkGray = Color(0xFF333333)
+private val ColorPrimary = Color(0xFF2DB400) //Color(0xFF2AC1BC)
+private val BackgroundColor = Color.White
+private val Gray = Color(0xFF999999)
+private val DarkGray = Color(0xFF333333)
 
 // 순위 메달 컬러
 private val GoldColor = Color(0xFFFFD700)
@@ -92,7 +88,7 @@ private val BronzeColor = Color(0xFFCD7F32)
 
 @Composable
 fun LoungeScreen(
-    viewModel: LoungeViewModel = hiltViewModel()
+    viewModel: LoungeViewModel
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -178,16 +174,11 @@ private fun LoungeScreenContent(
     onLocalMoreClick: () -> Unit
 ) {
     Scaffold(
-        containerColor = BaeminBackground,
+        containerColor = BackgroundColor,
         topBar = {
-            LoungeHeader(
-                onSearchClick = {
-                    Log.d(TAG, "Search clicked")
-                },
-                onNotificationClick = {
-                    Log.d(TAG, "Notification icon clicked")
-                }
-            )
+            LoungeHeaderContent {
+                TimberUtil.d("Search clicked")
+            }
         },
         bottomBar = {
             LoungeBottomNavigation(
@@ -230,60 +221,8 @@ private fun LoungeScreenContent(
     }
 }
 
-// ===== Header (배민 스타일) =====
-@Composable
-private fun LoungeHeader(
-    onSearchClick: () -> Unit,
-    onNotificationClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .background(BaeminBackground)
-            .padding(horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // 검색바 (헤더 내)
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .height(40.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFFF5F5F5))
-                .clickable(onClick = onSearchClick)
-                .padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SearchIcon(color = BaeminPrimary, modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "찾고 싶은 공연, 배우를 검색해보세요",
-                fontSize = 14.sp,
-                color = BaeminGray,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
 
-        // 알림 아이콘
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .clickable(onClick = onNotificationClick),
-            contentAlignment = Alignment.Center
-        ) {
-            NotificationIcon(
-                color = BaeminDarkGray,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-    }
-}
 
-// ===== Bottom Navigation (배민 스타일) =====
 @Composable
 private fun LoungeBottomNavigation(
     selectedTab: BottomTab,
@@ -293,17 +232,17 @@ private fun LoungeBottomNavigation(
         modifier = Modifier
             .shadow(elevation = 8.dp)
             .height(64.dp),
-        containerColor = BaeminBackground,
+        containerColor = BackgroundColor,
         tonalElevation = 0.dp
     ) {
         BottomTab.entries.forEach { tab ->
             val isSelected = selectedTab == tab
-            val iconColor = if (isSelected) BaeminPrimary else BaeminGray
+            val iconColor = if (isSelected) ColorPrimary else Gray
 
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
-                    Log.d(TAG, "Bottom tab clicked: ${tab.title}")
+                    TimberUtil.d("Bottom tab clicked: ${tab.title}")
                     onTabSelected(tab)
                 },
                 icon = {
@@ -322,10 +261,10 @@ private fun LoungeBottomNavigation(
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = BaeminPrimary,
-                    selectedTextColor = BaeminPrimary,
-                    unselectedIconColor = BaeminGray,
-                    unselectedTextColor = BaeminGray,
+                    selectedIconColor = ColorPrimary,
+                    selectedTextColor = ColorPrimary,
+                    unselectedIconColor = Gray,
+                    unselectedTextColor = Gray,
                     indicatorColor = Color.Transparent
                 )
             )
@@ -342,95 +281,12 @@ private fun TabIcon(
 ) {
     when (tab) {
         BottomTab.HOME -> HomeIcon(color = color, filled = isSelected, modifier = modifier)
-        BottomTab.SEARCH -> SearchIcon(color = color, modifier = modifier)
+        BottomTab.SEARCH -> PersonIcon(color = color, filled = isSelected, modifier = modifier)
         BottomTab.BOOKMARK -> BookmarkIcon(color = color, filled = isSelected, modifier = modifier)
         BottomTab.MY -> PersonIcon(color = color, filled = isSelected, modifier = modifier)
     }
 }
 
-// ===== Custom Icons =====
-@Composable
-private fun SearchIcon(
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Canvas(modifier = modifier) {
-        val strokeWidth = size.width * 0.1f
-        val radius = size.width * 0.32f
-        val center = Offset(size.width * 0.4f, size.height * 0.4f)
-
-        drawCircle(
-            color = color,
-            radius = radius,
-            center = center,
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-        )
-
-        drawLine(
-            color = color,
-            start = Offset(center.x + radius * 0.7f, center.y + radius * 0.7f),
-            end = Offset(size.width * 0.85f, size.height * 0.85f),
-            strokeWidth = strokeWidth,
-            cap = StrokeCap.Round
-        )
-    }
-}
-
-@Composable
-private fun ArrowRightIcon(
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Canvas(modifier = modifier) {
-        val strokeWidth = size.width * 0.12f
-
-        // > 모양 화살표
-        val arrowPath = Path().apply {
-            moveTo(size.width * 0.35f, size.height * 0.2f)
-            lineTo(size.width * 0.65f, size.height * 0.5f)
-            lineTo(size.width * 0.35f, size.height * 0.8f)
-        }
-        drawPath(arrowPath, color, style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
-    }
-}
-
-@Composable
-private fun NotificationIcon(
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Canvas(modifier = modifier) {
-        val strokeWidth = size.width * 0.08f
-
-        val bellPath = Path().apply {
-            moveTo(size.width * 0.5f, size.height * 0.1f)
-            lineTo(size.width * 0.5f, size.height * 0.18f)
-        }
-        drawPath(bellPath, color, style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
-
-        drawRoundRect(
-            color = color,
-            topLeft = Offset(size.width * 0.2f, size.height * 0.25f),
-            size = Size(size.width * 0.6f, size.height * 0.5f),
-            cornerRadius = CornerRadius(size.width * 0.15f),
-            style = Stroke(width = strokeWidth)
-        )
-
-        drawLine(
-            color = color,
-            start = Offset(size.width * 0.15f, size.height * 0.75f),
-            end = Offset(size.width * 0.85f, size.height * 0.75f),
-            strokeWidth = strokeWidth,
-            cap = StrokeCap.Round
-        )
-
-        drawCircle(
-            color = color,
-            radius = size.width * 0.08f,
-            center = Offset(size.width * 0.5f, size.height * 0.88f)
-        )
-    }
-}
 
 @Composable
 private fun HomeIcon(
@@ -546,215 +402,6 @@ private fun PersonIcon(
 
 // ===== 홈 탭 콘텐츠 =====
 
-// 배너 고정 높이
-private val BannerHeight = 380.dp
-
-// ===== TOP 배너 (KREAM 스타일) =====
-@Composable
-private fun TopBannerSection(
-    bannerItems: List<BoxOfficeItem>,
-    onBannerClick: (BoxOfficeItem) -> Unit
-) {
-    val actualItemCount = bannerItems.size
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(BannerHeight)
-            .background(Color(0xFFF5F5F5))
-    ) {
-        if (bannerItems.isEmpty()) {
-            // 로딩 상태
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "인기 공연을 불러오는 중...",
-                    fontSize = 14.sp,
-                    color = BaeminGray
-                )
-            }
-        } else {
-            val pageCount = Int.MAX_VALUE
-            val initialPage = (pageCount / 2) - ((pageCount / 2) % actualItemCount)
-            val pagerState = rememberPagerState(
-                initialPage = initialPage,
-                pageCount = { pageCount }
-            )
-
-            // 자동 스크롤 (3초마다, 유저 터치 시 2초 후 재시작)
-            LaunchedEffect(pagerState) {
-                var lastInteractionTime = 0L
-
-                while (true) {
-                    val currentTime = System.currentTimeMillis()
-
-                    // 유저가 스크롤 중이면 마지막 상호작용 시간 갱신
-                    if (pagerState.isScrollInProgress) {
-                        lastInteractionTime = currentTime
-                        delay(100L)
-                        continue
-                    }
-
-                    // 마지막 상호작용 후 2초가 지났는지 확인
-                    val timeSinceLastInteraction = currentTime - lastInteractionTime
-                    if (lastInteractionTime > 0 && timeSinceLastInteraction < 2000L) {
-                        delay(100L)
-                        continue
-                    }
-
-                    // 3초 대기 후 다음 페이지로 스크롤
-                    delay(3000L)
-
-                    // 스크롤 중이 아닐 때만 자동 스크롤
-                    if (!pagerState.isScrollInProgress) {
-                        pagerState.animateScrollToPage(
-                            page = pagerState.currentPage + 1,
-                            animationSpec = tween(durationMillis = 500)
-                        )
-                    }
-                }
-            }
-
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize()
-            ) { page ->
-                val actualIndex = page % actualItemCount
-                val item = bannerItems[actualIndex]
-
-                BannerItem(
-                    item = item,
-                    onClick = { onBannerClick(item) }
-                )
-            }
-
-            // 인디케이터 바 (하단) - 프로그레스 바 스타일
-            val currentIndex = pagerState.currentPage % actualItemCount
-            val progress = (currentIndex + 1).toFloat() / actualItemCount.toFloat()
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                // 배경 바
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(3.dp)
-                        .clip(RoundedCornerShape(1.5.dp))
-                        .background(Color.White.copy(alpha = 0.3f))
-                )
-                // 진행 바
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(progress)
-                        .height(3.dp)
-                        .clip(RoundedCornerShape(1.5.dp))
-                        .background(Color.White)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun BannerItem(
-    item: BoxOfficeItem,
-    onClick: () -> Unit
-) {
-    val context = LocalContext.current
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(onClick = onClick)
-    ) {
-        // 배경 이미지 (고화질, 전체 표시)
-        AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(item.posterUrl)
-                .crossfade(true)
-                .size(coil.size.Size.ORIGINAL)
-                .build(),
-            contentDescription = item.performanceName,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
-
-        // 그라데이션 오버레이 (하단)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.6f)
-                        ),
-                        startY = 300f
-                    )
-                )
-        )
-
-        // 텍스트 정보 (좌측 하단)
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = 16.dp, bottom = 32.dp, end = 16.dp)
-        ) {
-            // 공연 이름 (크게)
-            Text(
-                text = item.performanceName ?: "",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // 공연장
-            Text(
-                text = item.placeName ?: "",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.9f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            // 기간 (startDate ~ endDate)
-            Text(
-                text = item.performancePeriod ?: "",
-                fontSize = 12.sp,
-                color = Color.White.copy(alpha = 0.8f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-// 색상의 밝기(휘도) 계산
-private fun calculateLuminance(color: Int): Double {
-    val red = android.graphics.Color.red(color) / 255.0
-    val green = android.graphics.Color.green(color) / 255.0
-    val blue = android.graphics.Color.blue(color) / 255.0
-
-    val r = if (red <= 0.03928) red / 12.92 else Math.pow((red + 0.055) / 1.055, 2.4)
-    val g = if (green <= 0.03928) green / 12.92 else Math.pow((green + 0.055) / 1.055, 2.4)
-    val b = if (blue <= 0.03928) blue / 12.92 else Math.pow((blue + 0.055) / 1.055, 2.4)
-
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b
-}
-
 @Composable
 private fun HomeContent(
     state: LoungeState,
@@ -782,10 +429,11 @@ private fun HomeContent(
         state = listState,
         modifier = Modifier.fillMaxSize()
     ) {
-        // TOP 배너 (KREAM 스타일)
+        // TOP 배너
         item {
             TopBannerSection(
-                bannerItems = state.rankList.take(6),
+                isLoading = state.loading.isBannerLoading,
+                bannerList = state.rankList.take(6),
                 onBannerClick = { item ->
                     item.performanceId?.let { onRankItemClick(item) }
                 }
@@ -817,7 +465,7 @@ private fun HomeContent(
             ViewAllMyAreaPerformancesButton(
                 onClick = {
                     // TODO: 내 주변 공연 전체보기 페이지 연결
-                    Log.d(TAG, "View All My Area Performances button clicked")
+                    TimberUtil.d("View All My Area Performances button clicked")
                 }
             )
         }
@@ -854,7 +502,7 @@ private fun HomeContent(
                 text = "${state.currentMonth}월 인기 순위 Top50",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = BaeminDarkGray,
+                color = DarkGray,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             )
         }
@@ -890,7 +538,7 @@ private fun HomeContent(
                     Text(
                         text = "순위 정보를 불러오는 중...",
                         fontSize = 14.sp,
-                        color = BaeminGray
+                        color = Gray
                     )
                 }
             } else {
@@ -1017,7 +665,7 @@ private fun CategoryItem(
             text = genreCode.displayName,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
-            color = BaeminDarkGray,
+            color = DarkGray,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -1058,7 +706,7 @@ private fun MyAreaSection(
                 text = "${currentMonth}월 내 주변 공연",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = BaeminDarkGray
+                color = DarkGray
             )
             Spacer(modifier = Modifier.width(3.dp))
             Box(
@@ -1084,7 +732,7 @@ private fun MyAreaSection(
                     HongImageBuilder()
                         .width(18)
                         .height(18)
-                        .imageInfo(R.drawable.ic_refresh)
+                        .imageInfo(R.drawable.honglib_ic_refresh)
                         .applyOption()
                 )
             }
@@ -1103,7 +751,7 @@ private fun MyAreaSection(
                 Text(
                     text = if (isLoaded) "주변 공연 정보가 없습니다" else "주변 공연 정보를 불러오는 중...",
                     fontSize = 14.sp,
-                    color = BaeminGray
+                    color = Gray
                 )
             }
         } else {
@@ -1167,7 +815,7 @@ private fun MyAreaItem(
             text = item.name ?: "",
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = BaeminDarkGray,
+            color = DarkGray,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -1176,7 +824,7 @@ private fun MyAreaItem(
         Text(
             text = item.placeName ?: "",
             fontSize = 11.sp,
-            color = BaeminGray,
+            color = Gray,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1193,7 +841,7 @@ private fun MyAreaItem(
             Text(
                 text = period,
                 fontSize = 10.sp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1229,21 +877,10 @@ private fun LocalSection(
                 text = "지역별 공연이에요",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = BaeminDarkGray
+                color = DarkGray
             )
 
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onMoreClick),
-                contentAlignment = Alignment.Center
-            ) {
-                ArrowRightIcon(
-                    color = BaeminGray,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            ArrowRightIcon(onMoreClick)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -1285,7 +922,7 @@ private fun LocalSection(
                 Text(
                     text = if (isLoaded) "해당 지역의 공연 정보가 없습니다" else "지역별 공연 정보를 불러오는 중...",
                     fontSize = 14.sp,
-                    color = BaeminGray
+                    color = Gray
                 )
             }
         } else {
@@ -1317,11 +954,11 @@ private fun LocalTabChip(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(
-                color = if (isSelected) BaeminPrimary else BaeminBackground
+                color = if (isSelected) ColorPrimary else BackgroundColor
             )
             .border(
                 width = 1.dp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 shape = RoundedCornerShape(50)
             )
             .clickable(onClick = onClick)
@@ -1332,7 +969,7 @@ private fun LocalTabChip(
             text = text,
             fontSize = 12.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = if (isSelected) Color.White else BaeminPrimary
+            color = if (isSelected) Color.White else ColorPrimary
         )
     }
 }
@@ -1379,7 +1016,7 @@ private fun LocalItem(
             text = item.name ?: "",
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = BaeminDarkGray,
+            color = DarkGray,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -1388,7 +1025,7 @@ private fun LocalItem(
         Text(
             text = item.placeName ?: "",
             fontSize = 11.sp,
-            color = BaeminGray,
+            color = Gray,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1405,7 +1042,7 @@ private fun LocalItem(
             Text(
                 text = period,
                 fontSize = 10.sp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1441,21 +1078,10 @@ private fun GenreRankSection(
                 text = "장르별 랭킹이에요",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = BaeminDarkGray
+                color = DarkGray
             )
 
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onMoreClick),
-                contentAlignment = Alignment.Center
-            ) {
-                ArrowRightIcon(
-                    color = BaeminGray,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            ArrowRightIcon(onMoreClick)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -1497,7 +1123,7 @@ private fun GenreRankSection(
                 Text(
                     text = if (isLoaded) "해당 장르의 랭킹 정보가 없습니다" else "랭킹 정보를 불러오는 중...",
                     fontSize = 14.sp,
-                    color = BaeminGray
+                    color = Gray
                 )
             }
         } else {
@@ -1548,21 +1174,10 @@ private fun FestivalSection(
                 text = "지역 축제도 많아요",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = BaeminDarkGray
+                color = DarkGray
             )
 
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onMoreClick),
-                contentAlignment = Alignment.Center
-            ) {
-                ArrowRightIcon(
-                    color = BaeminGray,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            ArrowRightIcon(onMoreClick)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -1604,7 +1219,7 @@ private fun FestivalSection(
                 Text(
                     text = if (isLoaded) "해당 지역의 축제 정보가 없습니다" else "축제 정보를 불러오는 중...",
                     fontSize = 14.sp,
-                    color = BaeminGray
+                    color = Gray
                 )
             }
         } else {
@@ -1636,11 +1251,11 @@ private fun FestivalTabChip(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(
-                color = if (isSelected) BaeminPrimary else BaeminBackground
+                color = if (isSelected) ColorPrimary else BackgroundColor
             )
             .border(
                 width = 1.dp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 shape = RoundedCornerShape(50)
             )
             .clickable(onClick = onClick)
@@ -1651,7 +1266,7 @@ private fun FestivalTabChip(
             text = text,
             fontSize = 12.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = if (isSelected) Color.White else BaeminPrimary
+            color = if (isSelected) Color.White else ColorPrimary
         )
     }
 }
@@ -1698,7 +1313,7 @@ private fun FestivalItem(
             text = item.name ?: "",
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = BaeminDarkGray,
+            color = DarkGray,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -1707,7 +1322,7 @@ private fun FestivalItem(
         Text(
             text = item.placeName ?: "",
             fontSize = 11.sp,
-            color = BaeminGray,
+            color = Gray,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1724,7 +1339,7 @@ private fun FestivalItem(
             Text(
                 text = period,
                 fontSize = 10.sp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1760,24 +1375,10 @@ private fun AwardedSection(
                 text = "수상작은 어때요?",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = BaeminDarkGray
+                color = DarkGray
             )
 
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = {
-                        // TODO: 수상작 리스트 페이지 이동
-                        onMoreClick()
-                    }),
-                contentAlignment = Alignment.Center
-            ) {
-                ArrowRightIcon(
-                    color = BaeminGray,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            ArrowRightIcon(onMoreClick)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -1819,7 +1420,7 @@ private fun AwardedSection(
                 Text(
                     text = if (isLoaded) "해당 지역의 수상작 정보가 없습니다" else "수상작 정보를 불러오는 중...",
                     fontSize = 14.sp,
-                    color = BaeminGray
+                    color = Gray
                 )
             }
         } else {
@@ -1851,11 +1452,11 @@ private fun AwardedTabChip(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(
-                color = if (isSelected) BaeminPrimary else BaeminBackground
+                color = if (isSelected) ColorPrimary else BackgroundColor
             )
             .border(
                 width = 1.dp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 shape = RoundedCornerShape(50)
             )
             .clickable(onClick = onClick)
@@ -1866,7 +1467,7 @@ private fun AwardedTabChip(
             text = text,
             fontSize = 12.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = if (isSelected) Color.White else BaeminPrimary
+            color = if (isSelected) Color.White else ColorPrimary
         )
     }
 }
@@ -1913,7 +1514,7 @@ private fun AwardedItem(
             text = item.name ?: "",
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = BaeminDarkGray,
+            color = DarkGray,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -1922,7 +1523,7 @@ private fun AwardedItem(
         Text(
             text = item.placeName ?: "",
             fontSize = 11.sp,
-            color = BaeminGray,
+            color = Gray,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1939,7 +1540,7 @@ private fun AwardedItem(
             Text(
                 text = period,
                 fontSize = 10.sp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1952,7 +1553,7 @@ private fun AwardedItem(
                 text = item.awards ?: "",
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,
-                color = BaeminGray,
+                color = Gray,
                 lineHeight = 12.sp,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -1971,11 +1572,11 @@ private fun GenreTabChip(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(
-                color = if (isSelected) BaeminPrimary else BaeminBackground
+                color = if (isSelected) ColorPrimary else BackgroundColor
             )
             .border(
                 width = 1.dp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 shape = RoundedCornerShape(50)
             )
             .clickable(onClick = onClick)
@@ -1986,7 +1587,7 @@ private fun GenreTabChip(
             text = text,
             fontSize = 12.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = if (isSelected) Color.White else BaeminPrimary
+            color = if (isSelected) Color.White else ColorPrimary
         )
     }
 }
@@ -2026,7 +1627,7 @@ private fun GenreRankItem(
                             1 -> GoldColor
                             2 -> SilverColor
                             3 -> BronzeColor
-                            else -> BaeminDarkGray.copy(alpha = 0.8f)
+                            else -> DarkGray.copy(alpha = 0.8f)
                         }
                     ),
                 contentAlignment = Alignment.Center
@@ -2061,7 +1662,7 @@ private fun GenreRankItem(
             text = item.performanceName ?: "",
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = BaeminDarkGray,
+            color = DarkGray,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -2070,7 +1671,7 @@ private fun GenreRankItem(
         Text(
             text = item.placeName ?: "",
             fontSize = 11.sp,
-            color = BaeminGray,
+            color = Gray,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -2080,7 +1681,7 @@ private fun GenreRankItem(
             Text(
                 text = item.performancePeriod ?: "",
                 fontSize = 10.sp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -2124,7 +1725,7 @@ private fun HorizontalRankItem(
                             1 -> GoldColor
                             2 -> SilverColor
                             3 -> BronzeColor
-                            else -> BaeminDarkGray.copy(alpha = 0.8f)
+                            else -> DarkGray.copy(alpha = 0.8f)
                         }
                     ),
                 contentAlignment = Alignment.Center
@@ -2159,7 +1760,7 @@ private fun HorizontalRankItem(
             text = item.performanceName ?: "",
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = BaeminDarkGray,
+            color = DarkGray,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
@@ -2168,7 +1769,7 @@ private fun HorizontalRankItem(
         Text(
             text = item.placeName ?: "",
             fontSize = 11.sp,
-            color = BaeminGray,
+            color = Gray,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -2178,7 +1779,7 @@ private fun HorizontalRankItem(
             Text(
                 text = item.performancePeriod ?: "",
                 fontSize = 10.sp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -2228,7 +1829,7 @@ private fun ViewAllMyAreaPerformancesButton(onClick: () -> Unit) {
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .height(48.dp) // Fixed height for consistency
             .clip(RoundedCornerShape(8.dp))
-            .border(1.dp, BaeminPrimary, RoundedCornerShape(8.dp))
+            .border(1.dp, ColorPrimary, RoundedCornerShape(8.dp))
             .background(Color.White)
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
@@ -2238,7 +1839,7 @@ private fun ViewAllMyAreaPerformancesButton(onClick: () -> Unit) {
             text = "내 주변 공연 전체보기",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = BaeminPrimary
+            color = ColorPrimary
         )
         Spacer(modifier = Modifier.width(4.dp))
         // Placeholder for arrow icon, ideally replace with an actual icon resource
@@ -2246,7 +1847,7 @@ private fun ViewAllMyAreaPerformancesButton(onClick: () -> Unit) {
             text = ">", // Using text for now, can be replaced with an actual icon
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = BaeminPrimary
+            color = ColorPrimary
         )
     }
 }
@@ -2284,11 +1885,11 @@ private fun RankTabChip(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(
-                color = if (isSelected) BaeminPrimary else BaeminBackground
+                color = if (isSelected) ColorPrimary else BackgroundColor
             )
             .border(
                 width = 1.dp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 shape = RoundedCornerShape(50)
             )
             .clickable(onClick = onClick)
@@ -2299,7 +1900,7 @@ private fun RankTabChip(
             text = text,
             fontSize = 12.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = if (isSelected) Color.White else BaeminPrimary
+            color = if (isSelected) Color.White else ColorPrimary
         )
     }
 }
@@ -2323,7 +1924,7 @@ private fun RankListItem(
             1 -> GoldColor
             2 -> SilverColor
             3 -> BronzeColor
-            else -> BaeminDarkGray
+            else -> DarkGray
         }
 
         Text(
@@ -2371,7 +1972,7 @@ private fun RankListItem(
                 text = item.performanceName ?: "",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = BaeminDarkGray,
+                color = DarkGray,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -2380,7 +1981,7 @@ private fun RankListItem(
             Text(
                 text = item.placeName ?: "",
                 fontSize = 13.sp,
-                color = BaeminGray,
+                color = Gray,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -2389,7 +1990,7 @@ private fun RankListItem(
             Text(
                 text = item.performancePeriod ?: "",
                 fontSize = 12.sp,
-                color = BaeminPrimary,
+                color = ColorPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -2409,7 +2010,7 @@ private fun SmallBadge(text: String?) {
         Text(
             text = text,
             fontSize = 10.sp,
-            color = BaeminGray
+            color = Gray
         )
     }
 }
@@ -2460,13 +2061,13 @@ private fun EmptyTabContent(
                 text = title,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = BaeminDarkGray
+                color = DarkGray
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = description,
                 fontSize = 14.sp,
-                color = BaeminGray,
+                color = Gray,
                 textAlign = TextAlign.Center
             )
         }
@@ -2499,14 +2100,7 @@ private fun LoungeScreenPreview() {
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun LoungeHeaderPreview() {
-    LoungeHeader(
-        onSearchClick = {},
-        onNotificationClick = {}
-    )
-}
+
 
 @Preview(showBackground = true)
 @Composable

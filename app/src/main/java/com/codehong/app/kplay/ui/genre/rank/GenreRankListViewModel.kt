@@ -4,11 +4,12 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
+import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.GenreCode.Companion.toCode
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
-import com.codehong.app.kplay.util.DateUtil
 import com.codehong.library.architecture.mvi.BaseViewModel
+import com.codehong.library.util.DateUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -86,8 +87,8 @@ class GenreRankListViewModel @Inject constructor(
     }
 
     private fun getDefaultDateRange(): Pair<String, String> {
-        val startDate = DateUtil.getPreviousMonthFirstDay()
-        val endDate = DateUtil.getPreviousMonthLastDay()
+        val startDate = DateUtil.getPreviousMonthFirstDay(Consts.YYYY_MM_DD_FORMAT)
+        val endDate = DateUtil.getPreviousMonthLastDay(Consts.YYYY_MM_DD_FORMAT)
         return startDate to endDate
     }
 

@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.lounge
+package com.codehong.app.kplay.ui
 
 enum class BottomTab(
     val title: String,

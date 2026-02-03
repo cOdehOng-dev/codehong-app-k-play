@@ -1,13 +1,13 @@
 package com.codehong.app.kplay.ui.lounge
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
+import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
-import com.codehong.app.kplay.util.DateUtil
 import com.codehong.library.architecture.mvi.BaseViewModel
 import com.codehong.library.network.debug.TimberUtil
+import com.codehong.library.util.DateUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,106 +29,111 @@ class LoungeViewModel @Inject constructor(
     override fun handleEvents(event: LoungeEvent) {
         when (event) {
             is LoungeEvent.OnTabSelected -> {
-                Log.d(TAG, "Tab selected: ${event.tab.title}")
+                TimberUtil.d("Tab selected: ${event.tab.title}")
                 setState { copy(selectedTab = event.tab) }
             }
             is LoungeEvent.OnCategoryClick -> {
-                Log.d(TAG, "Category clicked: ${event.genreCode.displayName} (code: ${event.genreCode.code})")
+                TimberUtil.d("Category clicked: ${event.genreCode.displayName} (code: ${event.genreCode.code})")
                 setEffect { LoungeEffect.NavigateToCategory(event.genreCode) }
             }
             is LoungeEvent.OnRankTabSelected -> {
-                Log.d(TAG, "Rank tab selected: ${event.rankTab.title}")
+                TimberUtil.d("Rank tab selected: ${event.rankTab.title}")
                 setState { copy(selectedRankTab = event.rankTab) }
             }
             is LoungeEvent.OnRankItemClick -> {
-                Log.d(TAG, "Rank item clicked - performanceId: ${event.item.performanceId}")
+                TimberUtil.d("Rank item clicked - performanceId: ${event.item.performanceId}")
                 event.item.performanceId?.let {
                     setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
                 }
             }
             is LoungeEvent.OnRefreshNearbyClick -> {
-                Log.d(TAG, "Refresh nearby clicked")
+                TimberUtil.d("Refresh nearby clicked")
                 setEffect { LoungeEffect.RequestLocationPermission }
             }
             is LoungeEvent.OnNearbyItemClick -> {
-                Log.d(TAG, "Nearby item clicked - id: ${event.item.id}")
+                TimberUtil.d("Nearby item clicked - id: ${event.item.id}")
                 event.item.id?.let {
                     setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
                 }
             }
             is LoungeEvent.OnSignGuCodeUpdated -> {
-                Log.d(TAG, "SignGuCode updated: ${event.signGuCode.displayName}")
+                TimberUtil.d("SignGuCode updated: ${event.signGuCode.displayName}")
                 setState { copy(selectedSignGuCode = event.signGuCode) }
                 callMyAreaListApi(event.signGuCode.code)
             }
             is LoungeEvent.OnGenreTabSelected -> {
-                Log.d(TAG, "Genre tab selected: ${event.genreCode.displayName}")
+                TimberUtil.d("Genre tab selected: ${event.genreCode.displayName}")
                 setState { copy(selectedGenreTab = event.genreCode, isGenreRankLoaded = false, genreRankList = emptyList()) }
                 callGenreRankList(event.genreCode.code)
             }
             is LoungeEvent.OnGenreRankItemClick -> {
-                Log.d(TAG, "Genre rank item clicked - performanceId: ${event.item.performanceId}")
+                TimberUtil.d("Genre rank item clicked - performanceId: ${event.item.performanceId}")
                 event.item.performanceId?.let {
                     setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
                 }
             }
             is LoungeEvent.OnGenreRankMoreClick -> {
-                Log.d(TAG, "Genre rank more clicked - selectedGenreTab: ${state.value.selectedGenreTab.code}")
+                TimberUtil.d("Genre rank more clicked - selectedGenreTab: ${state.value.selectedGenreTab.code}")
                 setEffect { LoungeEffect.NavigateToGenreRankList(state.value.selectedGenreTab) }
             }
             is LoungeEvent.OnFestivalTabSelected -> {
-                Log.d(TAG, "Festival tab selected: ${event.signGuCode.displayName}")
+                TimberUtil.d("Festival tab selected: ${event.signGuCode.displayName}")
                 setState { copy(selectedFestivalTab = event.signGuCode, isFestivalLoaded = false, festivalList = emptyList()) }
                 callFestivalList(event.signGuCode.code)
             }
             is LoungeEvent.OnFestivalItemClick -> {
-                Log.d(TAG, "Festival item clicked - id: ${event.item.id}")
+                TimberUtil.d("Festival item clicked - id: ${event.item.id}")
                 event.item.id?.let {
                     setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
                 }
             }
             is LoungeEvent.OnFestivalMoreClick -> {
-                Log.d(TAG, "Festival more clicked")
+                TimberUtil.d("Festival more clicked")
                 setEffect { LoungeEffect.NavigateToFestivalList }
             }
             is LoungeEvent.OnAwardedTabSelected -> {
-                Log.d(TAG, "Awarded tab selected: ${event.signGuCode.displayName}")
+                TimberUtil.d("Awarded tab selected: ${event.signGuCode.displayName}")
                 setState { copy(selectedAwardedTab = event.signGuCode, isAwardedLoaded = false, awardedList = emptyList()) }
                 callAwardedPerformanceList(event.signGuCode.code)
             }
             is LoungeEvent.OnAwardedItemClick -> {
-                Log.d(TAG, "Awarded item clicked - id: ${event.item.id}")
+                TimberUtil.d("Awarded item clicked - id: ${event.item.id}")
                 event.item.id?.let {
                     setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
                 }
             }
             is LoungeEvent.OnAwardedMoreClick -> {
-                Log.d(TAG, "Awarded more clicked")
+                TimberUtil.d("Awarded more clicked")
                 // TODO: 수상작 리스트 페이지 이동
                 setEffect { LoungeEffect.NavigateToAwardedList }
             }
             is LoungeEvent.OnLocalTabSelected -> {
-                Log.d(TAG, "Local tab selected: ${event.signGuCode.displayName}")
+                TimberUtil.d("Local tab selected: ${event.signGuCode.displayName}")
                 setState { copy(selectedLocalTab = event.signGuCode, isLocalLoaded = false, localList = emptyList()) }
                 callLocalList(event.signGuCode.code)
             }
             is LoungeEvent.OnLocalItemClick -> {
-                Log.d(TAG, "Local item clicked - id: ${event.item.id}")
+                TimberUtil.d("Local item clicked - id: ${event.item.id}")
                 event.item.id?.let {
                     setEffect { LoungeEffect.NavigateToPerformanceDetail(it) }
                 }
             }
             is LoungeEvent.OnLocalMoreClick -> {
-                Log.d(TAG, "Local more clicked - selectedLocalTab: ${state.value.selectedLocalTab.code}")
+                TimberUtil.d("Local more clicked - selectedLocalTab: ${state.value.selectedLocalTab.code}")
                 setEffect { LoungeEffect.NavigateToLocalList(state.value.selectedLocalTab) }
             }
         }
     }
 
     fun callRankList() {
-        val startDate = DateUtil.getPreviousMonthFirstDay()
-        val endDate = DateUtil.getPreviousMonthLastDay()
+        val startDate = DateUtil.getPreviousMonthFirstDay(Consts.YYYY_MM_DD_FORMAT)
+        val endDate = DateUtil.getPreviousMonthLastDay(Consts.YYYY_MM_DD_FORMAT)
 
+        setState {
+            copy(
+                loading = loading.copy(isBannerLoading = true)
+            )
+        }
         viewModelScope.launch {
             performanceUseCase.getRankList(
                 serviceKey = BuildConfig.KOKOR_CLIENT_ID,
@@ -136,13 +141,14 @@ class LoungeViewModel @Inject constructor(
                 endDate = endDate
             ).collect { rankList ->
                 TimberUtil.d("Rank list size: ${rankList?.size ?: 0}")
-                rankList?.let { list ->
-                    setState {
-                        copy(
-                            rankList = list,
-                            currentMonth = DateUtil.getCurrentMonth()
-                        )
-                    }
+                if (rankList.isNullOrEmpty()) return@collect
+
+                setState {
+                    copy(
+                        rankList = rankList,
+                        currentMonth = DateUtil.getCurrentMonth(),
+                        loading = loading.copy(isBannerLoading = false)
+                    )
                 }
             }
         }
@@ -154,8 +160,8 @@ class LoungeViewModel @Inject constructor(
     fun callMyAreaListApi(
         myAreaCode: String = state.value.selectedSignGuCode.code
     ) {
-        val startDate = DateUtil.getToday()
-        val endDate = DateUtil.getOneMonthLater()
+        val startDate = DateUtil.getToday(Consts.YYYY_MM_DD_FORMAT)
+        val endDate = DateUtil.getOneMonthLater(Consts.YYYY_MM_DD_FORMAT)
 
         viewModelScope.launch {
             performanceUseCase.getPerformanceList(
@@ -178,8 +184,8 @@ class LoungeViewModel @Inject constructor(
     fun callLocalList(
         areaCode: String = state.value.selectedLocalTab.code
     ) {
-        val startDate = DateUtil.getPreviousMonthFirstDay()
-        val endDate = DateUtil.getPreviousMonthLastDay()
+        val startDate = DateUtil.getPreviousMonthFirstDay(Consts.YYYY_MM_DD_FORMAT)
+        val endDate = DateUtil.getPreviousMonthLastDay(Consts.YYYY_MM_DD_FORMAT)
 
         viewModelScope.launch {
             performanceUseCase.getPerformanceList(
@@ -202,8 +208,8 @@ class LoungeViewModel @Inject constructor(
     fun callGenreRankList(
         genreCode: String = state.value.selectedGenreTab.code
     ) {
-        val startDate = DateUtil.getPreviousMonthFirstDay()
-        val endDate = DateUtil.getPreviousMonthLastDay()
+        val startDate = DateUtil.getPreviousMonthFirstDay(Consts.YYYY_MM_DD_FORMAT)
+        val endDate = DateUtil.getPreviousMonthLastDay(Consts.YYYY_MM_DD_FORMAT)
 
         viewModelScope.launch {
             performanceUseCase.getRankList(
@@ -219,8 +225,8 @@ class LoungeViewModel @Inject constructor(
     }
 
     fun callFestivalList(signGuCode: String) {
-        val startDate = DateUtil.getPreviousMonthFirstDay()
-        val endDate = DateUtil.getPreviousMonthLastDay()
+        val startDate = DateUtil.getPreviousMonthFirstDay(Consts.YYYY_MM_DD_FORMAT)
+        val endDate = DateUtil.getPreviousMonthLastDay(Consts.YYYY_MM_DD_FORMAT)
 
         viewModelScope.launch {
             performanceUseCase.getFestivalList(
@@ -238,8 +244,8 @@ class LoungeViewModel @Inject constructor(
     }
 
     fun callAwardedPerformanceList(signGuCode: String) {
-        val startDate = DateUtil.getPreviousMonthFirstDay()
-        val endDate = DateUtil.getPreviousMonthLastDay()
+        val startDate = DateUtil.getPreviousMonthFirstDay(Consts.YYYY_MM_DD_FORMAT)
+        val endDate = DateUtil.getPreviousMonthLastDay(Consts.YYYY_MM_DD_FORMAT)
 
         viewModelScope.launch {
             performanceUseCase.getAwardedPerformanceList(

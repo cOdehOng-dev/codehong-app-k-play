@@ -4,6 +4,9 @@ import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.ui.BottomTab
+import com.codehong.app.kplay.ui.lounge.screen.LoungeLoading
+import com.codehong.app.kplay.ui.lounge.screen.RankTab
 import com.codehong.library.architecture.mvi.ViewEvent
 import com.codehong.library.architecture.mvi.ViewSideEffect
 import com.codehong.library.architecture.mvi.ViewState
@@ -31,7 +34,8 @@ data class LoungeState(
     val localList: List<PerformanceInfoItem> = emptyList(),
     val isLocalLoaded: Boolean = false,
     val selectedLocalTab: SignGuCode = SignGuCode.SEOUL,
-    val localTabs: List<SignGuCode> = SignGuCode.entries.toList()
+    val localTabs: List<SignGuCode> = SignGuCode.entries.toList(),
+    val loading: LoungeLoading = LoungeLoading()
 ) : ViewState
 
 sealed class LoungeEvent : ViewEvent {
@@ -67,14 +71,4 @@ sealed class LoungeEffect : ViewSideEffect {
     data class NavigateToLocalList(val signGuCode: SignGuCode) : LoungeEffect()
 }
 
-enum class RankTab(
-    val title: String,
-    val startRank: Int,
-    val endRank: Int
-) {
-    TOP_1_10("1~10위", 1, 10),
-    TOP_11_20("11~20위", 11, 20),
-    TOP_21_30("21~30위", 21, 30),
-    TOP_31_40("31~40위", 31, 40),
-    TOP_41_50("41~50위", 41, 50)
-}
+
