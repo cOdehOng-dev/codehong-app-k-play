@@ -56,4 +56,7 @@ sealed class PerformanceDetailEffect : ViewSideEffect {
 data class PerformanceDetailLoading(
     val isPerformanceDetailLoading: Boolean = true,
     val isPlaceDetailLoading: Boolean = true
-)
+) {
+    val isLoading: Boolean
+        get() = isPerformanceDetailLoading || isPlaceDetailLoading
+}
