@@ -19,9 +19,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.app.kplay.manager.ActivityManager
 import com.codehong.app.kplay.ui.theme.CodehongappkplayTheme
+import com.codehong.library.debugtool.log.TimberUtil
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
@@ -45,18 +47,19 @@ class LoungeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         viewModel.callRankList()
-        viewModel.callGenreRankList()
+        viewModel.callGenreRankList(GenreCode.THEATER.code)
         viewModel.callFestivalList(SignGuCode.SEOUL.code)
         viewModel.callAwardedPerformanceList(SignGuCode.SEOUL.code)
         viewModel.callLocalList(SignGuCode.SEOUL.code)
 
         // SharedPreferences에서 signGuCode를 읽어와 초기화
+        // TODO LocalDataSource로 이동
         val storedSignGuCodeName = sharedPreferences.getString(SIGN_GU_CODE_KEY, null)
         val initialSignGuCode = if (storedSignGuCodeName != null) {
             try {
                 SignGuCode.valueOf(storedSignGuCodeName)
             } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Invalid SignGuCode stored: $storedSignGuCodeName, defaulting to SEOUL", e)
+                TimberUtil.d( "Invalid SignGuCode stored: $storedSignGuCodeName, defaulting to SEOUL = $e")
                 SignGuCode.SEOUL
             }
         } else {
@@ -204,7 +207,7 @@ class LoungeActivity : ComponentActivity() {
                             sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "Geocoder error: ${e.message}")
+                        TimberUtil.d( "Geocoder error: ${e.message}")
                         val defaultSignGuCode = SignGuCode.SEOUL
                         viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
                         sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
@@ -216,13 +219,13 @@ class LoungeActivity : ComponentActivity() {
                     sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
                 }
             }.addOnFailureListener { e ->
-                Log.e(TAG, "Failed to get location: ${e.message}")
+                TimberUtil.d( "Failed to get location: ${e.message}")
                 val defaultSignGuCode = SignGuCode.SEOUL
                 viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
                 sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
             }
         } catch (e: SecurityException) {
-            Log.e(TAG, "Security exception: ${e.message}")
+            TimberUtil.d( "Security exception: ${e.message}")
             val defaultSignGuCode = SignGuCode.SEOUL
             viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
             sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()

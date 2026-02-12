@@ -31,6 +31,7 @@ dependencies {
     implementation(codehonglibs.network)
     implementation(codehonglibs.architecture)
     implementation(codehonglibs.util)
+    implementation(codehonglibs.debugtool)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

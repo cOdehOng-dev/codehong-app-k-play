@@ -3,11 +3,13 @@ package com.codehong.app.kplay.data.repository
 import com.codehong.app.kplay.data.datasource.PerformanceRemoteDataSource
 import com.codehong.app.kplay.data.mapper.asDomain
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
-import com.codehong.app.kplay.domain.model.CallStatus
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
+import com.codehong.app.kplay.domain.model.place.PlaceDetail
+import com.codehong.app.kplay.domain.model.place.PlaceInfoItem
 import com.codehong.app.kplay.domain.repository.PerformanceRepository
-import com.codehong.library.network.debug.TimberUtil
+import com.codehong.library.debugtool.log.TimberUtil
+import com.codehong.library.network.CallStatus
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -47,17 +49,11 @@ class PerformanceRepositoryImpl @Inject constructor(
         ).onStart {
             emit(CallStatus.Loading)
         }.catch {
-            TimberUtil.e("test here error 11 = $it")
             emit(CallStatus.Error(it))
         }.collect {
-            gson.toJson(it)?.let { json ->
-                TimberUtil.d("test here response json = $json")
-            }
-            TimberUtil.e("test here callback = $it")
             emit(CallStatus.Success(it.performances?.map { itemDto -> itemDto.asDomain() }))
         }
     }.catch {
-        TimberUtil.e("test here error 22 = $it")
         emit(CallStatus.Error(it))
     }
 
@@ -71,9 +67,6 @@ class PerformanceRepositoryImpl @Inject constructor(
             }.catch { e ->
                 emit(CallStatus.Error(e))
             }.collect {
-                gson.toJson(it)?.let { json ->
-                    TimberUtil.d("test here getPerformanceDetail json = $json")
-                }
                 emit(CallStatus.Success(it.performances?.map { itemDto -> itemDto.asDomain() }))
             }
     }.catch { e ->
@@ -166,6 +159,40 @@ class PerformanceRepositoryImpl @Inject constructor(
         }
     }.catch { e ->
         TimberUtil.e("test here getAwardedPerformanceList error 11 = $e")
+        emit(CallStatus.Error(e))
+    }
+
+    override fun searchPlace(
+        serviceKey: String,
+        keyword: String,
+        currentPage: String,
+        rowsPerPage: String
+    ): Flow<CallStatus<List<PlaceInfoItem>?>> = flow {
+        remote.searchPlace(serviceKey, currentPage, rowsPerPage, keyword)
+            .onStart {
+                emit(CallStatus.Loading)
+            }.catch { e ->
+                emit(CallStatus.Error(e))
+            }.collect {
+                emit(CallStatus.Success(it.facilities?.map { item -> item.asDomain() }))
+            }
+    }.catch { e ->
+        emit(CallStatus.Error(e))
+    }
+
+    override fun getPlaceDetail(
+        serviceKey: String,
+        id: String
+    ): Flow<CallStatus<PlaceDetail?>> = flow {
+        remote.getPlaceDetail(serviceKey, id)
+            .onStart {
+                emit(CallStatus.Loading)
+            }.catch { e ->
+                emit(CallStatus.Error(e))
+            }.collect {
+                emit(CallStatus.Success(it.facilities?.firstOrNull().asDomain()))
+            }
+    }.catch { e ->
         emit(CallStatus.Error(e))
     }
 }

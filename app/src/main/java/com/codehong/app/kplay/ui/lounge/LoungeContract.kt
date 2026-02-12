@@ -3,10 +3,9 @@ package com.codehong.app.kplay.ui.lounge
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.GenreCode
+import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.app.kplay.ui.BottomTab
-import com.codehong.app.kplay.ui.lounge.screen.LoungeLoading
-import com.codehong.app.kplay.ui.lounge.screen.RankTab
 import com.codehong.library.architecture.mvi.ViewEvent
 import com.codehong.library.architecture.mvi.ViewSideEffect
 import com.codehong.library.architecture.mvi.ViewState
@@ -18,24 +17,20 @@ data class LoungeState(
     val selectedRankTab: RankTab = RankTab.TOP_1_10,
     val currentMonth: Int = 1,
     val myAreaList: List<PerformanceInfoItem> = emptyList(),
-    val isMyAreaLoaded: Boolean = false,
     val selectedSignGuCode: SignGuCode = SignGuCode.SEOUL,
     val selectedGenreTab: GenreCode = GenreCode.THEATER,
     val genreRankList: List<BoxOfficeItem> = emptyList(),
-    val isGenreRankLoaded: Boolean = false,
     val festivalList: List<PerformanceInfoItem> = emptyList(),
-    val isFestivalLoaded: Boolean = false,
     val selectedFestivalTab: SignGuCode = SignGuCode.SEOUL,
-    val festivalTabs: List<SignGuCode> = SignGuCode.entries.toList(),
+    val festivalTabList: List<SignGuCode> = SignGuCode.entries.toList(),
     val awardedList: List<PerformanceInfoItem> = emptyList(),
     val isAwardedLoaded: Boolean = false,
     val selectedAwardedTab: SignGuCode = SignGuCode.SEOUL,
     val awardedTabs: List<SignGuCode> = SignGuCode.entries.toList(),
     val localList: List<PerformanceInfoItem> = emptyList(),
-    val isLocalLoaded: Boolean = false,
     val selectedLocalTab: SignGuCode = SignGuCode.SEOUL,
-    val localTabs: List<SignGuCode> = SignGuCode.entries.toList(),
-    val loading: LoungeLoading = LoungeLoading()
+    val localTabList: List<SignGuCode> = SignGuCode.entries.toList(),
+    val apiLoading: LoungeApiLoading = LoungeApiLoading()
 ) : ViewState
 
 sealed class LoungeEvent : ViewEvent {
@@ -71,4 +66,13 @@ sealed class LoungeEffect : ViewSideEffect {
     data class NavigateToLocalList(val signGuCode: SignGuCode) : LoungeEffect()
 }
 
+
+data class LoungeApiLoading(
+    val isMonthRankLoading: Boolean = true,
+    val isMyAreaLoading: Boolean = true,
+    val isLocalLoading: Boolean = true,
+    val isGenreRankingLoading: Boolean = true,
+    val isFestivalLoading: Boolean = true,
+    val isAwardLoading: Boolean = true
+)
 

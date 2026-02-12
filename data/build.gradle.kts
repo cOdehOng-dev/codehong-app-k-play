@@ -14,6 +14,7 @@ dependencies {
     implementation(codehonglibs.network)
     implementation(codehonglibs.architecture)
     implementation(codehonglibs.util)
+    implementation(codehonglibs.debugtool)
 
 
     testImplementation(libs.junit)

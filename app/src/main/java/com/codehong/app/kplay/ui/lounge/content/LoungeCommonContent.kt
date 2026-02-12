@@ -1,22 +1,27 @@
-package com.codehong.app.kplay.ui.lounge.screen
+package com.codehong.app.kplay.ui.lounge.content
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.codehong.library.widget.R
 import com.codehong.library.widget.extensions.hongBackground
 import com.codehong.library.widget.extensions.hongSpacing
-import com.codehong.library.widget.image.HongImageBuilder
-import com.codehong.library.widget.image.HongImageCompose
+import com.codehong.library.widget.image.def.HongImageBuilder
+import com.codehong.library.widget.image.def.HongImageCompose
 import com.codehong.library.widget.rule.HongLayoutParam
 import com.codehong.library.widget.rule.HongSpacingInfo
 import com.codehong.library.widget.rule.HongTextOverflow
@@ -74,10 +79,115 @@ fun LoungeHeaderContent(
     }
 }
 
+// TODO HONG box 제거 후 image에 clickable 적용
+@Composable
+fun ArrowRightIcon(
+    onMoreClick: () -> Unit
+) {
+    val isPreview = LocalInspectionMode.current
+
+    Box(
+        modifier = Modifier
+            .size(32.dp)
+            .clickable(onClick = onMoreClick),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isPreview) {
+            Image(
+                modifier = Modifier.size(25.dp),
+                painter = painterResource(id = R.drawable.honglib_ic_arrow_right),
+                contentDescription = null
+            )
+        } else {
+            HongImageCompose(
+                HongImageBuilder()
+                    .width(25)
+                    .height(25)
+                    .imageInfo(R.drawable.honglib_ic_arrow_right)
+                    .applyOption()
+            )
+        }
+    }
+}
+
+@Composable
+fun EmptyContent(
+    emptyText: String
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        HongTextCompose(
+            option = HongTextBuilder()
+                .text(emptyText)
+                .typography(HongTypo.BODY_20_B)
+                .color(HongColor.DARK_GRAY_100)
+                .applyOption()
+        )
+    }
+}
+
+@Composable
+fun ArrowTitleContent(
+    title: String,
+    onClickMore: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .hongSpacing(
+                HongSpacingInfo(
+                    left = 16f,
+                    right = 16f
+                )
+            ),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        HongTextCompose(
+            option = HongTextBuilder()
+                .text(title)
+                .typography(HongTypo.BODY_20_B)
+                .color(HongColor.BLACK_100)
+                .applyOption()
+        )
+
+        ArrowRightIcon(onClickMore)
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun LoungeHeaderContentPreview() {
     LoungeHeaderContent(
         onSearchClick = {},
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoungeArrowRightIconPreview() {
+    ArrowRightIcon(
+        onMoreClick = {},
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoungeEmptyContentPreview() {
+    EmptyContent(
+        emptyText = "데이터가 없습니다"
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoungeArrowTitleContentPreview() {
+    ArrowTitleContent(
+        title = "추천 공연이에요",
+        onClickMore = {}
     )
 }

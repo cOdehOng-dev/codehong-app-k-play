@@ -12,4 +12,12 @@ data class PerformanceInfoItem(
     val openRun: String? = null,
     val state: String? = null,
     val awards: String? = null
-)
+) {
+    val period get() = buildString {
+        startDate?.let { append(it) }
+        if (!startDate.isNullOrBlank() && !endDate.isNullOrBlank()) {
+            append(" ~ ")
+        }
+        endDate?.let { append(it) }
+    }
+}

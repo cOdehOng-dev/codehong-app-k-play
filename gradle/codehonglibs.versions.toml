@@ -1,8 +1,9 @@
 [versions]
-widget = "0.0.3.24-20260203.141404-SNAPSHOT"
-network = "0.0.1-20260202.165114-SNAPSHOT"
+widget = "0.0.3.24-20260212.162114-SNAPSHOT"
+network = "0.0.1-20260212.102841-SNAPSHOT"
 util = "0.0.1-20260203.095058-SNAPSHOT"
 architecture = "0.0.1-20260202.155955-SNAPSHOT"
+debugtool = "0.0.1-20260212.102504-SNAPSHOT"
 
 [plugins]
 
@@ -11,6 +12,7 @@ widget = { group = "com.codehong.library", name = "widget", version.ref = "widge
 network = { group = "com.codehong.library", name = "network", version.ref = "network" }
 util = { group = "com.codehong.library", name = "util", version.ref = "util" }
 architecture = { group = "com.codehong.library", name = "architecture", version.ref = "architecture" }
+debugtool = { group = "com.codehong.library", name = "debugtool", version.ref = "debugtool" }
 
 [bundles]
 

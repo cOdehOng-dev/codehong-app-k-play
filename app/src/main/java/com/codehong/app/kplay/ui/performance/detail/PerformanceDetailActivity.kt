@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.codehong.app.kplay.domain.Consts
+import com.codehong.app.kplay.manager.ActivityManager
 import com.codehong.app.kplay.ui.theme.CodehongappkplayTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -37,9 +38,20 @@ class PerformanceDetailActivity : ComponentActivity() {
                                 finish()
                             }
                             is PerformanceDetailEffect.OpenBookingPage -> {
-                                // TODO: 예매 페이지로 이동 처리
-                                // effect.relates에 예매처 정보가 담겨 있습니다.
-                                // 예: 웹뷰로 이동하거나 예매처 선택 다이얼로그 표시
+                                val siteList = effect.relates
+                                if (siteList.isEmpty()) return@collectLatest
+                                if (siteList.size > 1) {
+                                    // 예매처 선택 다이얼로그 표시
+                                    viewModel.callReservationSiteListPicker(siteList)
+
+                                } else {
+                                    // 단일 예매처 바로 이동
+                                    viewModel.setEvent(PerformanceDetailEvent.OnBookingSiteClick(siteList.firstOrNull()?.url))
+                                }
+                            }
+
+                            is PerformanceDetailEffect.OpenBookingSitePage -> {
+                                ActivityManager.openExternalUrl(this@PerformanceDetailActivity, effect.site)
                             }
                         }
                     }

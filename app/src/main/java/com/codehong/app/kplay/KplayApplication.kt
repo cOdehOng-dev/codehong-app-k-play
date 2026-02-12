@@ -2,10 +2,10 @@ package com.codehong.app.kplay
 
 import android.app.Application
 import com.codehong.app.kplay.di.ApplicationInterface
+import com.codehong.library.debugtool.log.TimberConfig
+import com.codehong.library.debugtool.log.TimberUtil
+import com.codehong.library.network.NetworkConfig
 import com.codehong.library.network.NetworkManager
-import com.codehong.library.network.debug.TimberConfig
-import com.codehong.library.network.debug.TimberUtil
-import com.hongji.library.util.network.NetworkConfig
 import com.naver.maps.map.NaverMapSdk
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp

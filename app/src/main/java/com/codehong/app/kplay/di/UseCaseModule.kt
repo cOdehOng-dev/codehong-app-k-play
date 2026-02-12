@@ -2,6 +2,7 @@ package com.codehong.app.kplay.di
 
 import com.codehong.app.kplay.domain.repository.PerformanceRepository
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
+import com.codehong.app.kplay.domain.usecase.PlaceUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,4 +18,10 @@ object UseCaseModule {
     fun providePerformanceUseCase(
         repository: PerformanceRepository
     ) = PerformanceUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun providePlaceUseCase(
+        repository: PerformanceRepository
+    ) = PlaceUseCase(repository)
 }

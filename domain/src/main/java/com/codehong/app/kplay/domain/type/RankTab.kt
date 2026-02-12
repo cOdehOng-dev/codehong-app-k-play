@@ -1,7 +1,7 @@
-package com.codehong.app.kplay.ui.lounge.screen
+package com.codehong.app.kplay.domain.type
 
 enum class RankTab(
-    val title: String,
+    val display: String,
     val startRank: Int,
     val endRank: Int
 ) {

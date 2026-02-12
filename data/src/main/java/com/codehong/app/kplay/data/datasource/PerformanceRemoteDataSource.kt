@@ -4,7 +4,7 @@ import com.codehong.app.kplay.data.model.boxoffice.BoxOfficeResponse
 import com.codehong.app.kplay.data.model.performance.detail.PerformanceDetailResponse
 import com.codehong.app.kplay.data.model.performance.list.PerformanceListResponse
 import com.codehong.app.kplay.data.remote.KopisApiService
-import com.codehong.library.network.debug.TimberUtil
+import com.codehong.library.debugtool.log.TimberUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -46,7 +46,7 @@ class PerformanceRemoteDataSource @Inject constructor(
         serviceKey: String,
         id: String,
     ): Flow<PerformanceDetailResponse> = flow {
-        emit(kopisApiService.getPerformanceDetail(id, serviceKey)).also { TimberUtil.i("test here response 11 = $it") }
+        emit(kopisApiService.getPerformanceDetail(id, serviceKey))
     }.flowOn(Dispatchers.IO)
 
     fun getBoxOffice(
@@ -58,7 +58,7 @@ class PerformanceRemoteDataSource @Inject constructor(
     ): Flow<BoxOfficeResponse> = flow {
         emit(
             kopisApiService.getBoxOffice(serviceKey, startDate, endDate, catecode, area)
-        ).also { TimberUtil.d("test here box office = $it") }
+        )
     }.flowOn(Dispatchers.IO)
 
     fun getFestivalList(
@@ -101,6 +101,34 @@ class PerformanceRemoteDataSource @Inject constructor(
                 rowsPerPage,
                 signGuCode,
                 signGuCodeSub
+            )
+        )
+    }.flowOn(Dispatchers.IO)
+
+    fun searchPlace(
+        serviceKey: String,
+        currentPage: String,
+        rowsPerPage: String,
+        keyword: String
+    ) = flow {
+        emit(
+            kopisApiService.searchPlace(
+                serviceKey,
+                currentPage,
+                rowsPerPage,
+                keyword
+            )
+        )
+    }.flowOn(Dispatchers.IO)
+
+    fun getPlaceDetail(
+        serviceKey: String,
+        id: String
+    ) = flow {
+        emit(
+            kopisApiService.getPlaceDetail(
+                id,
+                serviceKey
             )
         )
     }.flowOn(Dispatchers.IO)

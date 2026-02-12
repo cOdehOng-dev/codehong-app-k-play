@@ -95,4 +95,18 @@ object ActivityManager {
         val intent = Intent(context, AwardListActivity::class.java)
         context.startActivity(intent)
     }
+
+    fun openExternalUrl(
+        context: Context?,
+        url: String?
+    ) {
+        if (context == null || url.isNullOrEmpty()) {
+            return
+        }
+
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = android.net.Uri.parse(url)
+        }
+        context.startActivity(intent)
+    }
 }

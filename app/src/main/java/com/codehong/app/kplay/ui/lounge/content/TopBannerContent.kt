@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.lounge.screen
+package com.codehong.app.kplay.ui.lounge.content
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,12 +21,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.size.Size
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
-import com.codehong.library.network.debug.TimberUtil
+import com.codehong.library.debugtool.log.TimberUtil
 import com.codehong.library.widget.extensions.hongBackground
 import com.codehong.library.widget.extensions.hongSpacing
 import com.codehong.library.widget.extensions.shimmerEffect
-import com.codehong.library.widget.image.HongImageBuilder
-import com.codehong.library.widget.image.HongImageCompose
+import com.codehong.library.widget.image.def.HongImageBuilder
+import com.codehong.library.widget.image.def.HongImageCompose
 import com.codehong.library.widget.pager.HongHorizontalPagerBuilder
 import com.codehong.library.widget.pager.HongHorizontalPagerCompose
 import com.codehong.library.widget.rule.HongLayoutParam
@@ -40,7 +40,7 @@ import com.codehong.library.widget.text.def.HongTextBuilder
 import com.codehong.library.widget.text.def.HongTextCompose
 
 @Composable
-fun TopBannerSection(
+fun TopBannerContent(
     isLoading: Boolean,
     bannerList: List<BoxOfficeItem>,
     onBannerClick: (BoxOfficeItem) -> Unit
@@ -80,7 +80,7 @@ fun TopBannerSection(
                 .applyOption()
         ) { item ->
             (item as? BoxOfficeItem)?.let {
-                BannerItem(
+                BannerContent(
                     item = it,
                     onClick = { onBannerClick(it) }
                 )
@@ -128,7 +128,7 @@ fun TopBannerSection(
 }
 
 @Composable
-private fun BannerItem(
+private fun BannerContent(
     item: BoxOfficeItem,
     onClick: () -> Unit
 ) {
