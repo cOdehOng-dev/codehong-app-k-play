@@ -4,7 +4,6 @@ import com.codehong.app.kplay.data.model.boxoffice.BoxOfficeResponse
 import com.codehong.app.kplay.data.model.performance.detail.PerformanceDetailResponse
 import com.codehong.app.kplay.data.model.performance.list.PerformanceListResponse
 import com.codehong.app.kplay.data.remote.KopisApiService
-import com.codehong.library.debugtool.log.TimberUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -27,19 +26,20 @@ class PerformanceRemoteDataSource @Inject constructor(
         kidState: String? = null,
         genreCode: String? = null
     ): Flow<PerformanceListResponse> = flow {
-        TimberUtil.e("test here pass !!")
-        emit(kopisApiService.getPerformanceList(
-            service = service,
-            startDate = startDate,
-            endDate = endDate,
-            currentPage = currentPage,
-            rowsPerPage = rowsPerPage,
-            performanceState = performanceState,
-            signGuCode = signGuCode,
-            signGuCodeSub = signGuCodeSub,
-            kidState = kidState,
-            genreCode = genreCode
-        ).also { TimberUtil.d("test here response = $it") })
+        emit(
+            kopisApiService.getPerformanceList(
+                service = service,
+                startDate = startDate,
+                endDate = endDate,
+                currentPage = currentPage,
+                rowsPerPage = rowsPerPage,
+                performanceState = performanceState,
+                signGuCode = signGuCode,
+                signGuCodeSub = signGuCodeSub,
+                kidState = kidState,
+                genreCode = genreCode
+            )
+        )
     }.flowOn(Dispatchers.IO)
 
     fun getPerformanceDetail(

@@ -29,7 +29,7 @@ class LoungeViewModel @Inject constructor(
     override fun handleEvents(event: LoungeEvent) {
         when (event) {
             is LoungeEvent.OnTabSelected -> {
-                TimberUtil.d("Tab selected: ${event.tab.title}")
+                TimberUtil.d("Tab selected: ${event.tab.label}")
                 setState { copy(selectedTab = event.tab) }
             }
 
@@ -212,7 +212,7 @@ class LoungeViewModel @Inject constructor(
                 startDate = startDate,
                 endDate = endDate,
                 currentPage = "1",
-                rowsPerPage = "10",
+                rowsPerPage = "100",
                 signGuCode = myAreaCode,
             ).collect { myAreaList ->
                 setState {

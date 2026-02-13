@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.lounge.content
+package com.codehong.app.kplay.ui.lounge.content.home
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable

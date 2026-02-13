@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.lounge.content
+package com.codehong.app.kplay.ui.lounge.content.home
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.ui.lounge.content.Shimmer
 import com.codehong.library.widget.R
 import com.codehong.library.widget.extensions.disableRippleClickable
 import com.codehong.library.widget.image.def.HongImageBuilder

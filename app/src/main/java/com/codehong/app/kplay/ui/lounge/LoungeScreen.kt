@@ -1,34 +1,22 @@
 package com.codehong.app.kplay.ui.lounge
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,23 +25,17 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.SignGuCode
-import com.codehong.app.kplay.ui.BottomTab
-import com.codehong.app.kplay.ui.lounge.content.GenreListContent
-import com.codehong.app.kplay.ui.lounge.content.GenreRankContent
-import com.codehong.app.kplay.ui.lounge.content.LoungeHeaderContent
-import com.codehong.app.kplay.ui.lounge.content.MyAreaContent
-import com.codehong.app.kplay.ui.lounge.content.TabPerformanceContent
-import com.codehong.app.kplay.ui.lounge.content.TabRankPerformanceContent
-import com.codehong.app.kplay.ui.lounge.content.TopBannerContent
-import com.codehong.library.debugtool.log.TimberUtil
+import com.codehong.app.kplay.ui.lounge.content.MyLocationContent
+import com.codehong.app.kplay.ui.lounge.content.home.HomeContent
 import com.codehong.library.widget.R
 import com.codehong.library.widget.extensions.hongBackground
-import com.codehong.library.widget.image.def.HongImageBuilder
-import com.codehong.library.widget.image.def.HongImageCompose
-import com.codehong.library.widget.rule.HongScaleType
+import com.codehong.library.widget.liquid.tabbar.HongLiquidGlassTabBar
+import com.codehong.library.widget.liquidglass.tabbar.HongLiquidGlassTabBarBuilder
+import com.codehong.library.widget.liquidglass.tabbar.HongLiquidGlassTabItem
 import com.codehong.library.widget.rule.color.HongColor
 import com.codehong.library.widget.rule.color.HongColor.Companion.toColor
 
@@ -126,7 +108,7 @@ fun LoungeScreen(
 @Composable
 private fun LoungeScreenContent(
     state: LoungeState,
-    onTabSelected: (BottomTab) -> Unit,
+    onTabSelected: (BottomTabType) -> Unit,
     onCategoryClick: (GenreCode) -> Unit,
     onRankTabSelected: (RankTab) -> Unit,
     onRankItemClick: (BoxOfficeItem) -> Unit,
@@ -152,17 +134,6 @@ private fun LoungeScreenContent(
             .statusBarsPadding()
             .navigationBarsPadding(),
         containerColor = HongColor.WHITE_100.toColor(),
-        topBar = {
-            LoungeHeaderContent {
-                TimberUtil.d("Search clicked")
-            }
-        },
-        bottomBar = {
-            LoungeBottomNavigation(
-                selectedTab = state.selectedTab,
-                onTabSelected = onTabSelected
-            )
-        }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -170,7 +141,7 @@ private fun LoungeScreenContent(
                 .padding(paddingValues)
         ) {
             when (state.selectedTab) {
-                BottomTab.HOME -> HomeContent(
+                BottomTabType.HOME -> HomeContent(
                     state = state,
                     onCategoryClick = onCategoryClick,
                     onRankTabSelected = onRankTabSelected,
@@ -190,336 +161,56 @@ private fun LoungeScreenContent(
                     onLocalItemClick = onLocalItemClick,
                     onLocalMoreClick = onLocalMoreClick
                 )
-                BottomTab.SEARCH -> SearchContent()
-                BottomTab.BOOKMARK -> BookmarkContent()
-                BottomTab.MY -> MyContent()
+                BottomTabType.MY_LOCATION -> MyLocationContent(
+                    myAreaList = state.myAreaList,
+                    selectedAreaName = state.selectedSignGuCode.displayName
+                )
+                BottomTabType.BOOKMARK -> BookmarkContent()
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(alignment = Alignment.BottomCenter)
+            ) {
+                HongLiquidGlassTabBar(
+                    HongLiquidGlassTabBarBuilder()
+                        .isDarkTheme(false)
+                        .tabList(
+                            listOf(
+                                HongLiquidGlassTabItem(
+                                    R.drawable.honglib_ic_home,
+                                    BottomTabType.HOME.label
+                                ),
+                                HongLiquidGlassTabItem(
+                                    R.drawable.honglib_ic_location,
+                                    BottomTabType.MY_LOCATION.label
+                                ),
+                                HongLiquidGlassTabItem(
+                                    R.drawable.honglib_ic_favorite,
+                                    BottomTabType.BOOKMARK.label
+                                )
+                            )
+                        )
+                        .outerRadius(40)
+                        .tabBarHeight(80)
+                        .tabVerticalPadding(12)
+                        .innerSideGap(16)
+                        .onSelectedTab { i, item ->
+                            when (item.label) {
+                                BottomTabType.HOME.label -> onTabSelected(BottomTabType.HOME)
+                                BottomTabType.MY_LOCATION.label -> onTabSelected(BottomTabType.MY_LOCATION)
+                                BottomTabType.BOOKMARK.label -> onTabSelected(BottomTabType.BOOKMARK)
+                            }
+                        }
+                        .applyOption()
+                )
             }
         }
     }
 }
 
-
-
-@Composable
-private fun LoungeBottomNavigation(
-    selectedTab: BottomTab,
-    onTabSelected: (BottomTab) -> Unit
-) {
-    NavigationBar(
-        modifier = Modifier
-            .shadow(elevation = 8.dp)
-            .height(64.dp),
-        containerColor = HongColor.WHITE_100.toColor(),
-        tonalElevation = 0.dp
-    ) {
-        BottomTab.entries.forEach { tab ->
-            val isSelected = selectedTab == tab
-            val iconColor = if (isSelected) HongColor.MAIN_ORANGE_100.toColor() else HongColor.GRAY_50.toColor()
-
-            NavigationBarItem(
-                selected = isSelected,
-                onClick = {
-                    TimberUtil.d("Bottom tab clicked: ${tab.title}")
-                    onTabSelected(tab)
-                },
-                icon = {
-                    TabIcon(
-                        modifier = Modifier.size(24.dp),
-                        tab = tab,
-                        isSelected = isSelected,
-                        color = iconColor
-                    )
-                },
-                label = {
-                    Text(
-                        text = tab.title,
-                        fontSize = 11.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = HongColor.MAIN_ORANGE_100.toColor(),
-                    selectedTextColor = HongColor.MAIN_ORANGE_100.toColor(),
-                    unselectedIconColor = HongColor.GRAY_50.toColor(),
-                    unselectedTextColor = HongColor.GRAY_50.toColor(),
-                    indicatorColor = Color.Transparent
-                )
-            )
-        }
-    }
-}
-
-@Composable
-private fun TabIcon(
-    tab: BottomTab,
-    isSelected: Boolean,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    when (tab) {
-        BottomTab.HOME -> HomeIcon(color = color, filled = isSelected, modifier = modifier)
-        BottomTab.SEARCH -> SearchIcon(color = color, filled = isSelected, modifier = modifier)
-        BottomTab.BOOKMARK -> BookmarkIcon(color = color, filled = isSelected, modifier = modifier)
-        BottomTab.MY -> PersonIcon(color = color, filled = isSelected, modifier = modifier)
-    }
-}
-
-
-@Composable
-private fun HomeIcon(
-    color: Color,
-    filled: Boolean,
-    modifier: Modifier = Modifier
-) {
-    HongImageCompose(
-        HongImageBuilder()
-            .width(27)
-            .height(27)
-            .imageInfo(R.drawable.honglib_ic_home)
-            .imageColor(if (filled) HongColor.MAIN_ORANGE_100 else HongColor.GRAY_50)
-            .scaleType(HongScaleType.CENTER_CROP)
-            .applyOption()
-    )
-}
-
-@Composable
-private fun BookmarkIcon(
-    color: Color,
-    filled: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Canvas(modifier = modifier) {
-        val strokeWidth = size.width * 0.08f
-        val heartPath = Path().apply {
-            moveTo(size.width * 0.5f, size.height * 0.85f)
-            cubicTo(
-                size.width * 0.1f, size.height * 0.55f,
-                size.width * 0.1f, size.height * 0.2f,
-                size.width * 0.5f, size.height * 0.35f
-            )
-            cubicTo(
-                size.width * 0.9f, size.height * 0.2f,
-                size.width * 0.9f, size.height * 0.55f,
-                size.width * 0.5f, size.height * 0.85f
-            )
-            close()
-        }
-
-        if (filled) {
-            drawPath(heartPath, color)
-        } else {
-            drawPath(heartPath, color, style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
-        }
-    }
-}
-
-@Composable
-private fun SearchIcon(
-    color: Color,
-    filled: Boolean,
-    modifier: Modifier = Modifier
-) {
-    HongImageCompose(
-        HongImageBuilder()
-            .width(27)
-            .height(27)
-            .imageInfo(R.drawable.honglib_ic_search)
-            .imageColor(if (filled) HongColor.MAIN_ORANGE_100 else HongColor.GRAY_50)
-            .scaleType(HongScaleType.CENTER_CROP)
-            .applyOption()
-    )
-}
-
-@Composable
-private fun PersonIcon(
-    color: Color,
-    filled: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Canvas(modifier = modifier) {
-        val strokeWidth = size.width * 0.08f
-
-        if (filled) {
-            drawCircle(
-                color = color,
-                radius = size.width * 0.22f,
-                center = Offset(size.width * 0.5f, size.height * 0.28f)
-            )
-            drawArc(
-                color = color,
-                startAngle = 180f,
-                sweepAngle = 180f,
-                useCenter = true,
-                topLeft = Offset(size.width * 0.15f, size.height * 0.5f),
-                size = Size(size.width * 0.7f, size.height * 0.55f)
-            )
-        } else {
-            drawCircle(
-                color = color,
-                radius = size.width * 0.22f,
-                center = Offset(size.width * 0.5f, size.height * 0.28f),
-                style = Stroke(width = strokeWidth)
-            )
-            drawArc(
-                color = color,
-                startAngle = 180f,
-                sweepAngle = 180f,
-                useCenter = false,
-                topLeft = Offset(size.width * 0.15f, size.height * 0.5f),
-                size = Size(size.width * 0.7f, size.height * 0.55f),
-                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-            )
-        }
-    }
-}
-
 // ===== 홈 탭 콘텐츠 =====
-
-@Composable
-private fun HomeContent(
-    state: LoungeState,
-    onCategoryClick: (GenreCode) -> Unit,
-    onRankTabSelected: (RankTab) -> Unit,
-    onRankItemClick: (BoxOfficeItem) -> Unit,
-    onRefreshNearbyClick: () -> Unit,
-    onNearbyItemClick: (PerformanceInfoItem) -> Unit,
-    onGenreTabSelected: (GenreCode) -> Unit,
-    onGenreRankItemClick: (BoxOfficeItem) -> Unit,
-    onGenreRankMoreClick: () -> Unit,
-    onFestivalTabSelected: (SignGuCode) -> Unit,
-    onFestivalItemClick: (PerformanceInfoItem) -> Unit,
-    onFestivalMoreClick: () -> Unit,
-    onAwardedTabSelected: (SignGuCode) -> Unit,
-    onAwardedItemClick: (PerformanceInfoItem) -> Unit,
-    onAwardedMoreClick: () -> Unit,
-    onLocalTabSelected: (SignGuCode) -> Unit,
-    onLocalItemClick: (PerformanceInfoItem) -> Unit,
-    onLocalMoreClick: () -> Unit
-) {
-    val listState = rememberLazyListState()
-
-    LazyColumn(
-        state = listState,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // TOP 배너
-        item(key = "top_banner") {
-            TopBannerContent(
-                isLoading = state.apiLoading.isMonthRankLoading,
-                bannerList = state.rankList.take(6),
-                onBannerClick = { item ->
-                    item.performanceId?.let { onRankItemClick(item) }
-                }
-            )
-        }
-
-        // 카테고리 그리드
-        item(key = "genre_list") {
-            GenreListContent(
-                genreList = state.categories,
-                onClickGenre = onCategoryClick
-            )
-        }
-
-        // 내 주변 공연 섹션
-        item(key = "my_area") {
-            MyAreaContent(
-                isLoading = state.apiLoading.isMyAreaLoading,
-                currentMonth = state.currentMonth,
-                myAreaList = state.myAreaList,
-                onClickRefresh = onRefreshNearbyClick,
-                onClickProduct = onNearbyItemClick
-            )
-        }
-
-        // 순위 리스트
-        item(key = "rank_list") {
-            TabRankPerformanceContent(
-                title = "${state.currentMonth}월 인기 순위 Top50",
-                emptyText = "랭킹 정보가 없어요",
-                isLoading = state.apiLoading.isMonthRankLoading,
-                selectedTab = state.selectedRankTab,
-                tabList = state.rankList,
-                onSelectedTab = onRankTabSelected,
-                onClickProduct = onRankItemClick
-            )
-        }
-
-        // 지역별 공연 섹션
-        item(key = "local_content") {
-            TabPerformanceContent(
-                title = "지역별 공연이에요",
-                emptyText = "지역별 공연 정보가 없어요",
-                isLoading = state.apiLoading.isLocalLoading,
-                tabList = state.localTabList,
-                selectedTab = state.selectedLocalTab,
-                performanceList = state.localList,
-                onTabSelected = onLocalTabSelected,
-                onClickMore = onLocalMoreClick,
-                onClickProduct = onLocalItemClick
-            )
-        }
-
-        // 장르별 랭킹 섹션
-        item(key = "genre_rank") {
-            GenreRankContent(
-                isLoading = state.apiLoading.isGenreRankingLoading,
-                genreList = state.categories,
-                selectedTab = state.selectedGenreTab,
-                genreRankList = state.genreRankList,
-                onSelectedTab = onGenreTabSelected,
-                onClickProduct = onGenreRankItemClick,
-                onClickMore = onGenreRankMoreClick
-            )
-        }
-
-
-
-        // 축제 섹션
-        item(key = "festival_section") {
-            TabPerformanceContent(
-                title = "축제 공연은 어때요?",
-                emptyText = "축제 공연 정보가 없어요",
-                isLoading = state.apiLoading.isFestivalLoading,
-                tabList = state.festivalTabList,
-                selectedTab = state.selectedFestivalTab,
-                performanceList = state.festivalList,
-                onTabSelected = onFestivalTabSelected,
-                onClickMore = onFestivalMoreClick,
-                onClickProduct = onFestivalItemClick
-            )
-        }
-
-        // 수상작 섹션
-        item(key = "awarded_section") {
-            TabPerformanceContent(
-                title = "수상작은 어때요?",
-                emptyText = "수상작 정보가 없어요",
-                isLoading = state.apiLoading.isAwardLoading,
-                tabList = state.awardedTabs,
-                selectedTab = state.selectedAwardedTab,
-                performanceList = state.awardedList,
-                onTabSelected = onAwardedTabSelected,
-                onClickMore = onAwardedMoreClick,
-                onClickProduct = onAwardedItemClick
-            )
-        }
-
-        // 하단 여백
-        item(key = "bottom_spacer") {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
-
-// ===== 검색 탭 콘텐츠 (빈 화면) =====
-@Composable
-private fun SearchContent() {
-    EmptyTabContent(
-        title = "검색",
-        description = "공연, 장소, 아티스트를 검색해보세요"
-    )
-}
 
 // ===== 찜 탭 콘텐츠 (빈 화면) =====
 @Composable
@@ -594,16 +285,5 @@ private fun LoungeScreenPreview() {
         onLocalTabSelected = {},
         onLocalItemClick = {},
         onLocalMoreClick = {}
-    )
-}
-
-
-
-@Preview(showBackground = true)
-@Composable
-private fun LoungeBottomNavigationPreview() {
-    LoungeBottomNavigation(
-        selectedTab = BottomTab.HOME,
-        onTabSelected = {}
     )
 }

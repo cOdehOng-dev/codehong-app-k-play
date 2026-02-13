@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.lounge.content
+package com.codehong.app.kplay.ui.lounge.content.home
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.type.GenreCode
+import com.codehong.app.kplay.ui.lounge.content.Shimmer
 import com.codehong.library.widget.rule.HongSpacingInfo
 import com.codehong.library.widget.rule.color.HongColor
 import com.codehong.library.widget.rule.radius.HongRadiusInfo

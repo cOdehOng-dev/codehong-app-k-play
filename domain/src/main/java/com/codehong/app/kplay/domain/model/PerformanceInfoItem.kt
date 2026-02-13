@@ -11,7 +11,9 @@ data class PerformanceInfoItem(
     val genre: String? = null,
     val openRun: String? = null,
     val state: String? = null,
-    val awards: String? = null
+    val awards: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 ) {
     val period get() = buildString {
         startDate?.let { append(it) }
