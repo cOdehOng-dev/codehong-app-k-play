@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.type.GenreCode
+import com.codehong.app.kplay.ui.common.ChangeDateButton
 
 // 배민 스타일 컬러
 private val BaeminPrimary = Color(0xFF2AC1BC)
@@ -135,7 +136,7 @@ private fun GenreRankListScreenContent(
             )
 
             // 날짜 선택 영역
-            DateSelectionRow(
+            ChangeDateButton(
                 startDate = state.startDate,
                 endDate = state.endDate,
                 onDateChangeClick = onDateChangeClick

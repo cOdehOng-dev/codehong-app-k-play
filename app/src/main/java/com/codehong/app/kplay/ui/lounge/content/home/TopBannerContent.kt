@@ -34,6 +34,7 @@ import com.codehong.library.widget.rule.HongScaleType
 import com.codehong.library.widget.rule.HongSpacingInfo
 import com.codehong.library.widget.rule.HongTextOverflow
 import com.codehong.library.widget.rule.color.HongColor
+import com.codehong.library.widget.rule.color.HongColor.Companion.toColor
 import com.codehong.library.widget.rule.radius.HongRadiusInfo
 import com.codehong.library.widget.rule.typo.HongTypo
 import com.codehong.library.widget.text.def.HongTextBuilder
@@ -51,7 +52,7 @@ fun TopBannerContent(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(380.dp)
+            .height(450.dp)
             .hongBackground(HongColor.WHITE_100)
     ) {
         if (isLoading) {
@@ -143,7 +144,7 @@ private fun BannerContent(
                 .width(HongLayoutParam.MATCH_PARENT.value)
                 .height(HongLayoutParam.MATCH_PARENT.value)
                 .imageInfo(item.posterUrl)
-                .scaleType(HongScaleType.FIT_XY)
+                .scaleType(HongScaleType.FIT_WIDTH)
                 .size(Size.ORIGINAL)
                 .crossFade(true)
                 .applyOption()
@@ -157,7 +158,7 @@ private fun BannerContent(
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            Color.Black.copy(alpha = 0.6f)
+                            HongColor.BLACK_40.toColor()
                         ),
                         startY = 300f
                     )

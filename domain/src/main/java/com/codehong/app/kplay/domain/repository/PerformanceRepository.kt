@@ -67,4 +67,10 @@ interface PerformanceRepository {
         serviceKey: String,
         id: String
     ) : Flow<CallStatus<PlaceDetail?>>
+
+    fun setMyLocation(
+        myLocation: String?
+    )
+
+    fun getMyLocation(): String?
 }

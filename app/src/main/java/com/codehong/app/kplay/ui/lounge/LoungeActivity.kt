@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -21,14 +20,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.SignGuCode.Companion.nameToSingGuCode
 import com.codehong.app.kplay.manager.ActivityManager
 import com.codehong.app.kplay.ui.theme.CodehongappkplayTheme
 import com.codehong.library.debugtool.log.TimberUtil
+import com.codehong.library.widget.util.HongToastUtil
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 
-private const val TAG = "LoungeActivity"
+//private const val TAG = "LoungeActivity"
 
 @AndroidEntryPoint
 class LoungeActivity : ComponentActivity() {
@@ -38,11 +39,6 @@ class LoungeActivity : ComponentActivity() {
         LocationServices.getFusedLocationProviderClient(this)
     }
 
-    private val sharedPreferences by lazy {
-        getSharedPreferences("KPlayPrefs", MODE_PRIVATE)
-    }
-    private val SIGN_GU_CODE_KEY = "sign_gu_code_key"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -51,21 +47,7 @@ class LoungeActivity : ComponentActivity() {
         viewModel.callFestivalList(SignGuCode.SEOUL.code)
         viewModel.callAwardedPerformanceList(SignGuCode.SEOUL.code)
         viewModel.callLocalList(SignGuCode.SEOUL.code)
-
-        // SharedPreferences에서 signGuCode를 읽어와 초기화
-        // TODO LocalDataSource로 이동
-        val storedSignGuCodeName = sharedPreferences.getString(SIGN_GU_CODE_KEY, null)
-        val initialSignGuCode = if (storedSignGuCodeName != null) {
-            try {
-                SignGuCode.valueOf(storedSignGuCodeName)
-            } catch (e: IllegalArgumentException) {
-                TimberUtil.d( "Invalid SignGuCode stored: $storedSignGuCodeName, defaulting to SEOUL = $e")
-                SignGuCode.SEOUL
-            }
-        } else {
-            SignGuCode.SEOUL // 저장된 값이 없으면 기본값으로 SEOUL 사용
-        }
-        viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(initialSignGuCode))
+        viewModel.callMyLocation()
 
         setContent {
             var backPressedTime by remember { mutableStateOf(0L) }
@@ -76,7 +58,7 @@ class LoungeActivity : ComponentActivity() {
                     finish()
                 } else {
                     backPressedTime = System.currentTimeMillis()
-                    Toast.makeText(context, "한 번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show()
+                    HongToastUtil.showToast(context, "한 번 더 누르면 종료됩니다.")
                 }
             }
 
@@ -87,15 +69,14 @@ class LoungeActivity : ComponentActivity() {
                 val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
 
                 if (fineLocationGranted || coarseLocationGranted) {
-                    Log.d(TAG, "Location permission granted")
+                    TimberUtil.d( "Location permission granted")
                     getLocationAndUpdateSignGuCode()
                 } else {
-                    Log.d(TAG, "Location permission denied")
-                    Toast.makeText(
-                        this@LoungeActivity,
-                        "위치 권한이 거부되어 이전 설정 또는 서울 기준으로 조회합니다",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    TimberUtil.d("Location permission denied")
+                    HongToastUtil.showToast(
+                        context,
+                        "위치 권한이 거부되어 이전 설정 또는 서울 기준으로 조회합니다"
+                    )
                 }
             }
 
@@ -175,16 +156,14 @@ class LoungeActivity : ComponentActivity() {
 
     private fun getLocationAndUpdateSignGuCode() {
         if (!hasLocationPermission()) {
-            val defaultSignGuCode = SignGuCode.SEOUL
-            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
-            sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
+            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(SignGuCode.SEOUL))
             return
         }
 
         try {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
-                    Log.d(TAG, "Location: ${location.latitude}, ${location.longitude}")
+                    TimberUtil.d( "Location: ${location.latitude}, ${location.longitude}")
                     val geocoder = Geocoder(this, Locale.KOREA)
                     try {
                         @Suppress("DEPRECATION")
@@ -196,47 +175,33 @@ class LoungeActivity : ComponentActivity() {
                         if (!addresses.isNullOrEmpty()) {
                             val address = addresses[0]
                             val adminArea = address.adminArea
-                            Log.d(TAG, "Admin area: $adminArea")
+                            TimberUtil.d("Admin area: $adminArea")
 
-                            val signGuCode = findSignGuCodeByName(adminArea)
+                            val signGuCode = adminArea.nameToSingGuCode()
                             viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(signGuCode))
-                            sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, signGuCode.name).apply()
                         } else {
                             val defaultSignGuCode = SignGuCode.SEOUL
                             viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
-                            sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
                         }
                     } catch (e: Exception) {
                         TimberUtil.d( "Geocoder error: ${e.message}")
                         val defaultSignGuCode = SignGuCode.SEOUL
                         viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
-                        sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
                     }
                 } else {
-                    Log.d(TAG, "Location is null, using default SEOUL")
+                    TimberUtil.d( "Location is null, using default SEOUL")
                     val defaultSignGuCode = SignGuCode.SEOUL
                     viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
-                    sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
                 }
             }.addOnFailureListener { e ->
                 TimberUtil.d( "Failed to get location: ${e.message}")
                 val defaultSignGuCode = SignGuCode.SEOUL
                 viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
-                sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
             }
         } catch (e: SecurityException) {
             TimberUtil.d( "Security exception: ${e.message}")
             val defaultSignGuCode = SignGuCode.SEOUL
             viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
-            sharedPreferences.edit().putString(SIGN_GU_CODE_KEY, defaultSignGuCode.name).apply()
         }
-    }
-
-    private fun findSignGuCodeByName(areaName: String?): SignGuCode {
-        if (areaName.isNullOrBlank()) return SignGuCode.SEOUL
-
-        return SignGuCode.entries.find { signGuCode ->
-            areaName.contains(signGuCode.displayName.take(2))
-        } ?: SignGuCode.SEOUL
     }
 }

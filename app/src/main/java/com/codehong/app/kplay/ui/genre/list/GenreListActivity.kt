@@ -25,10 +25,6 @@ class GenreListActivity : ComponentActivity() {
                                 id = effect.performanceId
                             )
                         }
-                        is GenreListEffect.ShowDatePicker -> {
-                            // TODO: 달력 다이얼로그 표시
-                            // 날짜 선택 후 viewModel.setEvent(GenreListEvent.OnDateSelected(startDate, endDate)) 호출
-                        }
                     }
                 }
             }

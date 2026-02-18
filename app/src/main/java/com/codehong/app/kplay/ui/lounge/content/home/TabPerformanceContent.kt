@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.SignGuCode
-import com.codehong.app.kplay.ui.lounge.content.Shimmer
+import com.codehong.app.kplay.ui.lounge.content.RowShimmer
 import com.codehong.library.widget.rule.HongSpacingInfo
 import com.codehong.library.widget.rule.color.HongColor
 import com.codehong.library.widget.rule.radius.HongRadiusInfo
@@ -76,7 +76,7 @@ fun TabPerformanceContent(
     Spacer(modifier = Modifier.height(12.dp))
 
     if (isLoading) {
-        Shimmer()
+        RowShimmer()
         return
     }
 

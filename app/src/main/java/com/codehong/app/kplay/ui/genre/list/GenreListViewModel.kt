@@ -81,9 +81,16 @@ class GenreListViewModel @Inject constructor(
                 }
             }
             is GenreListEvent.OnDateChangeClick -> {
-                setEffect { GenreListEffect.ShowDatePicker }
+                setState { copy(isShowCalendar = true) }
+
+                // TODO HONG 필요한지 체크
+//                setEffect { GenreListEffect.ShowDatePicker }
             }
         }
+    }
+
+    fun hideCalendar() {
+        setState { copy(isShowCalendar = false) }
     }
 
     private fun getDefaultDateRange(): Pair<String, String> {

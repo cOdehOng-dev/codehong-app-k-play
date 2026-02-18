@@ -1,5 +1,6 @@
 package com.codehong.app.kplay.di
 
+import com.codehong.app.kplay.data.datasource.PerformanceLocalDataSource
 import com.codehong.app.kplay.data.datasource.PerformanceRemoteDataSource
 import com.codehong.app.kplay.data.repository.PerformanceRepositoryImpl
 import com.codehong.app.kplay.domain.repository.PerformanceRepository
@@ -16,6 +17,7 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun providePerformanceRepository(
-        remote: PerformanceRemoteDataSource
-    ): PerformanceRepository = PerformanceRepositoryImpl(remote)
+        remote: PerformanceRemoteDataSource,
+        local: PerformanceLocalDataSource
+    ): PerformanceRepository = PerformanceRepositoryImpl(remote, local)
 }

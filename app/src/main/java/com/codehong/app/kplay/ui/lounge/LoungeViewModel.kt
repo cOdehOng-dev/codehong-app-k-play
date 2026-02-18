@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
+import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
 import com.codehong.library.debugtool.log.TimberUtil
@@ -65,6 +66,7 @@ class LoungeViewModel @Inject constructor(
             is LoungeEvent.OnSignGuCodeUpdated -> {
                 TimberUtil.d("SignGuCode updated: ${event.signGuCode.displayName}")
                 setState { copy(selectedSignGuCode = event.signGuCode) }
+                setMyLocation(event.signGuCode.code)
                 callMyAreaListApi(event.signGuCode.code)
             }
 
@@ -339,5 +341,23 @@ class LoungeViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun setMyLocation(signGuCode: String) {
+        performanceUseCase.setMyLocation(signGuCode)
+    }
+
+    fun callMyLocation() {
+        val storedSignGuCodeName = performanceUseCase.getMyLocation()
+        val initialSignGuCode = if (storedSignGuCodeName != null) {
+            try {
+                SignGuCode.valueOf(storedSignGuCodeName)
+            } catch (e: IllegalArgumentException) {
+                SignGuCode.SEOUL
+            }
+        } else {
+            SignGuCode.SEOUL
+        }
+        setEvent(LoungeEvent.OnSignGuCodeUpdated(initialSignGuCode))
     }
 }

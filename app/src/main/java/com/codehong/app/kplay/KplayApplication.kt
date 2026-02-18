@@ -6,6 +6,7 @@ import com.codehong.library.debugtool.log.TimberConfig
 import com.codehong.library.debugtool.log.TimberUtil
 import com.codehong.library.network.NetworkConfig
 import com.codehong.library.network.NetworkManager
+import com.jakewharton.threetenabp.AndroidThreeTen
 import com.naver.maps.map.NaverMapSdk
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
@@ -22,6 +23,8 @@ class KplayApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        AndroidThreeTen.init(this)
 
         NaverMapSdk.getInstance(this).client =
             NaverMapSdk.NcpKeyClient(BuildConfig.NAVER_CLIENT_ID)

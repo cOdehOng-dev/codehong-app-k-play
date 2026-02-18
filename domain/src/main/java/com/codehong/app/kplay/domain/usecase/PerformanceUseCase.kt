@@ -125,4 +125,12 @@ class PerformanceUseCase @Inject constructor(
             }
         }
     }
+
+    fun setMyLocation(
+        myLocation: String?
+    ) {
+        repository.setMyLocation(myLocation)
+    }
+
+    fun getMyLocation(): String? = repository.getMyLocation()
 }

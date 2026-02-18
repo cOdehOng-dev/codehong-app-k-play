@@ -210,8 +210,6 @@ private fun LoungeScreenContent(
     }
 }
 
-// ===== 홈 탭 콘텐츠 =====
-
 // ===== 찜 탭 콘텐츠 (빈 화면) =====
 @Composable
 private fun BookmarkContent() {

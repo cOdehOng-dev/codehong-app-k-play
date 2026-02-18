@@ -1,5 +1,6 @@
 package com.codehong.app.kplay.data.repository
 
+import com.codehong.app.kplay.data.datasource.PerformanceLocalDataSource
 import com.codehong.app.kplay.data.datasource.PerformanceRemoteDataSource
 import com.codehong.app.kplay.data.mapper.asDomain
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
@@ -18,7 +19,8 @@ import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 class PerformanceRepositoryImpl @Inject constructor(
-    private val remote: PerformanceRemoteDataSource
+    private val remote: PerformanceRemoteDataSource,
+    private val local: PerformanceLocalDataSource
 ) : PerformanceRepository {
 
     private val gson = Gson()
@@ -149,16 +151,11 @@ class PerformanceRepositoryImpl @Inject constructor(
         ).onStart {
             emit(CallStatus.Loading)
         }.catch { e ->
-            TimberUtil.e("test here getAwardedPerformanceList error 11 = $e")
             emit(CallStatus.Error(e))
         }.collect {
-            gson.toJson(it)?.let { json ->
-                TimberUtil.d("test here getAwardedPerformanceList json = $json")
-            }
             emit(CallStatus.Success(it.performances?.map { itemDto -> itemDto.asDomain() }))
         }
     }.catch { e ->
-        TimberUtil.e("test here getAwardedPerformanceList error 11 = $e")
         emit(CallStatus.Error(e))
     }
 
@@ -195,4 +192,10 @@ class PerformanceRepositoryImpl @Inject constructor(
     }.catch { e ->
         emit(CallStatus.Error(e))
     }
+
+    override fun setMyLocation(myLocation: String?) {
+        local.setMyLocation(myLocation)
+    }
+
+    override fun getMyLocation(): String? = local.getMyLocation()
 }

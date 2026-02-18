@@ -300,5 +300,13 @@ enum class SignGuCode(
             }
             return null
         }
+
+        fun String?.nameToSingGuCode(): SignGuCode {
+            if (this.isNullOrBlank()) return SEOUL
+
+            return SignGuCode.entries.find { signGuCode ->
+                this.contains(signGuCode.displayName.take(2))
+            } ?: SEOUL
+        }
     }
 }

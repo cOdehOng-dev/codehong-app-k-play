@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
-import com.codehong.app.kplay.ui.lounge.content.Shimmer
+import com.codehong.app.kplay.ui.lounge.content.RowShimmer
 import com.codehong.library.widget.R
 import com.codehong.library.widget.extensions.disableRippleClickable
 import com.codehong.library.widget.image.def.HongImageBuilder
@@ -90,7 +90,7 @@ fun MyAreaContent(
     Spacer(modifier = Modifier.height(14.dp))
 
     if (isLoading) {
-        Shimmer()
+        RowShimmer()
         return
     }
 

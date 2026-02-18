@@ -1,6 +1,8 @@
 package com.codehong.app.kplay.di
 
+import com.codehong.app.kplay.data.datasource.PerformanceLocalDataSource
 import com.codehong.app.kplay.data.datasource.PerformanceRemoteDataSource
+import com.codehong.app.kplay.data.datasource.PrefManager
 import com.codehong.app.kplay.data.remote.KopisApiService
 import dagger.Module
 import dagger.Provides
@@ -17,4 +19,10 @@ object DataSourceModule {
     fun providePerformanceRemoteDataSource(
         kopisApiService: KopisApiService
     ) = PerformanceRemoteDataSource(kopisApiService)
+
+    @Provides
+    @Singleton
+    fun providePerformanceLocalDataSource(
+        prefManager: PrefManager
+    ) = PerformanceLocalDataSource(prefManager)
 }
