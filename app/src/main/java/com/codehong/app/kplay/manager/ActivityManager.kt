@@ -3,7 +3,7 @@ package com.codehong.app.kplay.manager
 import android.content.Context
 import android.content.Intent
 import com.codehong.app.kplay.domain.Consts
-import com.codehong.app.kplay.local.LocalListActivity
+import com.codehong.app.kplay.ui.local.LocalListActivity
 import com.codehong.app.kplay.ui.award.AwardListActivity
 import com.codehong.app.kplay.ui.festival.FestivalListActivity
 import com.codehong.app.kplay.ui.genre.list.GenreListActivity

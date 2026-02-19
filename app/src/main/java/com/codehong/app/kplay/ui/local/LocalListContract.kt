@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.local
+package com.codehong.app.kplay.ui.local
 
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.SignGuCode

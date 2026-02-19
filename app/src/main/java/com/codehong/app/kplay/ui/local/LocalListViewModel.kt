@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.local
+package com.codehong.app.kplay.ui.local
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle

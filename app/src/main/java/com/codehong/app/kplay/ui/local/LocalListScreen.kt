@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.local
+package com.codehong.app.kplay.ui.local
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
