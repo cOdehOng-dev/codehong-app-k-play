@@ -30,5 +30,4 @@ sealed class GenreListEvent : ViewEvent {
 
 sealed class GenreListEffect : ViewSideEffect {
     data class NavigateToDetail(val performanceId: String) : GenreListEffect()
-//    data object ShowDatePicker : GenreListEffect()
 }

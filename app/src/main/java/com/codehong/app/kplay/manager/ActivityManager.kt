@@ -3,15 +3,12 @@ package com.codehong.app.kplay.manager
 import android.content.Context
 import android.content.Intent
 import com.codehong.app.kplay.domain.Consts
+import com.codehong.app.kplay.local.LocalListActivity
 import com.codehong.app.kplay.ui.award.AwardListActivity
 import com.codehong.app.kplay.ui.festival.FestivalListActivity
 import com.codehong.app.kplay.ui.genre.list.GenreListActivity
-import com.codehong.app.kplay.ui.genre.list.GenreListViewModel
 import com.codehong.app.kplay.ui.genre.rank.GenreRankListActivity
-import com.codehong.app.kplay.ui.genre.rank.GenreRankListViewModel
 import com.codehong.app.kplay.ui.performance.detail.PerformanceDetailActivity
-import com.codehong.app.kplay.ui.performance.list.PerformanceListActivity
-import com.codehong.app.kplay.ui.performance.list.PerformanceListViewModel
 
 object ActivityManager {
 
@@ -38,7 +35,7 @@ object ActivityManager {
         }
 
         val intent = Intent(context, GenreListActivity::class.java).apply {
-            putExtra(GenreListViewModel.EXTRA_GENRE_CODE, genreCode)
+            putExtra(Consts.EXTRA_GENRE_CODE, genreCode)
         }
         context.startActivity(intent)
     }
@@ -66,12 +63,12 @@ object ActivityManager {
         }
 
         val intent = Intent(context, GenreRankListActivity::class.java).apply {
-            putExtra(GenreRankListViewModel.EXTRA_GENRE_CODE, genreCode)
+            putExtra(Consts.EXTRA_GENRE_CODE, genreCode)
         }
         context.startActivity(intent)
     }
 
-    fun openPerformanceList(
+    fun openLocalList(
         context: Context?,
         signGuCode: String? = null
     ) {
@@ -79,8 +76,8 @@ object ActivityManager {
             return
         }
 
-        val intent = Intent(context, PerformanceListActivity::class.java).apply {
-            signGuCode?.let { putExtra(PerformanceListViewModel.EXTRA_SIGN_GU_CODE, it) }
+        val intent = Intent(context, LocalListActivity::class.java).apply {
+            signGuCode?.let { putExtra(Consts.EXTRA_SIGN_GU_CODE, it) }
         }
         context.startActivity(intent)
     }

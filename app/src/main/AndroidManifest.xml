@@ -37,7 +37,7 @@
         <activity android:name=".main.MainActivity"/>
 
         <activity android:name=".ui.performance.detail.PerformanceDetailActivity"/>
-        <activity android:name=".ui.performance.list.PerformanceListActivity"/>
+        <activity android:name=".local.LocalListActivity"/>
 
         <activity android:name=".ui.genre.list.GenreListActivity"/>
         <activity android:name=".ui.genre.rank.GenreRankListActivity"/>

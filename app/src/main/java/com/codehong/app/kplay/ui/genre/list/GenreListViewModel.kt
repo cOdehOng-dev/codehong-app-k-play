@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
+import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.GenreCode.Companion.toCode
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
@@ -22,12 +23,8 @@ class GenreListViewModel @Inject constructor(
     private val performanceUseCase: PerformanceUseCase
 ) : BaseViewModel<GenreListEvent, GenreListState, GenreListEffect>(application) {
 
-    companion object {
-        const val EXTRA_GENRE_CODE = "genreCode"
-    }
-
     init {
-        val genreCodeString = savedStateHandle.get<String>(EXTRA_GENRE_CODE)
+        val genreCodeString = savedStateHandle.get<String>(Consts.EXTRA_GENRE_CODE)
         val genreCode = genreCodeString.toCode() ?: GenreCode.THEATER
 
         val (startDate, endDate) = getDefaultDateRange()
@@ -82,9 +79,6 @@ class GenreListViewModel @Inject constructor(
             }
             is GenreListEvent.OnDateChangeClick -> {
                 setState { copy(isShowCalendar = true) }
-
-                // TODO HONG 필요한지 체크
-//                setEffect { GenreListEffect.ShowDatePicker }
             }
         }
     }

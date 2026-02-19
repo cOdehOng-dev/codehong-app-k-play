@@ -128,7 +128,7 @@ class LoungeActivity : ComponentActivity() {
                             )
                         }
                         is LoungeEffect.NavigateToLocalList -> {
-                            ActivityManager.openPerformanceList(
+                            ActivityManager.openLocalList(
                                 this@LoungeActivity,
                                 effect.signGuCode.code
                             )

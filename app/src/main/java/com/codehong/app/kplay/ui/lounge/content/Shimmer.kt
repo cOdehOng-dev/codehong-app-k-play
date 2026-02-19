@@ -51,7 +51,6 @@ fun ColumnShimmer() {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .padding(top = 16.dp, start = 16.dp)
     ) {
         ColumnItemShimmer()
         Spacer(modifier = Modifier.height(12.dp))
@@ -127,7 +126,6 @@ fun ColumnItemShimmer() {
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 포스터 이미지
         Box(
             modifier = Modifier
                 .size(100.dp, 130.dp)

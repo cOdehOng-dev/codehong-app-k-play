@@ -1,10 +1,9 @@
-package com.codehong.app.kplay.ui.performance.list
+package com.codehong.app.kplay.local
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
-import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.app.kplay.domain.type.SignGuCode.Companion.toCode
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
@@ -16,11 +15,11 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class PerformanceListViewModel @Inject constructor(
+class LocalListViewModel @Inject constructor(
     application: Application,
     savedStateHandle: SavedStateHandle,
     private val performanceUseCase: PerformanceUseCase
-) : BaseViewModel<PerformanceListEvent, PerformanceListState, PerformanceListEffect>(application) {
+) : BaseViewModel<LocalListEvent, LocalListState, LocalListEffect>(application) {
 
     companion object {
         const val EXTRA_SIGN_GU_CODE = "signGuCode"
@@ -28,7 +27,7 @@ class PerformanceListViewModel @Inject constructor(
 
     init {
         val signGuCodeString = savedStateHandle.get<String>(EXTRA_SIGN_GU_CODE)
-        val signGuCode = signGuCodeString.toCode() ?: SignGuCode.SEOUL
+        val signGuCode = signGuCodeString.toCode()
 
         val (startDate, endDate) = getDefaultDateRange()
 
@@ -43,16 +42,16 @@ class PerformanceListViewModel @Inject constructor(
         callPerformanceListApi()
     }
 
-    override fun createInitialState(): PerformanceListState = PerformanceListState()
+    override fun createInitialState(): LocalListState = LocalListState()
 
-    override fun handleEvents(event: PerformanceListEvent) {
+    override fun handleEvents(event: LocalListEvent) {
         when (event) {
-            is PerformanceListEvent.OnPerformanceClick -> {
+            is LocalListEvent.OnPerformanceClick -> {
                 event.item.id?.let { id ->
-                    setEffect { PerformanceListEffect.NavigateToDetail(id) }
+                    setEffect { LocalListEffect.NavigateToDetail(id) }
                 }
             }
-            is PerformanceListEvent.OnSignGuCodeSelected -> {
+            is LocalListEvent.OnSignGuCodeSelected -> {
                 setState {
                     copy(
                         selectedSignGuCode = event.signGuCode,
@@ -63,7 +62,7 @@ class PerformanceListViewModel @Inject constructor(
                 }
                 callPerformanceListApi()
             }
-            is PerformanceListEvent.OnDateSelected -> {
+            is LocalListEvent.OnDateSelected -> {
                 setState {
                     copy(
                         startDate = event.startDate,
@@ -75,15 +74,19 @@ class PerformanceListViewModel @Inject constructor(
                 }
                 callPerformanceListApi()
             }
-            is PerformanceListEvent.OnLoadMore -> {
+            is LocalListEvent.OnLoadMore -> {
                 if (!state.value.isLoadingMore && state.value.hasMoreData) {
                     loadMore()
                 }
             }
-            is PerformanceListEvent.OnDateChangeClick -> {
-                setEffect { PerformanceListEffect.ShowDatePicker }
+            is LocalListEvent.OnDateChangeClick -> {
+                setState { copy(isShowCalendar = true) }
             }
         }
+    }
+
+    fun hideCalendar() {
+        setState { copy(isShowCalendar = false) }
     }
 
     private fun getDefaultDateRange(): Pair<String, String> {

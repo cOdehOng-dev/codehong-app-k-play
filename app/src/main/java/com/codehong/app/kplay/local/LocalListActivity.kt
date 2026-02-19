@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.performance.list
+package com.codehong.app.kplay.local
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,9 +9,9 @@ import com.codehong.app.kplay.manager.ActivityManager
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class PerformanceListActivity : ComponentActivity() {
+class LocalListActivity : ComponentActivity() {
 
-    private val viewModel by viewModels<PerformanceListViewModel>()
+    private val viewModel by viewModels<LocalListViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,21 +19,17 @@ class PerformanceListActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 viewModel.effect.collect { effect ->
                     when (effect) {
-                        is PerformanceListEffect.NavigateToDetail -> {
+                        is LocalListEffect.NavigateToDetail -> {
                             ActivityManager.openPerformanceDetail(
-                                context = this@PerformanceListActivity,
+                                context = this@LocalListActivity,
                                 id = effect.performanceId
                             )
-                        }
-                        is PerformanceListEffect.ShowDatePicker -> {
-                            // TODO: 달력 다이얼로그 표시
-                            // 날짜 선택 후 viewModel.setEvent(PerformanceListEvent.OnDateSelected(startDate, endDate)) 호출
                         }
                     }
                 }
             }
 
-            PerformanceListScreen(
+            LocalListScreen(
                 onBackClick = { finish() }
             )
         }
