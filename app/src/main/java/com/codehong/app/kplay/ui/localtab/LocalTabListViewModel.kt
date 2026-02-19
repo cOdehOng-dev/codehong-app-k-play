@@ -1,11 +1,13 @@
-package com.codehong.app.kplay.ui.local
+package com.codehong.app.kplay.ui.localtab
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
-import com.codehong.app.kplay.domain.type.SignGuCode.Companion.toCode
+import com.codehong.app.kplay.domain.type.GenreCode.Companion.toCode as toGenreCode
+import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.SignGuCode.Companion.toCode as toSignGuCode
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,21 +18,23 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
-class LocalListViewModel @Inject constructor(
+class LocalTabListViewModel @Inject constructor(
     application: Application,
     savedStateHandle: SavedStateHandle,
     private val performanceUseCase: PerformanceUseCase
-) : BaseViewModel<LocalListEvent, LocalListState, LocalListEffect>(application) {
+) : BaseViewModel<LocalTabListEvent, LocalTabListState, LocalTabListEffect>(application) {
 
     init {
-        val signGuCodeString = savedStateHandle.get<String>(Consts.EXTRA_SIGN_GU_CODE)
-        val signGuCode = signGuCodeString.toCode()
+        val genreCode = savedStateHandle.get<String>(Consts.EXTRA_GENRE_CODE).toGenreCode()
+        val signGuCode = savedStateHandle.get<String>(Consts.EXTRA_SIGN_GU_CODE).toSignGuCode()
 
         val (startDate, endDate) = getDefaultDateRange()
 
         setState {
             copy(
-                selectedSignGuCode = signGuCode,
+                title = genreCode?.displayName ?: "지역별 공연",
+                genreCode = genreCode,
+                selectedSignGuCode = signGuCode ?: SignGuCode.SEOUL,
                 startDate = startDate,
                 endDate = endDate
             )
@@ -39,16 +43,16 @@ class LocalListViewModel @Inject constructor(
         callPerformanceListApi()
     }
 
-    override fun createInitialState(): LocalListState = LocalListState()
+    override fun createInitialState(): LocalTabListState = LocalTabListState()
 
-    override fun handleEvents(event: LocalListEvent) {
+    override fun handleEvents(event: LocalTabListEvent) {
         when (event) {
-            is LocalListEvent.OnPerformanceClick -> {
+            is LocalTabListEvent.OnPerformanceClick -> {
                 event.item.id?.let { id ->
-                    setEffect { LocalListEffect.NavigateToDetail(id) }
+                    setEffect { LocalTabListEffect.NavigateToDetail(id) }
                 }
             }
-            is LocalListEvent.OnSignGuCodeSelected -> {
+            is LocalTabListEvent.OnSignGuCodeSelected -> {
                 setState {
                     copy(
                         selectedSignGuCode = event.signGuCode,
@@ -59,7 +63,7 @@ class LocalListViewModel @Inject constructor(
                 }
                 callPerformanceListApi()
             }
-            is LocalListEvent.OnDateSelected -> {
+            is LocalTabListEvent.OnDateSelected -> {
                 setState {
                     copy(
                         startDate = event.startDate,
@@ -71,12 +75,12 @@ class LocalListViewModel @Inject constructor(
                 }
                 callPerformanceListApi()
             }
-            is LocalListEvent.OnLoadMore -> {
+            is LocalTabListEvent.OnLoadMore -> {
                 if (!state.value.isLoadingMore && state.value.hasMoreData) {
                     loadMore()
                 }
             }
-            is LocalListEvent.OnDateChangeClick -> {
+            is LocalTabListEvent.OnDateChangeClick -> {
                 setState { copy(isShowCalendar = true) }
             }
         }
@@ -112,7 +116,8 @@ class LocalListViewModel @Inject constructor(
                 endDate = currentState.endDate,
                 currentPage = currentState.currentPage.toString(),
                 rowsPerPage = "20",
-                signGuCode = currentState.selectedSignGuCode.code
+                signGuCode = currentState.selectedSignGuCode.code,
+                genreCode = currentState.genreCode?.code
             ).collect { result ->
                 val newList = result ?: emptyList()
                 setState {
@@ -138,7 +143,8 @@ class LocalListViewModel @Inject constructor(
                 endDate = currentState.endDate,
                 currentPage = (currentState.currentPage + 1).toString(),
                 rowsPerPage = "20",
-                signGuCode = currentState.selectedSignGuCode.code
+                signGuCode = currentState.selectedSignGuCode.code,
+                genreCode = currentState.genreCode?.code
             ).collect { result ->
                 val newList = result ?: emptyList()
                 setState {

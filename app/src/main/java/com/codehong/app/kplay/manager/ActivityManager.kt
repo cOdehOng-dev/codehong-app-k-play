@@ -3,11 +3,10 @@ package com.codehong.app.kplay.manager
 import android.content.Context
 import android.content.Intent
 import com.codehong.app.kplay.domain.Consts
-import com.codehong.app.kplay.ui.local.LocalListActivity
 import com.codehong.app.kplay.ui.award.AwardListActivity
 import com.codehong.app.kplay.ui.festival.FestivalListActivity
-import com.codehong.app.kplay.ui.genre.list.GenreListActivity
 import com.codehong.app.kplay.ui.genre.rank.GenreRankListActivity
+import com.codehong.app.kplay.ui.localtab.LocalTabListActivity
 import com.codehong.app.kplay.ui.performance.detail.PerformanceDetailActivity
 
 object ActivityManager {
@@ -34,7 +33,7 @@ object ActivityManager {
             return
         }
 
-        val intent = Intent(context, GenreListActivity::class.java).apply {
+        val intent = Intent(context, LocalTabListActivity::class.java).apply {
             putExtra(Consts.EXTRA_GENRE_CODE, genreCode)
         }
         context.startActivity(intent)
@@ -76,7 +75,7 @@ object ActivityManager {
             return
         }
 
-        val intent = Intent(context, LocalListActivity::class.java).apply {
+        val intent = Intent(context, LocalTabListActivity::class.java).apply {
             signGuCode?.let { putExtra(Consts.EXTRA_SIGN_GU_CODE, it) }
         }
         context.startActivity(intent)

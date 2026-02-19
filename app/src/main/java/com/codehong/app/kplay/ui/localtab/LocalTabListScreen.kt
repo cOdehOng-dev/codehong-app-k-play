@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.local
+package com.codehong.app.kplay.ui.localtab
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -69,29 +69,29 @@ import com.codehong.library.widget.text.def.HongTextCompose
 import com.codehong.library.widget.util.HongDateUtil
 
 @Composable
-fun LocalListScreen(
-    viewModel: LocalListViewModel = hiltViewModel(),
+fun LocalTabListScreen(
+    viewModel: LocalTabListViewModel = hiltViewModel(),
     onBackClick: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LocalListScreenContent(
+    LocalTabListScreenContent(
         state = state,
         onBackClick = onBackClick,
         onSignGuCodeSelected = { signGuCode ->
-            viewModel.setEvent(LocalListEvent.OnSignGuCodeSelected(signGuCode))
+            viewModel.setEvent(LocalTabListEvent.OnSignGuCodeSelected(signGuCode))
         },
         onDateChangeClick = {
-            viewModel.setEvent(LocalListEvent.OnDateChangeClick)
+            viewModel.setEvent(LocalTabListEvent.OnDateChangeClick)
         },
         onPerformanceClick = { item ->
-            viewModel.setEvent(LocalListEvent.OnPerformanceClick(item))
+            viewModel.setEvent(LocalTabListEvent.OnPerformanceClick(item))
         },
         onLoadMore = {
-            viewModel.setEvent(LocalListEvent.OnLoadMore)
+            viewModel.setEvent(LocalTabListEvent.OnLoadMore)
         },
         onSelectDate = { startDate, endDate ->
-            viewModel.setEvent(LocalListEvent.OnDateSelected(startDate, endDate))
+            viewModel.setEvent(LocalTabListEvent.OnDateSelected(startDate, endDate))
             viewModel.hideCalendar()
         },
         onDismissCalendar = {
@@ -101,8 +101,8 @@ fun LocalListScreen(
 }
 
 @Composable
-private fun LocalListScreenContent(
-    state: LocalListState,
+private fun LocalTabListScreenContent(
+    state: LocalTabListState,
     onBackClick: () -> Unit,
     onSignGuCodeSelected: (SignGuCode) -> Unit,
     onDateChangeClick: () -> Unit,
@@ -144,10 +144,7 @@ private fun LocalListScreenContent(
                 .hongBackground(HongColor.WHITE_100),
             containerColor = HongColor.WHITE_100.toColor(),
             topBar = {
-                BackHeader(
-                    "지역별 공연",
-                    onBackClick
-                )
+                BackHeader(state.title) { onBackClick() }
             }
         ) { paddingValues ->
             Column(
@@ -223,8 +220,7 @@ private fun LocalListScreenContent(
         // 로딩 인디케이터 (더보기)
         if (state.isLoadingMore) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 HongProgress()
@@ -373,7 +369,6 @@ private fun LocalListScreenContent(
 
                             selectStartDate = startDate.toYyyyMmDd()
                             selectEndDate = endDate.toYyyyMmDd()
-
                         }
                         .applyOption(),
                 )
@@ -398,9 +393,9 @@ private fun LocalListScreenContent(
 
 @Preview(showBackground = true)
 @Composable
-private fun LocalListScreenPreview() {
-    LocalListScreenContent(
-        state = LocalListState(),
+private fun LocalTabListScreenPreview() {
+    LocalTabListScreenContent(
+        state = LocalTabListState(),
         onBackClick = {},
         onSignGuCodeSelected = {},
         onDateChangeClick = {},

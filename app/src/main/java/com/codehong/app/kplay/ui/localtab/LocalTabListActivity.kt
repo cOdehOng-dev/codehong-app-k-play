@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.genre.list
+package com.codehong.app.kplay.ui.localtab
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,9 +9,9 @@ import com.codehong.app.kplay.manager.ActivityManager
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class GenreListActivity : ComponentActivity() {
+class LocalTabListActivity : ComponentActivity() {
 
-    private val viewModel by viewModels<GenreListViewModel>()
+    private val viewModel by viewModels<LocalTabListViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,9 +19,9 @@ class GenreListActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 viewModel.effect.collect { effect ->
                     when (effect) {
-                        is GenreListEffect.NavigateToDetail -> {
+                        is LocalTabListEffect.NavigateToDetail -> {
                             ActivityManager.openPerformanceDetail(
-                                context = this@GenreListActivity,
+                                context = this@LocalTabListActivity,
                                 id = effect.performanceId
                             )
                         }
@@ -29,7 +29,7 @@ class GenreListActivity : ComponentActivity() {
                 }
             }
 
-            GenreListScreen(
+            LocalTabListScreen(
                 onBackClick = { finish() }
             )
         }
