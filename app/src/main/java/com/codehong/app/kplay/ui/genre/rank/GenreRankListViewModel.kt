@@ -21,12 +21,9 @@ class GenreRankListViewModel @Inject constructor(
     private val performanceUseCase: PerformanceUseCase
 ) : BaseViewModel<GenreRankListEvent, GenreRankListState, GenreRankListEffect>(application) {
 
-    companion object {
-        const val EXTRA_GENRE_CODE = "genreCode"
-    }
 
     init {
-        val genreCodeString = savedStateHandle.get<String>(EXTRA_GENRE_CODE)
+        val genreCodeString = savedStateHandle.get<String>(Consts.EXTRA_GENRE_CODE)
         val genreCode = genreCodeString.toCode() ?: GenreCode.THEATER
 
         val (startDate, endDate) = getDefaultDateRange()

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
+import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.type.SignGuCode.Companion.toCode
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
@@ -21,12 +22,8 @@ class LocalListViewModel @Inject constructor(
     private val performanceUseCase: PerformanceUseCase
 ) : BaseViewModel<LocalListEvent, LocalListState, LocalListEffect>(application) {
 
-    companion object {
-        const val EXTRA_SIGN_GU_CODE = "signGuCode"
-    }
-
     init {
-        val signGuCodeString = savedStateHandle.get<String>(EXTRA_SIGN_GU_CODE)
+        val signGuCodeString = savedStateHandle.get<String>(Consts.EXTRA_SIGN_GU_CODE)
         val signGuCode = signGuCodeString.toCode()
 
         val (startDate, endDate) = getDefaultDateRange()
