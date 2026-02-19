@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.performance.detail
+package com.codehong.app.kplay.ui.performance.detail.content
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

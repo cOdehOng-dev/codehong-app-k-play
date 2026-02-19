@@ -29,8 +29,8 @@ import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.SignGuCode
-import com.codehong.app.kplay.ui.lounge.content.MyLocationContent
 import com.codehong.app.kplay.ui.lounge.content.home.HomeContent
+import com.codehong.app.kplay.ui.lounge.content.MyLocationContent
 import com.codehong.library.widget.R
 import com.codehong.library.widget.extensions.hongBackground
 import com.codehong.library.widget.liquid.tabbar.HongLiquidGlassTabBar

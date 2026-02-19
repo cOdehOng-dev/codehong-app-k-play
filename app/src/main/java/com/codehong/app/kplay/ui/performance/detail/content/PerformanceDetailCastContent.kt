@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.performance.detail
+package com.codehong.app.kplay.ui.performance.detail.content
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -6,10 +6,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.codehong.library.widget.image.def.HongImageBuilder
-import com.codehong.library.widget.image.def.HongImageCompose
-import com.codehong.library.widget.rule.HongLayoutParam
-import com.codehong.library.widget.rule.HongScaleType
 import com.codehong.library.widget.rule.HongSpacingInfo
 import com.codehong.library.widget.rule.color.HongColor
 import com.codehong.library.widget.rule.color.HongColor.Companion.toColor
@@ -18,10 +14,11 @@ import com.codehong.library.widget.text.def.HongTextBuilder
 import com.codehong.library.widget.text.def.HongTextCompose
 
 @Composable
-fun PerformanceDetailNoticeContent(
-    imageUrlList: List<String>?
+fun PerformanceDetailCastContent(
+    castInfo: String?,
+    crewInfo: String?,
 ) {
-    if (imageUrlList.isNullOrEmpty()) return
+    if (castInfo.isNullOrBlank() && crewInfo.isNullOrBlank()) return
 
     HorizontalDivider(
         thickness = 8.dp,
@@ -33,7 +30,7 @@ fun PerformanceDetailNoticeContent(
     HongTextCompose(
         option = HongTextBuilder()
             .padding(HongSpacingInfo(left  = 16f, right = 16f))
-            .text("공지사항")
+            .text("출연진 및 제작진")
             .typography(HongTypo.BODY_18_B)
             .color(HongColor.BLACK_100)
             .applyOption()
@@ -41,14 +38,27 @@ fun PerformanceDetailNoticeContent(
 
     Spacer(modifier = Modifier.height(26.dp))
 
-    // 이미지 리스트를 vertical하게 배치
-    imageUrlList.forEach { imageUrl ->
-        HongImageCompose(
-            HongImageBuilder()
-                .width(HongLayoutParam.MATCH_PARENT.value)
-                .imageInfo(imageUrl)
-                .scaleType(HongScaleType.FIT_WIDTH)
+    if (!castInfo.isNullOrBlank()) {
+        HongTextCompose(
+            option = HongTextBuilder()
+                .padding(HongSpacingInfo(left  = 16f, right = 16f, bottom = 10f))
+                .text(castInfo)
+                .typography(HongTypo.BODY_16)
+                .color(HongColor.BLACK_100)
                 .applyOption()
         )
     }
+
+    if (!crewInfo.isNullOrBlank()) {
+        HongTextCompose(
+            option = HongTextBuilder()
+                .padding(HongSpacingInfo(left  = 16f, right = 16f, bottom = 16f))
+                .text(crewInfo)
+                .typography(HongTypo.BODY_16)
+                .color(HongColor.BLACK_100)
+                .applyOption()
+        )
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
 }

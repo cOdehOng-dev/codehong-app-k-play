@@ -21,6 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
 import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
+import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailCastContent
+import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailInfoContent
+import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailNoticeContent
+import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailPlaceContent
+import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailPriceContent
+import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailTimeTableContent
 import com.codehong.library.widget.R
 import com.codehong.library.widget.button.text.HongButtonTextBuilder
 import com.codehong.library.widget.button.text.HongButtonTextCompose
