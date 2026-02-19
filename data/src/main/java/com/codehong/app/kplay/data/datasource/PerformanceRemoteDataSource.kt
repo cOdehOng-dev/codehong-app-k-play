@@ -1,8 +1,8 @@
 package com.codehong.app.kplay.data.datasource
 
-import com.codehong.app.kplay.data.model.boxoffice.BoxOfficeResponse
-import com.codehong.app.kplay.data.model.performance.detail.PerformanceDetailResponse
-import com.codehong.app.kplay.data.model.performance.list.PerformanceListResponse
+import com.codehong.app.kplay.data.model.boxoffice.BoxOfficeResponseDto
+import com.codehong.app.kplay.data.model.performance.detail.PerformanceDetailResponseDto
+import com.codehong.app.kplay.data.model.performance.list.PerformanceListResponseDto
 import com.codehong.app.kplay.data.remote.KopisApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +25,7 @@ class PerformanceRemoteDataSource @Inject constructor(
         signGuCodeSub: String? = null,
         kidState: String? = null,
         genreCode: String? = null
-    ): Flow<PerformanceListResponse> = flow {
+    ): Flow<PerformanceListResponseDto> = flow {
         emit(
             kopisApiService.getPerformanceList(
                 service = service,
@@ -45,7 +45,7 @@ class PerformanceRemoteDataSource @Inject constructor(
     fun getPerformanceDetail(
         serviceKey: String,
         id: String,
-    ): Flow<PerformanceDetailResponse> = flow {
+    ): Flow<PerformanceDetailResponseDto> = flow {
         emit(kopisApiService.getPerformanceDetail(id, serviceKey))
     }.flowOn(Dispatchers.IO)
 
@@ -55,7 +55,7 @@ class PerformanceRemoteDataSource @Inject constructor(
         endDate: String,
         catecode: String? = null,
         area: String? = null
-    ): Flow<BoxOfficeResponse> = flow {
+    ): Flow<BoxOfficeResponseDto> = flow {
         emit(
             kopisApiService.getBoxOffice(serviceKey, startDate, endDate, catecode, area)
         )
@@ -69,7 +69,7 @@ class PerformanceRemoteDataSource @Inject constructor(
         rowsPerPage: String,
         signGuCode: String? = null,
         signGuCodeSub: String? = null
-    ): Flow<PerformanceListResponse> = flow {
+    ): Flow<PerformanceListResponseDto> = flow {
         emit(
             kopisApiService.getFestivalList(
                 serviceKey,
@@ -91,7 +91,7 @@ class PerformanceRemoteDataSource @Inject constructor(
         rowsPerPage: String,
         signGuCode: String? = null,
         signGuCodeSub: String? = null
-    ): Flow<PerformanceListResponse> = flow {
+    ): Flow<PerformanceListResponseDto> = flow {
         emit(
             kopisApiService.getAwardedPerformanceList(
                 serviceKey,

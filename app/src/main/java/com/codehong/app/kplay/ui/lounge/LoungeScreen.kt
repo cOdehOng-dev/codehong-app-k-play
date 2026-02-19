@@ -1,21 +1,33 @@
 package com.codehong.app.kplay.ui.lounge
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -23,21 +35,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.codehong.app.kplay.domain.model.BottomTabItem
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.SignGuCode
-import com.codehong.app.kplay.ui.lounge.content.home.HomeContent
 import com.codehong.app.kplay.ui.lounge.content.MyLocationContent
+import com.codehong.app.kplay.ui.lounge.content.home.HomeContent
 import com.codehong.library.widget.R
 import com.codehong.library.widget.extensions.hongBackground
-import com.codehong.library.widget.liquid.tabbar.HongLiquidGlassTabBar
-import com.codehong.library.widget.liquidglass.tabbar.HongLiquidGlassTabBarBuilder
-import com.codehong.library.widget.liquidglass.tabbar.HongLiquidGlassTabItem
+import com.codehong.library.widget.image.def.HongImageBuilder
+import com.codehong.library.widget.image.def.HongImageCompose
+import com.codehong.library.widget.rule.HongScaleType
 import com.codehong.library.widget.rule.color.HongColor
 import com.codehong.library.widget.rule.color.HongColor.Companion.toColor
+import com.codehong.library.widget.rule.typo.HongTypo
+import com.codehong.library.widget.text.def.HongTextBuilder
+import com.codehong.library.widget.text.def.HongTextCompose
 
 
 @Composable
@@ -127,6 +143,12 @@ private fun LoungeScreenContent(
     onLocalItemClick: (PerformanceInfoItem) -> Unit,
     onLocalMoreClick: () -> Unit
 ) {
+    val tabList = listOf(
+        BottomTabItem(BottomTabType.HOME, R.drawable.honglib_ic_home),
+        BottomTabItem(BottomTabType.MY_LOCATION, R.drawable.honglib_ic_location),
+        BottomTabItem(BottomTabType.BOOKMARK, R.drawable.honglib_ic_favorite)
+    )
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -134,6 +156,67 @@ private fun LoungeScreenContent(
             .statusBarsPadding()
             .navigationBarsPadding(),
         containerColor = HongColor.WHITE_100.toColor(),
+        bottomBar = {
+            Column {
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = HongColor.GRAY_10.toColor()
+                )
+                CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                    NavigationBar(
+                        modifier = Modifier.height(60.dp),
+                        containerColor = HongColor.WHITE_100.toColor(),
+                        tonalElevation = 0.dp
+                    ) {
+                        tabList.forEach { tabItem ->
+                            val isSelected = state.selectedTab == tabItem.tab
+                            val interactionSource = remember { MutableInteractionSource() }
+                            val isPressed by interactionSource.collectIsPressedAsState()
+                            val scale by animateFloatAsState(
+                                targetValue = if (isPressed) 0.65f else 1f,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioNoBouncy,
+                                    stiffness = Spring.StiffnessMedium
+                                ),
+                                label = "tabScale"
+                            )
+                            NavigationBarItem(
+                                modifier = Modifier.scale(scale),
+                                selected = isSelected,
+                                onClick = { onTabSelected(tabItem.tab) },
+                                interactionSource = interactionSource,
+                                icon = {
+                                    HongImageCompose(
+                                        HongImageBuilder()
+                                            .width(26)
+                                            .height(26)
+                                            .imageInfo(tabItem.iconRes)
+                                            .imageColor(if (isSelected) HongColor.MAIN_ORANGE_100 else HongColor.GRAY_50)
+                                            .scaleType(HongScaleType.CENTER_CROP)
+                                            .applyOption()
+                                    )
+                                },
+                                label = {
+                                    HongTextCompose(
+                                        option = HongTextBuilder()
+                                            .text(tabItem.tab.label)
+                                            .typography(HongTypo.BODY_13)
+                                            .color(if (isSelected) HongColor.MAIN_ORANGE_100 else HongColor.GRAY_50)
+                                            .applyOption()
+                                    )
+                                },
+                                alwaysShowLabel = true,
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedTextColor = HongColor.MAIN_ORANGE_100.toColor(),
+                                    indicatorColor = Color.Transparent,
+                                    unselectedTextColor = HongColor.GRAY_50.toColor()
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -166,45 +249,6 @@ private fun LoungeScreenContent(
                     selectedAreaName = state.selectedSignGuCode.displayName
                 )
                 BottomTabType.BOOKMARK -> BookmarkContent()
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(alignment = Alignment.BottomCenter)
-            ) {
-                HongLiquidGlassTabBar(
-                    HongLiquidGlassTabBarBuilder()
-                        .isDarkTheme(false)
-                        .tabList(
-                            listOf(
-                                HongLiquidGlassTabItem(
-                                    R.drawable.honglib_ic_home,
-                                    BottomTabType.HOME.label
-                                ),
-                                HongLiquidGlassTabItem(
-                                    R.drawable.honglib_ic_location,
-                                    BottomTabType.MY_LOCATION.label
-                                ),
-                                HongLiquidGlassTabItem(
-                                    R.drawable.honglib_ic_favorite,
-                                    BottomTabType.BOOKMARK.label
-                                )
-                            )
-                        )
-                        .outerRadius(40)
-                        .tabBarHeight(80)
-                        .tabVerticalPadding(12)
-                        .innerSideGap(16)
-                        .onSelectedTab { i, item ->
-                            when (item.label) {
-                                BottomTabType.HOME.label -> onTabSelected(BottomTabType.HOME)
-                                BottomTabType.MY_LOCATION.label -> onTabSelected(BottomTabType.MY_LOCATION)
-                                BottomTabType.BOOKMARK.label -> onTabSelected(BottomTabType.BOOKMARK)
-                            }
-                        }
-                        .applyOption()
-                )
             }
         }
     }

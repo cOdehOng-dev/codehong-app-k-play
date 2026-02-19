@@ -1,8 +1,8 @@
 package com.codehong.app.kplay.data.remote
 
-import com.codehong.app.kplay.data.model.boxoffice.BoxOfficeResponse
-import com.codehong.app.kplay.data.model.performance.detail.PerformanceDetailResponse
-import com.codehong.app.kplay.data.model.performance.list.PerformanceListResponse
+import com.codehong.app.kplay.data.model.boxoffice.BoxOfficeResponseDto
+import com.codehong.app.kplay.data.model.performance.detail.PerformanceDetailResponseDto
+import com.codehong.app.kplay.data.model.performance.list.PerformanceListResponseDto
 import com.codehong.app.kplay.data.model.place.PlaceDetailResponseDto
 import com.codehong.app.kplay.data.model.place.PlaceListResponseDto
 import retrofit2.http.GET
@@ -23,13 +23,13 @@ interface KopisApiService {
         @Query("signgucodesub") signGuCodeSub: String? = null,
         @Query("kidstate") kidState: String? = null,
         @Query("shcate") genreCode: String? = null
-    ): PerformanceListResponse
+    ): PerformanceListResponseDto
 
     @GET("/openApi/restful/pblprfr/{mt20id}")
     suspend fun getPerformanceDetail(
         @Path("mt20id") id: String,
         @Query("service") serviceKey: String,
-    ): PerformanceDetailResponse
+    ): PerformanceDetailResponseDto
 
     @GET("/openApi/restful/boxoffice")
     suspend fun getBoxOffice(
@@ -38,7 +38,7 @@ interface KopisApiService {
         @Query("eddate") eddate: String,
         @Query("catecode") catecode: String? = null,
         @Query("area") area: String? = null
-    ): BoxOfficeResponse
+    ): BoxOfficeResponseDto
 
     @GET("/openApi/restful/prffest")
     suspend fun getFestivalList(
@@ -49,7 +49,7 @@ interface KopisApiService {
         @Query("rows") rowsPerPage: String,
         @Query("signgucode") signGuCode: String? = null,
         @Query("signgucodesub") signGuCodeSub: String? = null
-    ): PerformanceListResponse
+    ): PerformanceListResponseDto
 
     @GET("/openApi/restful/prfawad")
     suspend fun getAwardedPerformanceList(
@@ -60,7 +60,7 @@ interface KopisApiService {
         @Query("rows") rowsPerPage: String,
         @Query("signgucode") signGuCode: String? = null,
         @Query("signgucodesub") signGuCodeSub: String? = null
-    ): PerformanceListResponse
+    ): PerformanceListResponseDto
 
     @GET("/openApi/restful/prfplc")
     suspend fun searchPlace(
