@@ -8,6 +8,7 @@ import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.type.GenreCode.Companion.toCode as toGenreCode
 import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.app.kplay.domain.type.SignGuCode.Companion.toCode as toSignGuCode
+import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,7 +44,9 @@ class LocalTabListViewModel @Inject constructor(
         callPerformanceListApi()
     }
 
-    override fun createInitialState(): LocalTabListState = LocalTabListState()
+    override fun createInitialState(): LocalTabListState = LocalTabListState(
+        themeType = performanceUseCase.getThemeType().toThemeType()
+    )
 
     override fun handleEvents(event: LocalTabListEvent) {
         when (event) {

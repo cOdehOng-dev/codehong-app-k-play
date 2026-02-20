@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
 import com.codehong.library.debugtool.log.TimberUtil
@@ -23,7 +24,8 @@ class LoungeViewModel @Inject constructor(
 
     override fun createInitialState(): LoungeState {
         return LoungeState(
-            currentMonth = DateUtil.getCurrentMonth()
+            currentMonth = DateUtil.getCurrentMonth(),
+            themeType = performanceUseCase.getThemeType().toThemeType()
         )
     }
 
@@ -164,6 +166,11 @@ class LoungeViewModel @Inject constructor(
             is LoungeEvent.OnLocalMoreClick -> {
                 TimberUtil.d("Local more clicked - selectedLocalTab: ${state.value.selectedLocalTab.code}")
                 setEffect { LoungeEffect.NavigateToLocalList(state.value.selectedLocalTab) }
+            }
+
+            is LoungeEvent.OnThemeChanged -> {
+                setState { copy(themeType = event.themeType) }
+                performanceUseCase.setThemeType(event.themeType.name)
             }
         }
     }

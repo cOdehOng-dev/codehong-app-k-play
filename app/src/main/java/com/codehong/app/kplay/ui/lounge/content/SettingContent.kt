@@ -1,0 +1,184 @@
+package com.codehong.app.kplay.ui.lounge.content
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.codehong.app.kplay.domain.type.ThemeType
+import com.codehong.library.widget.extensions.hongBackground
+import com.codehong.library.widget.rule.color.HongColor
+import com.codehong.library.widget.rule.color.HongColor.Companion.toColor
+import com.codehong.library.widget.rule.typo.HongTypo
+import com.codehong.library.widget.text.def.HongTextBuilder
+import com.codehong.library.widget.text.def.HongTextCompose
+
+@Composable
+fun SettingContent(
+    isDarkMode: Boolean,
+    themeType: ThemeType,
+    onThemeChanged: (ThemeType) -> Unit
+) {
+    val bgColor = if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100
+    val titleColor = if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100
+    val dividerColor = if (isDarkMode) HongColor.DARK_GRAY_100 else HongColor.GRAY_10
+
+    var showThemeDialog by remember { mutableStateOf(false) }
+
+    if (showThemeDialog) {
+        ThemeSelectDialog(
+            isDarkMode = isDarkMode,
+            currentTheme = themeType,
+            onThemeSelected = { selected ->
+                onThemeChanged(selected)
+                showThemeDialog = false
+            },
+            onDismiss = { showThemeDialog = false }
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .hongBackground(bgColor)
+    ) {
+        // 헤더
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = "설정",
+                modifier = Modifier.padding(horizontal = 20.dp),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = titleColor.toColor()
+            )
+        }
+
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = dividerColor.toColor()
+        )
+
+        // 스크롤 가능한 설정 목록
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // 테마 설정 아이템
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .clickable { showThemeDialog = true }
+                    .padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                HongTextCompose(
+                    option = HongTextBuilder()
+                        .text("테마")
+                        .typography(HongTypo.BODY_16)
+                        .color(titleColor)
+                        .applyOption()
+                )
+                HongTextCompose(
+                    option = HongTextBuilder()
+                        .text(themeType.displayName)
+                        .typography(HongTypo.BODY_14)
+                        .color(HongColor.GRAY_50)
+                        .applyOption()
+                )
+            }
+
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = dividerColor.toColor()
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThemeSelectDialog(
+    isDarkMode: Boolean,
+    currentTheme: ThemeType,
+    onThemeSelected: (ThemeType) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val titleColor = if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "테마 선택",
+                fontWeight = FontWeight.Bold,
+                color = titleColor.toColor()
+            )
+        },
+        text = {
+            Column {
+                ThemeType.entries.forEach { type ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clickable { onThemeSelected(type) },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = currentTheme == type,
+                            onClick = { onThemeSelected(type) },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = HongColor.MAIN_ORANGE_100.toColor(),
+                                unselectedColor = HongColor.GRAY_50.toColor()
+                            )
+                        )
+                        Text(
+                            text = type.displayName,
+                            modifier = Modifier.padding(start = 8.dp),
+                            color = titleColor.toColor(),
+                            fontSize = 15.sp
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = "취소",
+                    color = HongColor.GRAY_50.toColor()
+                )
+            }
+        }
+    )
+}

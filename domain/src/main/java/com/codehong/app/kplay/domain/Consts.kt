@@ -4,6 +4,7 @@ object Consts {
 
     const val PREF_NAME = "k_play_pref"
     const val KEY_SIGN_GU_CODE = "sign_gu_code"
+    const val KEY_THEME_TYPE = "theme_type"
 
     const val PERFORMANCE_ID = "performance_id"
     const val SIGN_GU_CODE = "sign_gu_code"

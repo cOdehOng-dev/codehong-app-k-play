@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.model.performance.detail.TicketingSite
+import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.app.kplay.domain.usecase.PlaceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
@@ -20,7 +21,9 @@ class PerformanceDetailViewModel @Inject constructor(
     application
 ) {
 
-    override fun createInitialState(): PerformanceDetailState = PerformanceDetailState()
+    override fun createInitialState(): PerformanceDetailState = PerformanceDetailState(
+        themeType = performanceUseCase.getThemeType().toThemeType()
+    )
 
     override fun handleEvents(event: PerformanceDetailEvent) {
         when (event) {
@@ -45,10 +48,6 @@ class PerformanceDetailViewModel @Inject constructor(
                         isShowReservationPicker = false
                     )
                 }
-            }
-
-            is PerformanceDetailEvent.OnToggleDarkMode -> {
-                setState { copy(isDarkMode = !isDarkMode) }
             }
         }
     }

@@ -3,6 +3,7 @@ package com.codehong.app.kplay.ui.performance.detail
 import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
 import com.codehong.app.kplay.domain.model.performance.detail.TicketingSite
 import com.codehong.app.kplay.domain.model.place.PlaceDetail
+import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.domain.util.toPeriod
 import com.codehong.library.architecture.mvi.ViewEvent
 import com.codehong.library.architecture.mvi.ViewSideEffect
@@ -14,7 +15,7 @@ data class PerformanceDetailState(
     val siteList: List<TicketingSite> = emptyList(),
     val isShowReservationPicker: Boolean = false,
     val loading: PerformanceDetailLoading = PerformanceDetailLoading(),
-    val isDarkMode: Boolean = false
+    val themeType: ThemeType = ThemeType.SYSTEM
 ) : ViewState {
 
     val period: String
@@ -40,7 +41,6 @@ data class PerformanceDetailState(
 sealed class PerformanceDetailEvent : ViewEvent {
     data object OnBookingClick : PerformanceDetailEvent()
     data object OnBackClick : PerformanceDetailEvent()
-    data object OnToggleDarkMode : PerformanceDetailEvent()
 
     data class OnBookingSiteClick(val site: String?) : PerformanceDetailEvent()
 

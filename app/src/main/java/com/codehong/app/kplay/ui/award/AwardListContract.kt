@@ -2,11 +2,13 @@ package com.codehong.app.kplay.ui.award
 
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.library.architecture.mvi.ViewEvent
 import com.codehong.library.architecture.mvi.ViewSideEffect
 import com.codehong.library.architecture.mvi.ViewState
 
 data class AwardListState(
+    val themeType: ThemeType = ThemeType.SYSTEM,
     val selectedSignGuCode: SignGuCode = SignGuCode.SEOUL,
     val startDate: String = "",  // yyyyMMdd
     val endDate: String = "",    // yyyyMMdd

@@ -7,6 +7,7 @@ import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.GenreCode.Companion.toCode
+import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
 import com.codehong.library.util.DateUtil
@@ -40,7 +41,9 @@ class GenreRankListViewModel @Inject constructor(
         callGenreRankListApi()
     }
 
-    override fun createInitialState(): GenreRankListState = GenreRankListState()
+    override fun createInitialState(): GenreRankListState = GenreRankListState(
+        themeType = performanceUseCase.getThemeType().toThemeType()
+    )
 
     override fun handleEvents(event: GenreRankListEvent) {
         when (event) {

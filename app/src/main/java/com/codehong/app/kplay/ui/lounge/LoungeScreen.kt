@@ -6,6 +6,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -42,7 +43,9 @@ import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.ui.lounge.content.MyLocationContent
+import com.codehong.app.kplay.ui.lounge.content.SettingContent
 import com.codehong.app.kplay.ui.lounge.content.home.HomeContent
 import com.codehong.library.widget.R
 import com.codehong.library.widget.extensions.hongBackground
@@ -66,6 +69,9 @@ fun LoungeScreen(
         state = state,
         onTabSelected = { tab ->
             viewModel.setEvent(LoungeEvent.OnTabSelected(tab))
+        },
+        onThemeChanged = { themeType ->
+            viewModel.setEvent(LoungeEvent.OnThemeChanged(themeType))
         },
         onCategoryClick = { cateCode ->
             viewModel.setEvent(LoungeEvent.OnCategoryClick(cateCode))
@@ -125,6 +131,7 @@ fun LoungeScreen(
 private fun LoungeScreenContent(
     state: LoungeState,
     onTabSelected: (BottomTabType) -> Unit,
+    onThemeChanged: (ThemeType) -> Unit,
     onCategoryClick: (GenreCode) -> Unit,
     onRankTabSelected: (RankTab) -> Unit,
     onRankItemClick: (BoxOfficeItem) -> Unit,
@@ -143,10 +150,18 @@ private fun LoungeScreenContent(
     onLocalItemClick: (PerformanceInfoItem) -> Unit,
     onLocalMoreClick: () -> Unit
 ) {
+    val isSystemDark = isSystemInDarkTheme()
+    val isDarkMode = when (state.themeType) {
+        ThemeType.LIGHT -> false
+        ThemeType.DARK -> true
+        ThemeType.SYSTEM -> isSystemDark
+    }
+
     val tabList = listOf(
         BottomTabItem(BottomTabType.HOME, R.drawable.honglib_ic_home),
         BottomTabItem(BottomTabType.MY_LOCATION, R.drawable.honglib_ic_location),
-        BottomTabItem(BottomTabType.BOOKMARK, R.drawable.honglib_ic_favorite)
+        BottomTabItem(BottomTabType.BOOKMARK, R.drawable.honglib_ic_favorite),
+        BottomTabItem(BottomTabType.SETTINGS, R.drawable.honglib_ic_setting)
     )
 
     Scaffold(
@@ -249,6 +264,11 @@ private fun LoungeScreenContent(
                     selectedAreaName = state.selectedSignGuCode.displayName
                 )
                 BottomTabType.BOOKMARK -> BookmarkContent()
+                BottomTabType.SETTINGS -> SettingContent(
+                    isDarkMode = isDarkMode,
+                    themeType = state.themeType,
+                    onThemeChanged = onThemeChanged
+                )
             }
         }
     }
@@ -260,15 +280,6 @@ private fun BookmarkContent() {
     EmptyTabContent(
         title = "찜한 공연",
         description = "관심있는 공연을 찜해보세요"
-    )
-}
-
-// ===== MY 탭 콘텐츠 (빈 화면) =====
-@Composable
-private fun MyContent() {
-    EmptyTabContent(
-        title = "마이페이지",
-        description = "로그인하고 다양한 혜택을 받아보세요"
     )
 }
 
@@ -310,6 +321,7 @@ private fun LoungeScreenPreview() {
     LoungeScreenContent(
         state = LoungeState(),
         onTabSelected = {},
+        onThemeChanged = {},
         onCategoryClick = {},
         onRankTabSelected = {},
         onRankItemClick = {},

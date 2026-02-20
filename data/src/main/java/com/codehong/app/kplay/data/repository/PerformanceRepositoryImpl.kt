@@ -198,4 +198,10 @@ class PerformanceRepositoryImpl @Inject constructor(
     }
 
     override fun getMyLocation(): String? = local.getMyLocation()
+
+    override fun setThemeType(themeType: String?) {
+        local.setThemeType(themeType)
+    }
+
+    override fun getThemeType(): String? = local.getThemeType()
 }

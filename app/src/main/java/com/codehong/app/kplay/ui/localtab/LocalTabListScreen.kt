@@ -36,12 +36,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.ui.common.BackHeader
 import com.codehong.app.kplay.ui.common.ChangeDateButton
 import com.codehong.app.kplay.ui.common.PerformanceItemContent
@@ -111,6 +113,13 @@ private fun LocalTabListScreenContent(
     onSelectDate: (startDate: String, endDate: String) -> Unit,
     onDismissCalendar: () -> Unit = {}
 ) {
+    val isDarkMode = when (state.themeType) {
+        ThemeType.LIGHT -> false
+        ThemeType.DARK -> true
+        ThemeType.SYSTEM -> isSystemInDarkTheme()
+    }
+    val bgColor = if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100
+
     val listState = rememberLazyListState()
 
     var selectStartDate by remember { mutableStateOf(state.startDate) }
@@ -141,8 +150,8 @@ private fun LocalTabListScreenContent(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .hongBackground(HongColor.WHITE_100),
-            containerColor = HongColor.WHITE_100.toColor(),
+                .hongBackground(bgColor),
+            containerColor = bgColor.toColor(),
             topBar = {
                 BackHeader(state.title) { onBackClick() }
             }

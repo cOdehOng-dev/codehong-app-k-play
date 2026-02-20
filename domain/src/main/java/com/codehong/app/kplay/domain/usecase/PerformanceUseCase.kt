@@ -133,4 +133,10 @@ class PerformanceUseCase @Inject constructor(
     }
 
     fun getMyLocation(): String? = repository.getMyLocation()
+
+    fun setThemeType(themeType: String?) {
+        repository.setThemeType(themeType)
+    }
+
+    fun getThemeType(): String? = repository.getThemeType()
 }

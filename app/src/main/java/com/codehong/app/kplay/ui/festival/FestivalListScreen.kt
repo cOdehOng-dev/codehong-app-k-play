@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.ui.common.ChangeDateButton
 
 // 배민 스타일 컬러
@@ -87,6 +89,14 @@ private fun FestivalListScreenContent(
     onFestivalClick: (PerformanceInfoItem) -> Unit,
     onLoadMore: () -> Unit
 ) {
+    val isDarkMode = when (state.themeType) {
+        ThemeType.LIGHT -> false
+        ThemeType.DARK -> true
+        ThemeType.SYSTEM -> isSystemInDarkTheme()
+    }
+    val bgColor = if (isDarkMode) Color(0xFF000000) else BaeminBackground
+    val titleColor = if (isDarkMode) Color.White else BaeminDarkGray
+
     val listState = rememberLazyListState()
 
     // Infinite scroll 감지
@@ -110,10 +120,12 @@ private fun FestivalListScreenContent(
     }
 
     Scaffold(
-        containerColor = BaeminBackground,
+        containerColor = bgColor,
         topBar = {
             FestivalListHeader(
                 title = "지역 축제",
+                bgColor = bgColor,
+                titleColor = titleColor,
                 onBackClick = onBackClick
             )
         }
@@ -208,13 +220,15 @@ private fun FestivalListScreenContent(
 @Composable
 private fun FestivalListHeader(
     title: String,
+    bgColor: Color,
+    titleColor: Color,
     onBackClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
-            .background(BaeminBackground)
+            .background(bgColor)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -228,7 +242,7 @@ private fun FestivalListHeader(
             Text(
                 text = "←",
                 fontSize = 24.sp,
-                color = BaeminDarkGray
+                color = titleColor
             )
         }
 
@@ -238,7 +252,7 @@ private fun FestivalListHeader(
             text = title,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = BaeminDarkGray
+            color = titleColor
         )
     }
 }

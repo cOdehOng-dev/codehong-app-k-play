@@ -1,6 +1,5 @@
 package com.codehong.app.kplay.ui.performance.detail
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.unit.dp
+import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
 import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailCastContent
 import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailInfoContent
@@ -57,23 +58,28 @@ fun PerformanceDetailScreen(
     state: PerformanceDetailState,
     onEvent: (PerformanceDetailEvent) -> Unit
 ) {
+    val isDarkMode = when (state.themeType) {
+        ThemeType.LIGHT -> false
+        ThemeType.DARK -> true
+        ThemeType.SYSTEM -> isSystemInDarkTheme()
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
             .navigationBarsPadding()
-            .hongBackground(if (state.isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100),
+            .hongBackground(if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100),
         topBar = {
             PerformanceDetailTopBar(
                 title = state.performanceDetail?.name,
-                isDarkMode = state.isDarkMode,
-                onBackClick = { onEvent(PerformanceDetailEvent.OnBackClick) },
-                onToggleDarkMode = { onEvent(PerformanceDetailEvent.OnToggleDarkMode) }
+                isDarkMode = isDarkMode,
+                onBackClick = { onEvent(PerformanceDetailEvent.OnBackClick) }
             )
         },
         bottomBar = {
             PerformanceDetailBottomBar(
-                isDarkMode = state.isDarkMode,
+                isDarkMode = isDarkMode,
                 onBookingClick = { onEvent(PerformanceDetailEvent.OnBookingClick) }
             )
         }
@@ -90,6 +96,7 @@ fun PerformanceDetailScreen(
         } else if (state.performanceDetail != null) {
             PerformanceDetailBody(
                 state = state,
+                isDarkMode = isDarkMode,
                 modifier = Modifier.padding(innerPadding)
             )
         }
@@ -105,36 +112,19 @@ fun PerformanceDetailScreen(
 private fun PerformanceDetailTopBar(
     title: String?,
     isDarkMode: Boolean,
-    onBackClick: () -> Unit,
-    onToggleDarkMode: () -> Unit
+    onBackClick: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
-        HongHeaderIcon(
-            HongHeaderIconBuilder()
-                .backgroundColor(if (isDarkMode) HongColor.BLACK_100.hex else HongColor.WHITE_100.hex)
-                .titleColor(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
-                .titleTypo(HongTypo.BODY_17_B)
-                .title(title)
-                .backIcon(R.drawable.honglib_ic_arrow_left)
-                .backIconColor(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
-                .onBack { onBackClick() }
-                .applyOption()
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .clickable { onToggleDarkMode() }
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            HongTextCompose(
-                option = HongTextBuilder()
-                    .text(if (isDarkMode) "라이트" else "다크")
-                    .typography(HongTypo.CONTENTS_14)
-                    .color(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
-                    .applyOption()
-            )
-        }
-    }
+    HongHeaderIcon(
+        HongHeaderIconBuilder()
+            .backgroundColor(if (isDarkMode) HongColor.BLACK_100.hex else HongColor.WHITE_100.hex)
+            .titleColor(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
+            .titleTypo(HongTypo.BODY_17_B)
+            .title(title)
+            .backIcon(R.drawable.honglib_ic_arrow_left)
+            .backIconColor(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
+            .onBack { onBackClick() }
+            .applyOption()
+    )
 }
 
 @Composable
@@ -166,6 +156,7 @@ private fun PerformanceDetailBottomBar(
 @Composable
 private fun PerformanceDetailBody(
     state: PerformanceDetailState,
+    isDarkMode: Boolean,
     modifier: Modifier = Modifier
 ) {
     val performanceDetail = state.performanceDetail ?: return
@@ -173,7 +164,7 @@ private fun PerformanceDetailBody(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .hongBackground(if (state.isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100)
+            .hongBackground(if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100)
             .verticalScroll(rememberScrollState())
     ) {
         PerformanceDetailPosterSection(posterUrl = performanceDetail.posterUrl)
@@ -184,7 +175,7 @@ private fun PerformanceDetailBody(
                 .padding(HongSpacingInfo(left = 16f, right = 16f))
                 .text(performanceDetail.name)
                 .typography(HongTypo.TITLE_22_B)
-                .color(if (state.isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
+                .color(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
                 .applyOption()
         )
 
@@ -193,18 +184,18 @@ private fun PerformanceDetailBody(
         PerformanceDetailInfoSection(
             period = state.period,
             performanceDetail = performanceDetail,
-            isDarkMode = state.isDarkMode
+            isDarkMode = isDarkMode
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        PerformanceDetailCastContent(performanceDetail.cast, performanceDetail.crew, state.isDarkMode)
+        PerformanceDetailCastContent(performanceDetail.cast, performanceDetail.crew, isDarkMode)
 
-        PerformanceDetailTimeTableContent(performanceDetail.dateGuidance, state.isDarkMode)
+        PerformanceDetailTimeTableContent(performanceDetail.dateGuidance, isDarkMode)
 
-        PerformanceDetailPriceContent(performanceDetail.priceInfo, state.isDarkMode)
+        PerformanceDetailPriceContent(performanceDetail.priceInfo, isDarkMode)
 
-        PerformanceDetailPlaceContent(state.placeDetail, state.isDarkMode)
+        PerformanceDetailPlaceContent(state.placeDetail, isDarkMode)
 
         PerformanceDetailNoticeContent(performanceDetail.imageUrlList)
 

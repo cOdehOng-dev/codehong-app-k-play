@@ -6,12 +6,14 @@ import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.library.architecture.mvi.ViewEvent
 import com.codehong.library.architecture.mvi.ViewSideEffect
 import com.codehong.library.architecture.mvi.ViewState
 
 data class LoungeState(
     val selectedTab: BottomTabType = BottomTabType.HOME,
+    val themeType: ThemeType = ThemeType.SYSTEM,
     val categories: List<GenreCode> = GenreCode.entries.toList(),
     val rankList: List<BoxOfficeItem> = emptyList(),
     val selectedRankTab: RankTab = RankTab.TOP_1_10,
@@ -53,6 +55,7 @@ sealed class LoungeEvent : ViewEvent {
     data class OnLocalTabSelected(val signGuCode: SignGuCode) : LoungeEvent()
     data class OnLocalItemClick(val item: PerformanceInfoItem) : LoungeEvent()
     data object OnLocalMoreClick : LoungeEvent()
+    data class OnThemeChanged(val themeType: ThemeType) : LoungeEvent()
 }
 
 sealed class LoungeEffect : ViewSideEffect {

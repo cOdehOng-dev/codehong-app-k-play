@@ -3,6 +3,7 @@ package com.codehong.app.kplay.ui.award
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
+import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +32,9 @@ class AwardListViewModel @Inject constructor(
         callAwardListApi()
     }
 
-    override fun createInitialState(): AwardListState = AwardListState()
+    override fun createInitialState(): AwardListState = AwardListState(
+        themeType = performanceUseCase.getThemeType().toThemeType()
+    )
 
     override fun handleEvents(event: AwardListEvent) {
         when (event) {

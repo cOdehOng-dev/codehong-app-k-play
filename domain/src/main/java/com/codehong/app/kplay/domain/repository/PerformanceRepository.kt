@@ -73,4 +73,8 @@ interface PerformanceRepository {
     )
 
     fun getMyLocation(): String?
+
+    fun setThemeType(themeType: String?)
+
+    fun getThemeType(): String?
 }

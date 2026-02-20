@@ -2,11 +2,13 @@ package com.codehong.app.kplay.ui.genre.rank
 
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.type.GenreCode
+import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.library.architecture.mvi.ViewEvent
 import com.codehong.library.architecture.mvi.ViewSideEffect
 import com.codehong.library.architecture.mvi.ViewState
 
 data class GenreRankListState(
+    val themeType: ThemeType = ThemeType.SYSTEM,
     val initialGenreCode: GenreCode = GenreCode.THEATER,
     val selectedGenreCode: GenreCode = GenreCode.THEATER,
     val startDate: String = "",  // yyyyMMdd
