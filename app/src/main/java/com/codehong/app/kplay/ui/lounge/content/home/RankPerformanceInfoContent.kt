@@ -1,6 +1,5 @@
 package com.codehong.app.kplay.ui.lounge.content.home
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.ui.common.Badge
+import com.codehong.library.widget.extensions.clickPress
 import com.codehong.library.widget.image.def.HongImageBuilder
 import com.codehong.library.widget.image.def.HongImageCompose
 import com.codehong.library.widget.rule.HongScaleType
@@ -35,7 +35,9 @@ fun RankPerformanceInfoContent(
         modifier = Modifier
             .width(130.dp)
             .fillMaxHeight()
-            .clickable(onClick = onClick)
+            .clickPress {
+                onClick()
+            }
     ) {
         Box {
             HongImageCompose(

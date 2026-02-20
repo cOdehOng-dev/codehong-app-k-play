@@ -46,6 +46,10 @@ class PerformanceDetailViewModel @Inject constructor(
                     )
                 }
             }
+
+            is PerformanceDetailEvent.OnToggleDarkMode -> {
+                setState { copy(isDarkMode = !isDarkMode) }
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.map
+package com.codehong.app.kplay.ui.map
 
 import android.Manifest
 import android.annotation.SuppressLint

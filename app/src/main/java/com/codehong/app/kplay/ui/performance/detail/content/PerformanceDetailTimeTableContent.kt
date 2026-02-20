@@ -24,14 +24,15 @@ import com.codehong.library.widget.text.def.HongTextCompose
 
 @Composable
 fun PerformanceDetailTimeTableContent(
-    timeTable: String?
+    timeTable: String?,
+    isDarkMode: Boolean = false
 ) {
     if (timeTable.isNullOrEmpty()) return
     val timeTableList = timeTable.splitAndParseWithParentheses()
 
     HorizontalDivider(
         thickness = 8.dp,
-        color = HongColor.GRAY_10.toColor()
+        color = (if (isDarkMode) HongColor.DARK_GRAY_100 else HongColor.GRAY_10).toColor()
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -41,7 +42,7 @@ fun PerformanceDetailTimeTableContent(
             .padding(HongSpacingInfo(left  = 16f, right = 16f))
             .text("시간표")
             .typography(HongTypo.BODY_18_B)
-            .color(HongColor.BLACK_100)
+            .color(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
             .applyOption()
     )
 
@@ -51,7 +52,7 @@ fun PerformanceDetailTimeTableContent(
         modifier = Modifier
             .fillMaxWidth()
             .hongSpacing(HongSpacingInfo(16f, 16f, 16f, 16f))
-            .hongBackground(color = HongColor.GRAY_05, radius = HongRadiusInfo(10))
+            .hongBackground(color = if (isDarkMode) HongColor.DARK_GRAY_100 else HongColor.GRAY_05, radius = HongRadiusInfo(10))
             .hongSpacing(HongSpacingInfo(20f, 20f, 20f, 20f))
     ) {
         timeTableList.forEachIndexed { i, time ->
@@ -68,14 +69,14 @@ fun PerformanceDetailTimeTableContent(
                     option = HongTextBuilder()
                         .text(time.first)
                         .typography(HongTypo.BODY_16)
-                        .color(HongColor.BLACK_100)
+                        .color(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
                         .applyOption()
                 )
                 HongTextCompose(
                     option = HongTextBuilder()
                         .text(time.second)
                         .typography(HongTypo.BODY_16_B)
-                        .color(HongColor.BLACK_100)
+                        .color(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
                         .applyOption()
                 )
             }

@@ -1,6 +1,5 @@
 package com.codehong.app.kplay.ui.lounge.content.home
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.codehong.app.kplay.domain.extensions.extractParenthesesContent
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.ui.common.Badge
+import com.codehong.library.widget.extensions.clickPress
 import com.codehong.library.widget.image.def.HongImageBuilder
 import com.codehong.library.widget.image.def.HongImageCompose
 import com.codehong.library.widget.rule.HongScaleType
@@ -25,7 +25,7 @@ import com.codehong.library.widget.text.def.HongTextBuilder
 import com.codehong.library.widget.text.def.HongTextCompose
 
 @Composable
-fun PerformanceInfoItemContent(
+fun PerformanceInfoContent(
     item: PerformanceInfoItem,
     onClick: () -> Unit
 ) {
@@ -33,7 +33,9 @@ fun PerformanceInfoItemContent(
         modifier = Modifier
             .width(130.dp)
             .fillMaxHeight()
-            .clickable(onClick = onClick)
+            .clickPress {
+                onClick()
+            }
     ) {
         // 포스터 이미지
         HongImageCompose(

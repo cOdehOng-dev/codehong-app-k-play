@@ -14,25 +14,27 @@ import com.codehong.library.widget.text.def.HongTextCompose
 @Composable
 fun PerformanceDetailInfoContent(
     label: String,
-    value: String?
+    value: String?,
+    isDarkMode: Boolean = false
 ) {
     if (value.isNullOrBlank()) return
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // 타이틀
         HongTextCompose(
             option = HongTextBuilder()
                 .text(label)
                 .typography(HongTypo.CONTENTS_14)
-                .color(HongColor.GRAY_50)
+                .color(if (isDarkMode) HongColor.WHITE_100 else HongColor.GRAY_50)
                 .applyOption()
         )
         HongTextCompose(
             option = HongTextBuilder()
                 .text(value)
                 .typography(HongTypo.CONTENTS_14)
-                .color(HongColor.BLACK_100)
+                .color(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
                 .applyOption()
         )
     }

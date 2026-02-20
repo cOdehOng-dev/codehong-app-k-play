@@ -91,7 +91,7 @@ fun TabPerformanceContent(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             performanceList.forEach { item ->
-                PerformanceInfoItemContent(
+                PerformanceInfoContent(
                     item = item,
                     onClick = { onClickProduct(item) }
                 )

@@ -40,6 +40,7 @@ import com.naver.maps.map.compose.rememberUpdatedMarkerState
 @Composable
 fun PerformanceDetailPlaceContent(
     placeDetail: PlaceDetail?,
+    isDarkMode: Boolean = false
 ) {
     val latitude = placeDetail?.latitude?.toDoubleOrNull()
     val longitude = placeDetail?.longitude?.toDoubleOrNull()
@@ -70,7 +71,7 @@ fun PerformanceDetailPlaceContent(
 
     HorizontalDivider(
         thickness = 8.dp,
-        color = HongColor.GRAY_10.toColor()
+        color = (if (isDarkMode) HongColor.DARK_GRAY_100 else HongColor.GRAY_10).toColor()
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -80,7 +81,7 @@ fun PerformanceDetailPlaceContent(
             .padding(HongSpacingInfo(left  = 16f, right = 16f))
             .text("공연장소")
             .typography(HongTypo.BODY_18_B)
-            .color(HongColor.BLACK_100)
+            .color(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
             .applyOption()
     )
 
@@ -128,7 +129,7 @@ fun PerformanceDetailPlaceContent(
                 .margin(HongSpacingInfo(left = 5f))
                 .text(placeDetail.placeAddress)
                 .typography(HongTypo.BODY_14_B)
-                .color(HongColor.BLACK_100)
+                .color(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
                 .maxLines(1)
                 .overflow(HongTextOverflow.ELLIPSIS)
                 .applyOption()

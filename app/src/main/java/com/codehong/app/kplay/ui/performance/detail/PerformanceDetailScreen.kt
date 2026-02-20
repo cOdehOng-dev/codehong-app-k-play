@@ -1,5 +1,6 @@
 package com.codehong.app.kplay.ui.performance.detail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,15 +62,18 @@ fun PerformanceDetailScreen(
             .fillMaxSize()
             .statusBarsPadding()
             .navigationBarsPadding()
-            .hongBackground(HongColor.WHITE_100),
+            .hongBackground(if (state.isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100),
         topBar = {
             PerformanceDetailTopBar(
                 title = state.performanceDetail?.name,
-                onBackClick = { onEvent(PerformanceDetailEvent.OnBackClick) }
+                isDarkMode = state.isDarkMode,
+                onBackClick = { onEvent(PerformanceDetailEvent.OnBackClick) },
+                onToggleDarkMode = { onEvent(PerformanceDetailEvent.OnToggleDarkMode) }
             )
         },
         bottomBar = {
             PerformanceDetailBottomBar(
+                isDarkMode = state.isDarkMode,
                 onBookingClick = { onEvent(PerformanceDetailEvent.OnBookingClick) }
             )
         }
@@ -100,29 +104,48 @@ fun PerformanceDetailScreen(
 @Composable
 private fun PerformanceDetailTopBar(
     title: String?,
-    onBackClick: () -> Unit
+    isDarkMode: Boolean,
+    onBackClick: () -> Unit,
+    onToggleDarkMode: () -> Unit
 ) {
-    HongHeaderIcon(
-        HongHeaderIconBuilder()
-            .backgroundColor(HongColor.WHITE_100.hex)
-            .titleColor(HongColor.BLACK_100)
-            .titleTypo(HongTypo.BODY_17_B)
-            .title(title)
-            .backIcon(R.drawable.honglib_ic_arrow_left)
-            .backIconColor(HongColor.BLACK_100)
-            .onBack { onBackClick() }
-            .applyOption()
-    )
+    Box(modifier = Modifier.fillMaxWidth()) {
+        HongHeaderIcon(
+            HongHeaderIconBuilder()
+                .backgroundColor(if (isDarkMode) HongColor.BLACK_100.hex else HongColor.WHITE_100.hex)
+                .titleColor(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
+                .titleTypo(HongTypo.BODY_17_B)
+                .title(title)
+                .backIcon(R.drawable.honglib_ic_arrow_left)
+                .backIconColor(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
+                .onBack { onBackClick() }
+                .applyOption()
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .clickable { onToggleDarkMode() }
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            HongTextCompose(
+                option = HongTextBuilder()
+                    .text(if (isDarkMode) "라이트" else "다크")
+                    .typography(HongTypo.CONTENTS_14)
+                    .color(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
+                    .applyOption()
+            )
+        }
+    }
 }
 
 @Composable
 private fun PerformanceDetailBottomBar(
+    isDarkMode: Boolean,
     onBookingClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .hongBackground(HongColor.WHITE_100)
+            .hongBackground(if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100)
     ) {
         HongButtonTextCompose(
             HongButtonTextBuilder()
@@ -150,7 +173,7 @@ private fun PerformanceDetailBody(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .hongBackground(HongColor.WHITE_100)
+            .hongBackground(if (state.isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100)
             .verticalScroll(rememberScrollState())
     ) {
         PerformanceDetailPosterSection(posterUrl = performanceDetail.posterUrl)
@@ -161,7 +184,7 @@ private fun PerformanceDetailBody(
                 .padding(HongSpacingInfo(left = 16f, right = 16f))
                 .text(performanceDetail.name)
                 .typography(HongTypo.TITLE_22_B)
-                .color(HongColor.BLACK_100)
+                .color(if (state.isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
                 .applyOption()
         )
 
@@ -169,18 +192,19 @@ private fun PerformanceDetailBody(
 
         PerformanceDetailInfoSection(
             period = state.period,
-            performanceDetail = performanceDetail
+            performanceDetail = performanceDetail,
+            isDarkMode = state.isDarkMode
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        PerformanceDetailCastContent(performanceDetail.cast, performanceDetail.crew)
+        PerformanceDetailCastContent(performanceDetail.cast, performanceDetail.crew, state.isDarkMode)
 
-        PerformanceDetailTimeTableContent(performanceDetail.dateGuidance)
+        PerformanceDetailTimeTableContent(performanceDetail.dateGuidance, state.isDarkMode)
 
-        PerformanceDetailPriceContent(performanceDetail.priceInfo)
+        PerformanceDetailPriceContent(performanceDetail.priceInfo, state.isDarkMode)
 
-        PerformanceDetailPlaceContent(state.placeDetail)
+        PerformanceDetailPlaceContent(state.placeDetail, state.isDarkMode)
 
         PerformanceDetailNoticeContent(performanceDetail.imageUrlList)
 
@@ -224,33 +248,34 @@ private fun PerformanceDetailPosterSection(posterUrl: String?) {
 @Composable
 private fun PerformanceDetailInfoSection(
     period: String,
-    performanceDetail: PerformanceDetail
+    performanceDetail: PerformanceDetail,
+    isDarkMode: Boolean = false
 ) {
     Column(
         modifier = Modifier.padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         period.takeIf { it.isNotBlank() }?.let {
-            PerformanceDetailInfoContent(label = "공연 기간", value = it)
+            PerformanceDetailInfoContent(label = "공연 기간", value = it, isDarkMode = isDarkMode)
         }
 
         performanceDetail.facilityName?.takeIf { it.isNotBlank() }?.let {
-            PerformanceDetailInfoContent(label = "공연장", value = it)
+            PerformanceDetailInfoContent(label = "공연장", value = it, isDarkMode = isDarkMode)
         }
         performanceDetail.runtime?.takeIf { it.isNotBlank() && it != "0분" }?.let {
-            PerformanceDetailInfoContent(label = "러닝타임", value = it)
+            PerformanceDetailInfoContent(label = "러닝타임", value = it, isDarkMode = isDarkMode)
         }
 
         performanceDetail.ageLimit?.takeIf { it.isNotBlank() }?.let {
-            PerformanceDetailInfoContent(label = "관람등급", value = it)
+            PerformanceDetailInfoContent(label = "관람등급", value = it, isDarkMode = isDarkMode)
         }
 
         performanceDetail.hostCompany?.takeIf { it.isNotBlank() }?.let {
-            PerformanceDetailInfoContent(label = "주최", value = it)
+            PerformanceDetailInfoContent(label = "주최", value = it, isDarkMode = isDarkMode)
         }
 
         performanceDetail.sponsorCompany?.takeIf { it.isNotBlank() }?.let {
-            PerformanceDetailInfoContent(label = "주관", value = it)
+            PerformanceDetailInfoContent(label = "주관", value = it, isDarkMode = isDarkMode)
         }
     }
 }

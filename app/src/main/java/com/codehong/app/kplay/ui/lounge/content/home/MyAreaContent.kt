@@ -105,7 +105,7 @@ fun MyAreaContent(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             myAreaList.forEach { item ->
-                PerformanceInfoItemContent(
+                PerformanceInfoContent(
                     item = item,
                     onClick = { onClickProduct(item) }
                 )

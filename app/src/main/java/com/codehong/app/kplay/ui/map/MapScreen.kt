@@ -1,5 +1,6 @@
-package com.codehong.app.kplay.map
+package com.codehong.app.kplay.ui.map
 
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -91,7 +92,7 @@ fun MapScreen(
             containerColor = Color.White
         ) {
             Icon(
-                painter = painterResource(id = android.R.drawable.ic_menu_mylocation),
+                painter = painterResource(id = R.drawable.ic_menu_mylocation),
                 contentDescription = "내 위치",
                 tint = Color(0xFF1976D2)
             )

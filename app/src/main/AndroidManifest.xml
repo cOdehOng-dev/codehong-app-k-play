@@ -33,7 +33,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".map.MapActivity"/>
+        <activity android:name=".ui.map.MapActivity"/>
         <activity android:name=".main.MainActivity"/>
 
         <activity android:name=".ui.performance.detail.PerformanceDetailActivity"/>

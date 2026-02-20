@@ -13,7 +13,8 @@ data class PerformanceDetailState(
     val placeDetail: PlaceDetail? = null,
     val siteList: List<TicketingSite> = emptyList(),
     val isShowReservationPicker: Boolean = false,
-    val loading: PerformanceDetailLoading = PerformanceDetailLoading()
+    val loading: PerformanceDetailLoading = PerformanceDetailLoading(),
+    val isDarkMode: Boolean = false
 ) : ViewState {
 
     val period: String
@@ -39,6 +40,7 @@ data class PerformanceDetailState(
 sealed class PerformanceDetailEvent : ViewEvent {
     data object OnBookingClick : PerformanceDetailEvent()
     data object OnBackClick : PerformanceDetailEvent()
+    data object OnToggleDarkMode : PerformanceDetailEvent()
 
     data class OnBookingSiteClick(val site: String?) : PerformanceDetailEvent()
 
