@@ -6,6 +6,7 @@ import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
+import com.codehong.app.kplay.domain.usecase.FavoriteUseCase
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
 import com.codehong.library.debugtool.log.TimberUtil
@@ -19,14 +20,27 @@ private const val TAG = "LoungeViewModel"
 @HiltViewModel
 class LoungeViewModel @Inject constructor(
     application: Application,
-    private val performanceUseCase: PerformanceUseCase
+    private val performanceUseCase: PerformanceUseCase,
+    private val favoriteUseCase: FavoriteUseCase
 ) : BaseViewModel<LoungeEvent, LoungeState, LoungeEffect>(application) {
+
+    init {
+        observeFavorites()
+    }
 
     override fun createInitialState(): LoungeState {
         return LoungeState(
             currentMonth = DateUtil.getCurrentMonth(),
             themeType = performanceUseCase.getThemeType().toThemeType()
         )
+    }
+
+    private fun observeFavorites() {
+        viewModelScope.launch {
+            favoriteUseCase.getFavoriteList().collect { favoriteList ->
+                setState { copy(favoriteList = favoriteList) }
+            }
+        }
     }
 
     override fun handleEvents(event: LoungeEvent) {
@@ -171,6 +185,16 @@ class LoungeViewModel @Inject constructor(
             is LoungeEvent.OnThemeChanged -> {
                 setState { copy(themeType = event.themeType) }
                 performanceUseCase.setThemeType(event.themeType.name)
+            }
+
+            is LoungeEvent.OnFavoriteItemClick -> {
+                setEffect { LoungeEffect.NavigateToPerformanceDetail(event.id) }
+            }
+
+            is LoungeEvent.OnFavoriteItemDelete -> {
+                viewModelScope.launch {
+                    favoriteUseCase.removeFavorite(event.id)
+                }
             }
         }
     }

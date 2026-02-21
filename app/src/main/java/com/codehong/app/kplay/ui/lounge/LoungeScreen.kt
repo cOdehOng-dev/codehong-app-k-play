@@ -1,20 +1,33 @@
 package com.codehong.app.kplay.ui.lounge
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.NavigationBar
@@ -26,19 +39,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.codehong.app.kplay.domain.model.BottomTabItem
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.favorite.FavoritePerformance
 import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
@@ -54,9 +71,12 @@ import com.codehong.library.widget.image.def.HongImageCompose
 import com.codehong.library.widget.rule.HongScaleType
 import com.codehong.library.widget.rule.color.HongColor
 import com.codehong.library.widget.rule.color.HongColor.Companion.toColor
+import com.codehong.library.widget.rule.radius.HongRadiusInfo
 import com.codehong.library.widget.rule.typo.HongTypo
 import com.codehong.library.widget.text.def.HongTextBuilder
 import com.codehong.library.widget.text.def.HongTextCompose
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -123,6 +143,12 @@ fun LoungeScreen(
         },
         onLocalMoreClick = {
             viewModel.setEvent(LoungeEvent.OnLocalMoreClick)
+        },
+        onFavoriteItemClick = { id ->
+            viewModel.setEvent(LoungeEvent.OnFavoriteItemClick(id))
+        },
+        onFavoriteItemDelete = { id ->
+            viewModel.setEvent(LoungeEvent.OnFavoriteItemDelete(id))
         }
     )
 }
@@ -148,7 +174,9 @@ private fun LoungeScreenContent(
     onAwardedMoreClick: () -> Unit,
     onLocalTabSelected: (SignGuCode) -> Unit,
     onLocalItemClick: (PerformanceInfoItem) -> Unit,
-    onLocalMoreClick: () -> Unit
+    onLocalMoreClick: () -> Unit,
+    onFavoriteItemClick: (String) -> Unit,
+    onFavoriteItemDelete: (String) -> Unit
 ) {
     val isSystemDark = isSystemInDarkTheme()
     val isDarkMode = when (state.themeType) {
@@ -263,7 +291,12 @@ private fun LoungeScreenContent(
                     myAreaList = state.myAreaList,
                     selectedAreaName = state.selectedSignGuCode.displayName
                 )
-                BottomTabType.BOOKMARK -> BookmarkContent()
+                BottomTabType.BOOKMARK -> BookmarkContent(
+                    favoriteList = state.favoriteList,
+                    isDarkMode = isDarkMode,
+                    onItemClick = onFavoriteItemClick,
+                    onItemDelete = onFavoriteItemDelete
+                )
                 BottomTabType.SETTINGS -> SettingContent(
                     isDarkMode = isDarkMode,
                     themeType = state.themeType,
@@ -274,13 +307,205 @@ private fun LoungeScreenContent(
     }
 }
 
-// ===== 찜 탭 콘텐츠 (빈 화면) =====
+// ===== 찜 탭 콘텐츠 =====
 @Composable
-private fun BookmarkContent() {
-    EmptyTabContent(
-        title = "찜한 공연",
-        description = "관심있는 공연을 찜해보세요"
-    )
+private fun BookmarkContent(
+    favoriteList: List<FavoritePerformance>,
+    isDarkMode: Boolean,
+    onItemClick: (String) -> Unit,
+    onItemDelete: (String) -> Unit
+) {
+    if (favoriteList.isEmpty()) {
+        EmptyTabContent(
+            title = "찜한 공연",
+            description = "관심있는 공연을 찜해보세요"
+        )
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .hongBackground(if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100)
+        ) {
+            items(
+                items = favoriteList,
+                key = { it.id }
+            ) { item ->
+                SwipeToDeleteItem(
+                    onDelete = { onItemDelete(item.id) }
+                ) {
+                    FavoritePerformanceItem(
+                        item = item,
+                        isDarkMode = isDarkMode,
+                        onClick = { onItemClick(item.id) }
+                    )
+                }
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = if (isDarkMode) HongColor.DARK_GRAY_100.toColor() else HongColor.GRAY_10.toColor()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SwipeToDeleteItem(
+    onDelete: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    val deleteButtonWidthDp = 80.dp
+    val deleteButtonWidthPx = with(LocalDensity.current) { deleteButtonWidthDp.toPx() }
+    val offsetX = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
+
+    val draggableState = rememberDraggableState { delta ->
+        coroutineScope.launch {
+            offsetX.snapTo((offsetX.value + delta).coerceIn(-deleteButtonWidthPx, 0f))
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+    ) {
+        // 삭제 버튼 (배경)
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .width(deleteButtonWidthDp)
+                .fillMaxHeight()
+                .background(Color.Red)
+                .clickable {
+                    coroutineScope.launch {
+                        offsetX.animateTo(0f, animationSpec = spring(stiffness = Spring.StiffnessMedium))
+                    }
+                    onDelete()
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "삭제",
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        // 콘텐츠 (전경)
+        Box(
+            modifier = Modifier
+                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                .draggable(
+                    state = draggableState,
+                    orientation = Orientation.Horizontal,
+                    onDragStopped = {
+                        coroutineScope.launch {
+                            val targetOffset = if (offsetX.value < -deleteButtonWidthPx / 2) {
+                                -deleteButtonWidthPx
+                            } else {
+                                0f
+                            }
+                            offsetX.animateTo(
+                                targetOffset,
+                                animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                            )
+                        }
+                    }
+                )
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun FavoritePerformanceItem(
+    item: FavoritePerformance,
+    isDarkMode: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .hongBackground(if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100)
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 포스터 이미지
+        HongImageCompose(
+            option = HongImageBuilder()
+                .width(60)
+                .height(80)
+                .imageInfo(item.posterUrl)
+                .radius(HongRadiusInfo(all = 8))
+                .scaleType(HongScaleType.CENTER_CROP)
+                .applyOption()
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // 공연 정보
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            // 공연명
+            HongTextCompose(
+                option = HongTextBuilder()
+                    .text(item.name ?: "")
+                    .typography(HongTypo.BODY_16_B)
+                    .color(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
+                    .applyOption()
+            )
+
+            if (!item.facilityName.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                HongTextCompose(
+                    option = HongTextBuilder()
+                        .text(item.facilityName)
+                        .typography(HongTypo.BODY_13)
+                        .color(HongColor.GRAY_50)
+                        .applyOption()
+                )
+            }
+
+            val period = buildPeriod(item.startDate, item.endDate)
+            if (period.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                HongTextCompose(
+                    option = HongTextBuilder()
+                        .text(period)
+                        .typography(HongTypo.BODY_13)
+                        .color(HongColor.GRAY_50)
+                        .applyOption()
+                )
+            }
+        }
+
+        // 화살표 아이콘
+        HongImageCompose(
+            option = HongImageBuilder()
+                .width(20)
+                .height(20)
+                .imageInfo(R.drawable.honglib_ic_arrow_right)
+                .imageColor(HongColor.GRAY_50)
+                .scaleType(HongScaleType.CENTER_CROP)
+                .applyOption()
+        )
+    }
+}
+
+private fun buildPeriod(startDate: String?, endDate: String?): String {
+    if (startDate.isNullOrBlank() && endDate.isNullOrBlank()) return ""
+    val start = startDate?.let { formatDate(it) } ?: ""
+    val end = endDate?.let { formatDate(it) } ?: ""
+    return if (start == end) start else "$start ~ $end"
+}
+
+private fun formatDate(date: String): String {
+    if (date.length != 8) return date
+    return "${date.substring(0, 4)}.${date.substring(4, 6)}.${date.substring(6, 8)}"
 }
 
 // ===== 빈 탭 공통 콘텐츠 =====
@@ -338,6 +563,8 @@ private fun LoungeScreenPreview() {
         onAwardedMoreClick = {},
         onLocalTabSelected = {},
         onLocalItemClick = {},
-        onLocalMoreClick = {}
+        onLocalMoreClick = {},
+        onFavoriteItemClick = {},
+        onFavoriteItemDelete = {}
     )
 }

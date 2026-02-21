@@ -1,6 +1,7 @@
 package com.codehong.app.kplay.ui.performance.detail
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -52,6 +53,11 @@ class PerformanceDetailActivity : ComponentActivity() {
 
                             is PerformanceDetailEffect.OpenBookingSitePage -> {
                                 ActivityManager.openExternalUrl(this@PerformanceDetailActivity, effect.site)
+                            }
+
+                            is PerformanceDetailEffect.ShowFavoriteToast -> {
+                                val message = if (effect.isAdded) "찜하기에 추가했어요." else "찜하기에서 삭제했어요."
+                                Toast.makeText(this@PerformanceDetailActivity, message, Toast.LENGTH_SHORT).show()
                             }
                         }
                     }

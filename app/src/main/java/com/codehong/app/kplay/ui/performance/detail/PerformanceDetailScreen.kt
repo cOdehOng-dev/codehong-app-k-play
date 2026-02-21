@@ -1,8 +1,10 @@
 package com.codehong.app.kplay.ui.performance.detail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,14 +12,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.unit.dp
@@ -80,7 +85,9 @@ fun PerformanceDetailScreen(
         bottomBar = {
             PerformanceDetailBottomBar(
                 isDarkMode = isDarkMode,
-                onBookingClick = { onEvent(PerformanceDetailEvent.OnBookingClick) }
+                isFavorite = state.isFavorite,
+                onBookingClick = { onEvent(PerformanceDetailEvent.OnBookingClick) },
+                onFavoriteClick = { onEvent(PerformanceDetailEvent.OnFavoriteClick) }
             )
         }
     ) { innerPadding ->
@@ -130,26 +137,61 @@ private fun PerformanceDetailTopBar(
 @Composable
 private fun PerformanceDetailBottomBar(
     isDarkMode: Boolean,
-    onBookingClick: () -> Unit
+    isFavorite: Boolean,
+    onBookingClick: () -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .hongBackground(if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100)
     ) {
-        HongButtonTextCompose(
-            HongButtonTextBuilder()
-                .margin(HongSpacingInfo(left = 16f, right = 16f, top = 12f, bottom = 12f))
-                .width(HongLayoutParam.MATCH_PARENT.value)
-                .height(52)
-                .text("예매하기")
-                .textTypo(HongTypo.BODY_18_B)
-                .textColor(HongColor.WHITE_100)
-                .backgroundColor(HongColor.MAIN_ORANGE_100.hex)
-                .radius(HongRadiusInfo(all = 12))
-                .onClick { onBookingClick() }
-                .applyOption()
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(8f)) {
+                HongButtonTextCompose(
+                    HongButtonTextBuilder()
+                        .width(HongLayoutParam.MATCH_PARENT.value)
+                        .height(52)
+                        .text("예매하기")
+                        .textTypo(HongTypo.BODY_18_B)
+                        .textColor(HongColor.WHITE_100)
+                        .backgroundColor(HongColor.MAIN_ORANGE_100.hex)
+                        .radius(HongRadiusInfo(all = 12))
+                        .onClick { onBookingClick() }
+                        .applyOption()
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .weight(2f)
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .hongBackground(
+                        if (isFavorite) HongColor.MAIN_ORANGE_100
+                        else if (isDarkMode) HongColor.DARK_GRAY_100
+                        else HongColor.GRAY_10
+                    )
+                    .clickable { onFavoriteClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                HongImageCompose(
+                    option = HongImageBuilder()
+                        .width(24)
+                        .height(24)
+                        .imageInfo(R.drawable.honglib_ic_favorite)
+                        .imageColor(if (isFavorite) HongColor.WHITE_100 else HongColor.GRAY_50)
+                        .scaleType(HongScaleType.CENTER_CROP)
+                        .applyOption()
+                )
+            }
+        }
     }
 }
 

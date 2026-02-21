@@ -15,7 +15,8 @@ data class PerformanceDetailState(
     val siteList: List<TicketingSite> = emptyList(),
     val isShowReservationPicker: Boolean = false,
     val loading: PerformanceDetailLoading = PerformanceDetailLoading(),
-    val themeType: ThemeType = ThemeType.SYSTEM
+    val themeType: ThemeType = ThemeType.SYSTEM,
+    val isFavorite: Boolean = false
 ) : ViewState {
 
     val period: String
@@ -41,6 +42,7 @@ data class PerformanceDetailState(
 sealed class PerformanceDetailEvent : ViewEvent {
     data object OnBookingClick : PerformanceDetailEvent()
     data object OnBackClick : PerformanceDetailEvent()
+    data object OnFavoriteClick : PerformanceDetailEvent()
 
     data class OnBookingSiteClick(val site: String?) : PerformanceDetailEvent()
 
@@ -50,9 +52,8 @@ sealed class PerformanceDetailEvent : ViewEvent {
 sealed class PerformanceDetailEffect : ViewSideEffect {
     data object NavigateBack : PerformanceDetailEffect()
     data class OpenBookingPage(val relates: List<TicketingSite>) : PerformanceDetailEffect()
-
     data class OpenBookingSitePage(val site: String?) : PerformanceDetailEffect()
-
+    data class ShowFavoriteToast(val isAdded: Boolean) : PerformanceDetailEffect()
 }
 
 data class PerformanceDetailLoading(

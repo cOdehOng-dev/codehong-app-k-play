@@ -3,8 +3,10 @@ package com.codehong.app.kplay.ui.performance.detail
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
+import com.codehong.app.kplay.domain.model.favorite.FavoritePerformance
 import com.codehong.app.kplay.domain.model.performance.detail.TicketingSite
 import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
+import com.codehong.app.kplay.domain.usecase.FavoriteUseCase
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.app.kplay.domain.usecase.PlaceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
@@ -16,7 +18,8 @@ import javax.inject.Inject
 class PerformanceDetailViewModel @Inject constructor(
     application: Application,
     private val performanceUseCase: PerformanceUseCase,
-    private val placeUseCase: PlaceUseCase
+    private val placeUseCase: PlaceUseCase,
+    private val favoriteUseCase: FavoriteUseCase
 ) : BaseViewModel<PerformanceDetailEvent, PerformanceDetailState, PerformanceDetailEffect>(
     application
 ) {
@@ -49,6 +52,32 @@ class PerformanceDetailViewModel @Inject constructor(
                     )
                 }
             }
+
+            is PerformanceDetailEvent.OnFavoriteClick -> {
+                val detail = state.value.performanceDetail ?: return
+                val id = detail.id ?: return
+                viewModelScope.launch {
+                    if (state.value.isFavorite) {
+                        favoriteUseCase.removeFavorite(id)
+                        setState { copy(isFavorite = false) }
+                        setEffect { PerformanceDetailEffect.ShowFavoriteToast(false) }
+                    } else {
+                        favoriteUseCase.addFavorite(
+                            FavoritePerformance(
+                                id = id,
+                                name = detail.name,
+                                posterUrl = detail.posterUrl,
+                                startDate = detail.startDate,
+                                endDate = detail.endDate,
+                                facilityName = detail.facilityName,
+                                genre = detail.genre
+                            )
+                        )
+                        setState { copy(isFavorite = true) }
+                        setEffect { PerformanceDetailEffect.ShowFavoriteToast(true) }
+                    }
+                }
+            }
         }
     }
 
@@ -70,9 +99,15 @@ class PerformanceDetailViewModel @Inject constructor(
                 id = performanceId
             ).collect { result ->
                 val performanceDetail = result?.firstOrNull()
+                val isFavorite = if (!performanceDetail?.id.isNullOrEmpty()) {
+                    favoriteUseCase.isFavorite(performanceDetail!!.id!!)
+                } else {
+                    false
+                }
                 setState {
                     copy(
                         performanceDetail = performanceDetail,
+                        isFavorite = isFavorite,
                         loading = loading.copy(isPerformanceDetailLoading = false)
                     )
                 }

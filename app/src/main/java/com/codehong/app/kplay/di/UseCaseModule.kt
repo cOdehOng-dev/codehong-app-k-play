@@ -1,6 +1,8 @@
 package com.codehong.app.kplay.di
 
+import com.codehong.app.kplay.domain.repository.FavoriteRepository
 import com.codehong.app.kplay.domain.repository.PerformanceRepository
+import com.codehong.app.kplay.domain.usecase.FavoriteUseCase
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.app.kplay.domain.usecase.PlaceUseCase
 import dagger.Module
@@ -24,4 +26,10 @@ object UseCaseModule {
     fun providePlaceUseCase(
         repository: PerformanceRepository
     ) = PlaceUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideFavoriteUseCase(
+        repository: FavoriteRepository
+    ) = FavoriteUseCase(repository)
 }

@@ -2,7 +2,10 @@ package com.codehong.app.kplay.di
 
 import com.codehong.app.kplay.data.datasource.PerformanceLocalDataSource
 import com.codehong.app.kplay.data.datasource.PerformanceRemoteDataSource
+import com.codehong.app.kplay.data.room.dao.FavoritePerformanceDao
+import com.codehong.app.kplay.data.repository.FavoriteRepositoryImpl
 import com.codehong.app.kplay.data.repository.PerformanceRepositoryImpl
+import com.codehong.app.kplay.domain.repository.FavoriteRepository
 import com.codehong.app.kplay.domain.repository.PerformanceRepository
 import dagger.Module
 import dagger.Provides
@@ -20,4 +23,10 @@ object RepositoryModule {
         remote: PerformanceRemoteDataSource,
         local: PerformanceLocalDataSource
     ): PerformanceRepository = PerformanceRepositoryImpl(remote, local)
+
+    @Provides
+    @Singleton
+    fun provideFavoriteRepository(
+        dao: FavoritePerformanceDao
+    ): FavoriteRepository = FavoriteRepositoryImpl(dao)
 }

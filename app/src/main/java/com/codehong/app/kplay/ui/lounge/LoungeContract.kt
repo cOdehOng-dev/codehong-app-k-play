@@ -2,6 +2,7 @@ package com.codehong.app.kplay.ui.lounge
 
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.favorite.FavoritePerformance
 import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
@@ -32,7 +33,8 @@ data class LoungeState(
     val localList: List<PerformanceInfoItem> = emptyList(),
     val selectedLocalTab: SignGuCode = SignGuCode.SEOUL,
     val localTabList: List<SignGuCode> = SignGuCode.entries.toList(),
-    val apiLoading: LoungeApiLoading = LoungeApiLoading()
+    val apiLoading: LoungeApiLoading = LoungeApiLoading(),
+    val favoriteList: List<FavoritePerformance> = emptyList()
 ) : ViewState
 
 sealed class LoungeEvent : ViewEvent {
@@ -56,6 +58,8 @@ sealed class LoungeEvent : ViewEvent {
     data class OnLocalItemClick(val item: PerformanceInfoItem) : LoungeEvent()
     data object OnLocalMoreClick : LoungeEvent()
     data class OnThemeChanged(val themeType: ThemeType) : LoungeEvent()
+    data class OnFavoriteItemClick(val id: String) : LoungeEvent()
+    data class OnFavoriteItemDelete(val id: String) : LoungeEvent()
 }
 
 sealed class LoungeEffect : ViewSideEffect {
