@@ -8,6 +8,7 @@ import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.app.kplay.domain.type.ThemeType
+import com.codehong.app.kplay.ui.lounge.content.mylocation.VenueGroup
 import com.codehong.library.architecture.mvi.ViewEvent
 import com.codehong.library.architecture.mvi.ViewSideEffect
 import com.codehong.library.architecture.mvi.ViewState
@@ -34,7 +35,9 @@ data class LoungeState(
     val selectedLocalTab: SignGuCode = SignGuCode.SEOUL,
     val localTabList: List<SignGuCode> = SignGuCode.entries.toList(),
     val apiLoading: LoungeApiLoading = LoungeApiLoading(),
-    val favoriteList: List<FavoritePerformance> = emptyList()
+    val favoriteList: List<FavoritePerformance> = emptyList(),
+    val venueGroups: List<VenueGroup> = emptyList(),
+    val cacheSizeText: String = ""
 ) : ViewState
 
 sealed class LoungeEvent : ViewEvent {
@@ -60,6 +63,7 @@ sealed class LoungeEvent : ViewEvent {
     data class OnThemeChanged(val themeType: ThemeType) : LoungeEvent()
     data class OnFavoriteItemClick(val id: String) : LoungeEvent()
     data class OnFavoriteItemDelete(val id: String) : LoungeEvent()
+    data object OnCacheDeleteConfirmed : LoungeEvent()
 }
 
 sealed class LoungeEffect : ViewSideEffect {
@@ -80,6 +84,7 @@ data class LoungeApiLoading(
     val isLocalLoading: Boolean = true,
     val isGenreRankingLoading: Boolean = true,
     val isFestivalLoading: Boolean = true,
-    val isAwardLoading: Boolean = true
+    val isAwardLoading: Boolean = true,
+    val isVenueGroupLoading: Boolean = false
 )
 

@@ -4,14 +4,19 @@ import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
+import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.SignGuCode
 import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
 import com.codehong.app.kplay.domain.usecase.FavoriteUseCase
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
+import com.codehong.app.kplay.domain.usecase.PlaceUseCase
+import com.codehong.app.kplay.ui.lounge.content.mylocation.VenueGroup
 import com.codehong.library.architecture.mvi.BaseViewModel
 import com.codehong.library.debugtool.log.TimberUtil
 import com.codehong.library.util.DateUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,8 +26,12 @@ private const val TAG = "LoungeViewModel"
 class LoungeViewModel @Inject constructor(
     application: Application,
     private val performanceUseCase: PerformanceUseCase,
-    private val favoriteUseCase: FavoriteUseCase
+    private val favoriteUseCase: FavoriteUseCase,
+    private val placeUseCase: PlaceUseCase
 ) : BaseViewModel<LoungeEvent, LoungeState, LoungeEffect>(application) {
+
+    // 마지막으로 위경도 조회를 완료한 도시 코드 (캐시 키)
+    private var lastResolvedSignGuCode: SignGuCode? = null
 
     init {
         observeFavorites()
@@ -48,6 +57,19 @@ class LoungeViewModel @Inject constructor(
             is LoungeEvent.OnTabSelected -> {
                 TimberUtil.d("Tab selected: ${event.tab.label}")
                 setState { copy(selectedTab = event.tab) }
+                if (event.tab == BottomTabType.MY_LOCATION) {
+                    val currentSignGuCode = state.value.selectedSignGuCode
+                    val alreadyResolved = lastResolvedSignGuCode == currentSignGuCode
+                    val hasVenues = state.value.venueGroups.isNotEmpty()
+                    if (!alreadyResolved || !hasVenues) {
+                        resolveVenueCoordinates(state.value.myAreaList)
+                    } else {
+                        TimberUtil.d("$TAG ▶ venue 이미 조회됨 (${currentSignGuCode.displayName}), skip")
+                    }
+                }
+                if (event.tab == BottomTabType.SETTINGS) {
+                    loadCacheSize()
+                }
             }
 
             is LoungeEvent.OnCategoryClick -> {
@@ -81,7 +103,18 @@ class LoungeViewModel @Inject constructor(
 
             is LoungeEvent.OnSignGuCodeUpdated -> {
                 TimberUtil.d("SignGuCode updated: ${event.signGuCode.displayName}")
-                setState { copy(selectedSignGuCode = event.signGuCode) }
+                if (state.value.selectedSignGuCode != event.signGuCode) {
+                    // 도시가 변경되면 venue 캐시 무효화
+                    lastResolvedSignGuCode = null
+                    setState {
+                        copy(
+                            selectedSignGuCode = event.signGuCode,
+                            venueGroups = emptyList()
+                        )
+                    }
+                } else {
+                    setState { copy(selectedSignGuCode = event.signGuCode) }
+                }
                 setMyLocation(event.signGuCode.code)
                 callMyAreaListApi(event.signGuCode.code)
             }
@@ -196,6 +229,13 @@ class LoungeViewModel @Inject constructor(
                     favoriteUseCase.removeFavorite(event.id)
                 }
             }
+
+            is LoungeEvent.OnCacheDeleteConfirmed -> {
+                viewModelScope.launch {
+                    placeUseCase.clearCache()
+                    loadCacheSize()
+                }
+            }
         }
     }
 
@@ -236,9 +276,7 @@ class LoungeViewModel @Inject constructor(
 
         viewModelScope.launch {
             setState {
-                copy(
-                    apiLoading = apiLoading.copy(isMyAreaLoading = true)
-                )
+                copy(apiLoading = apiLoading.copy(isMyAreaLoading = true))
             }
             performanceUseCase.getPerformanceList(
                 service = BuildConfig.KOKOR_CLIENT_ID,
@@ -254,6 +292,54 @@ class LoungeViewModel @Inject constructor(
                         apiLoading = apiLoading.copy(isMyAreaLoading = false)
                     )
                 }
+            }
+        }
+    }
+
+    /**
+     * 내 주변 탭 선택 시 호출.
+     * placeName 기준으로 공연장을 그룹화하고 PlaceUseCase로 위경도를 조회하여 VenueGroup 생성.
+     * 같은 도시에서 이미 핀을 찍은 적이 있으면 호출되지 않음.
+     */
+    private fun resolveVenueCoordinates(performances: List<PerformanceInfoItem>) {
+        val targetSignGuCode = state.value.selectedSignGuCode
+        viewModelScope.launch {
+            setState {
+                copy(apiLoading = apiLoading.copy(isVenueGroupLoading = true))
+            }
+
+            val grouped = performances.groupBy { it.placeName ?: "알 수 없음" }
+            val venueGroups = mutableListOf<VenueGroup>()
+
+            grouped.forEach { (placeName, items) ->
+                val detail = placeUseCase.getPlaceDetail(
+                    serviceKey = BuildConfig.KOKOR_CLIENT_ID,
+                    keyword = placeName,
+                    currentPage = "1",
+                    rowsPerPage = "5"
+                ).firstOrNull()
+
+                val lat = detail?.latitude?.toDoubleOrNull()
+                val lng = detail?.longitude?.toDoubleOrNull()
+
+                TimberUtil.d("venue=$placeName lat=$lat lng=$lng performances=${items.size}")
+
+                venueGroups.add(
+                    VenueGroup(
+                        placeName = placeName,
+                        lat = lat,
+                        lng = lng,
+                        performances = items
+                    )
+                )
+            }
+
+            lastResolvedSignGuCode = targetSignGuCode
+            setState {
+                copy(
+                    venueGroups = venueGroups,
+                    apiLoading = apiLoading.copy(isVenueGroupLoading = false)
+                )
             }
         }
     }
@@ -376,6 +462,23 @@ class LoungeViewModel @Inject constructor(
 
     fun setMyLocation(signGuCode: String) {
         performanceUseCase.setMyLocation(signGuCode)
+    }
+
+    private fun loadCacheSize() {
+        viewModelScope.launch {
+            val bytes = placeUseCase.getCacheSize()
+            val text = formatCacheSize(bytes)
+            setState { copy(cacheSizeText = text) }
+        }
+    }
+
+    private fun formatCacheSize(bytes: Long): String {
+        return when {
+            bytes <= 0L -> "0 MB"
+            bytes < 1024L -> "${bytes} B"
+            bytes < 1024L * 1024L -> String.format("%.2f KB", bytes / 1024.0)
+            else -> String.format("%.2f MB", bytes / (1024.0 * 1024.0))
+        }
     }
 
     fun callMyLocation() {

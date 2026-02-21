@@ -2,6 +2,7 @@ package com.codehong.app.kplay.di
 
 import com.codehong.app.kplay.domain.repository.FavoriteRepository
 import com.codehong.app.kplay.domain.repository.PerformanceRepository
+import com.codehong.app.kplay.domain.repository.PlaceDetailCacheRepository
 import com.codehong.app.kplay.domain.usecase.FavoriteUseCase
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.app.kplay.domain.usecase.PlaceUseCase
@@ -24,8 +25,9 @@ object UseCaseModule {
     @Provides
     @Singleton
     fun providePlaceUseCase(
-        repository: PerformanceRepository
-    ) = PlaceUseCase(repository)
+        repository: PerformanceRepository,
+        cacheRepository: PlaceDetailCacheRepository
+    ) = PlaceUseCase(repository, cacheRepository)
 
     @Provides
     @Singleton

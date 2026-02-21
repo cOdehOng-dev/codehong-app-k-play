@@ -112,12 +112,12 @@ class PerformanceDetailViewModel @Inject constructor(
                     )
                 }
 
-                callPlaceSearchApi(performanceDetail?.facilityName)
+                callPlaceDetailApi(performanceDetail?.facilityName)
             }
         }
     }
 
-    fun callPlaceSearchApi(keyword: String?) {
+    fun callPlaceDetailApi(keyword: String?) {
         val keywordPlaceName = keyword?.split(" ")?.firstOrNull()
         if (keywordPlaceName.isNullOrEmpty()) {
             setState {
@@ -130,34 +130,11 @@ class PerformanceDetailViewModel @Inject constructor(
         }
         viewModelScope.launch {
             setState { copy(loading = loading.copy(isPlaceDetailLoading = true)) }
-            placeUseCase.searchPlace(
+            placeUseCase.getPlaceDetail(
                 serviceKey = BuildConfig.KOKOR_CLIENT_ID,
                 keyword = keywordPlaceName,
                 currentPage = "1",
                 rowsPerPage = "50"
-            ).collect { placeList ->
-                val place =
-                    placeList?.find { placeInfo -> keyword.contains(placeInfo.placeName ?: "") }
-                val placeId = place?.placeId
-                if (!placeId.isNullOrEmpty()) {
-                    callPlaceDetailApi(placeId)
-                } else {
-                    setState {
-                        copy(
-                            placeDetail = null,
-                            loading = loading.copy(isPlaceDetailLoading = false)
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    fun callPlaceDetailApi(placeId: String) {
-        viewModelScope.launch {
-            placeUseCase.getPlaceDetail(
-                serviceKey = BuildConfig.KOKOR_CLIENT_ID,
-                id = placeId
             ).collect { detail ->
                 setState {
                     copy(

@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.codehong.app.kplay.data.room.KPlayDatabase
 import com.codehong.app.kplay.data.room.RoomConst
 import com.codehong.app.kplay.data.room.dao.FavoritePerformanceDao
+import com.codehong.app.kplay.data.room.dao.PlaceDetailDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,4 +38,9 @@ object DatabaseModule {
     @Singleton
     fun provideFavoritePerformanceDao(db: KPlayDatabase): FavoritePerformanceDao =
         db.favoritePerformanceDao()
+
+    @Provides
+    @Singleton
+    fun providePlaceDetailDao(db: KPlayDatabase): PlaceDetailDao =
+        db.placeDetailDao()
 }

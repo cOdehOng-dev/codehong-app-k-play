@@ -1,8 +1,10 @@
-package com.codehong.app.kplay.ui.lounge.content
+package com.codehong.app.kplay.ui.lounge.content.mylocation
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.Typeface
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -13,15 +15,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.library.debugtool.log.TimberUtil
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
@@ -63,32 +69,44 @@ private val GrayColor = Color(0xFF999999)
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 fun MyLocationContent(
-    myAreaList: List<PerformanceInfoItem>,
-    selectedAreaName: String = "서울"
+    venueGroups: List<VenueGroup>,
+    isVenueGroupLoading: Boolean = false,
+    selectedAreaName: String = "서울",
+    onPerformanceClick: (PerformanceInfoItem) -> Unit
 ) {
+    LaunchedEffect(venueGroups) {
+        TimberUtil.d("MyLocation ▶ venue 그룹 수: ${venueGroups.size}")
+        venueGroups.forEach { group ->
+            TimberUtil.d("MyLocation ▶ [${group.placeName}] ${group.performances.size}건 lat=${group.lat} lng=${group.lng}")
+            group.performances.forEach { item ->
+                TimberUtil.d("MyLocation   - id=${item.id} | name=${item.name} | ${item.startDate}~${item.endDate}")
+            }
+        }
+    }
+
     val areaCenter = remember(selectedAreaName) {
         getAreaCenter(selectedAreaName)
     }
 
-    val itemsWithPosition = remember(myAreaList, areaCenter) {
-        myAreaList.mapIndexed { index, item ->
-            val lat = item.latitude
-                ?: (areaCenter.latitude + generateOffset(item.hashCode(), index, true))
-            val lng = item.longitude
-                ?: (areaCenter.longitude + generateOffset(item.hashCode(), index, false))
-            item to LatLng(lat, lng)
+    // 각 VenueGroup에 실제 좌표 or 오프셋 좌표를 매핑
+    val groupsWithPosition = remember(venueGroups, areaCenter) {
+        venueGroups.mapIndexed { index, group ->
+            val lat = group.lat ?: (areaCenter.latitude + generateOffset(group.hashCode(), index, true))
+            val lng = group.lng ?: (areaCenter.longitude + generateOffset(group.hashCode(), index, false))
+            group to LatLng(lat, lng)
         }
     }
 
-    var selectedItem by remember { mutableStateOf<PerformanceInfoItem?>(null) }
+    var selectedGroup by remember { mutableStateOf<VenueGroup?>(null) }
     var selectedPosition by remember { mutableStateOf<LatLng?>(null) }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition(areaCenter, 11.0)
     }
 
-    val dotBitmap = remember { createCircleBitmap(80, 0xFF2AC1BC.toInt()) }
-    val dotImage = remember { OverlayImage.fromBitmap(dotBitmap) }
+    // 핀 비트맵 캐시: count별로 생성
+    val bitmapCache = remember { mutableMapOf<Int, Bitmap>() }
+    val overlayCache = remember { mutableMapOf<Int, OverlayImage>() }
 
     LaunchedEffect(selectedPosition) {
         selectedPosition?.let {
@@ -98,6 +116,15 @@ fun MyLocationContent(
 
     LaunchedEffect(areaCenter) {
         cameraPositionState.move(CameraUpdate.scrollTo(areaCenter))
+    }
+
+    // 선택 그룹이 바뀌면 pager를 0으로 리셋하기 위한 상태
+    val pagerState = rememberPagerState(initialPage = 0) {
+        selectedGroup?.performances?.size ?: 0
+    }
+
+    LaunchedEffect(selectedGroup?.placeName) {
+        pagerState.scrollToPage(0)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -111,21 +138,31 @@ fun MyLocationContent(
                 isLogoClickEnabled = false
             ),
             onMapClick = { _, _ ->
-                selectedItem = null
+                selectedGroup = null
                 selectedPosition = null
             }
         ) {
-            itemsWithPosition.forEach { (item, position) ->
-                key(item.id ?: item.hashCode()) {
-                    val isSelected = selectedItem?.id == item.id
+            groupsWithPosition.forEach { (group, position) ->
+                key(group.placeName) {
+                    val isSelected = selectedGroup?.placeName == group.placeName
+                    val count = group.performances.size
+
+                    val overlayImage = remember(count) {
+                        overlayCache.getOrPut(count) {
+                            val bitmap = bitmapCache.getOrPut(count) {
+                                createVenueBitmap(sizePx = 80, color = 0xFF2AC1BC.toInt(), count = count)
+                            }
+                            OverlayImage.fromBitmap(bitmap)
+                        }
+                    }
 
                     Marker(
                         state = rememberMarkerState(position = position),
-                        icon = dotImage,
-                        width = if (isSelected) 12.dp else 22.dp,
-                        height = if (isSelected) 12.dp else 22.dp,
+                        icon = overlayImage,
+                        width = if (isSelected) 52.dp else 44.dp,
+                        height = if (isSelected) 52.dp else 44.dp,
                         onClick = {
-                            selectedItem = item
+                            selectedGroup = group
                             selectedPosition = position
                             true
                         }
@@ -134,80 +171,62 @@ fun MyLocationContent(
             }
         }
 
-        // 말풍선 (카메라가 선택된 핀 중심으로 이동하므로 화면 중앙 위에 표시)
-        AnimatedVisibility(
-            visible = selectedItem != null,
-            enter = fadeIn() + slideInVertically { it / 2 },
-            exit = fadeOut(),
-            modifier = Modifier
-                .align(Alignment.Center)
-                .offset(y = (-60).dp)
-        ) {
-            selectedItem?.let { item ->
-                SpeechBubble(
-                    name = item.name ?: "",
-                    place = item.placeName ?: ""
-                )
+        // 위경도 조회 로딩 인디케이터
+        if (isVenueGroupLoading) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 16.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White.copy(alpha = 0.9f))
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        color = PrimaryColor,
+                        strokeWidth = 2.dp
+                    )
+                    Text(
+                        text = "공연장 위치 조회 중...",
+                        fontSize = 12.sp,
+                        color = DarkGrayColor
+                    )
+                }
             }
         }
 
-        // 하단 공연 정보 카드
+        // 하단 공연 정보 Pager 카드
         AnimatedVisibility(
-            visible = selectedItem != null,
+            visible = selectedGroup != null,
             enter = slideInVertically { it } + fadeIn(),
             exit = slideOutVertically { it } + fadeOut(),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(start = 16.dp, end = 16.dp, bottom = 100.dp)
+                .padding(bottom = 100.dp)
         ) {
-            selectedItem?.let { item ->
-                PerformanceInfoCard(
-                    item = item,
-                    onClick = {
-                        // TODO: 공연 상세 화면으로 이동
-                    }
-                )
+            selectedGroup?.let { group ->
+                HorizontalPager(
+                    state = pagerState,
+                    contentPadding = PaddingValues(horizontal = 40.dp),
+                    pageSpacing = 8.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) { page ->
+                    val item = group.performances.getOrNull(page) ?: return@HorizontalPager
+                    PerformanceInfoCard(
+                        item = item,
+                        onClick = { onPerformanceClick(item) }
+                    )
+                }
             }
         }
     }
 }
 
-// ===== 말풍선 =====
-@Composable
-private fun SpeechBubble(
-    name: String,
-    place: String
-) {
-    Box(
-        modifier = Modifier
-            .shadow(6.dp, RoundedCornerShape(10.dp))
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color.White)
-            .padding(horizontal = 14.dp, vertical = 10.dp)
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            Text(
-                text = name,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = DarkGrayColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = place,
-                fontSize = 11.sp,
-                color = GrayColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-// ===== 하단 공연 정보 카드 (FestivalListItem 스타일) =====
+// ===== 하단 공연 정보 카드 =====
 @Composable
 private fun PerformanceInfoCard(
     item: PerformanceInfoItem,
@@ -223,7 +242,6 @@ private fun PerformanceInfoCard(
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 포스터 이미지
         AsyncImage(
             model = item.posterUrl,
             contentDescription = item.name,
@@ -235,12 +253,10 @@ private fun PerformanceInfoCard(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // 정보 영역
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // 장르, 지역 뱃지
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -252,7 +268,6 @@ private fun PerformanceInfoCard(
                 }
             }
 
-            // 공연명
             Text(
                 text = item.name ?: "",
                 fontSize = 15.sp,
@@ -262,7 +277,6 @@ private fun PerformanceInfoCard(
                 overflow = TextOverflow.Ellipsis
             )
 
-            // 장소명
             Text(
                 text = item.placeName ?: "",
                 fontSize = 13.sp,
@@ -271,7 +285,6 @@ private fun PerformanceInfoCard(
                 overflow = TextOverflow.Ellipsis
             )
 
-            // 공연 기간
             Text(
                 text = item.period,
                 fontSize = 12.sp,
@@ -300,22 +313,19 @@ private fun MapSmallBadge(text: String?) {
     }
 }
 
-// ===== 원형 점 비트맵 생성 =====
-private fun createCircleBitmap(sizePx: Int, color: Int): Bitmap {
+// ===== 공연장 핀 비트맵 생성 (뱃지 포함) =====
+private fun createVenueBitmap(sizePx: Int, color: Int, count: Int): Bitmap {
     val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     val center = sizePx / 2f
     val borderWidth = sizePx * 0.12f
     val radius = center - borderWidth / 2f
 
-    // 흰색 외곽선
     val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         this.color = android.graphics.Color.WHITE
         style = Paint.Style.STROKE
         strokeWidth = borderWidth
     }
-
-    // 채우기
     val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         this.color = color
         style = Paint.Style.FILL
@@ -323,6 +333,38 @@ private fun createCircleBitmap(sizePx: Int, color: Int): Bitmap {
 
     canvas.drawCircle(center, center, radius, fillPaint)
     canvas.drawCircle(center, center, radius, borderPaint)
+
+    // 2개 이상 공연이 있을 때 우측 상단에 빨간 뱃지 표시
+    if (count > 1) {
+        val badgeRadius = sizePx * 0.22f
+        val badgeCenterX = sizePx * 0.78f
+        val badgeCenterY = sizePx * 0.22f
+
+        val badgeFill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.color = android.graphics.Color.RED
+            style = Paint.Style.FILL
+        }
+        val badgeBorder = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.color = android.graphics.Color.WHITE
+            style = Paint.Style.STROKE
+            strokeWidth = sizePx * 0.06f
+        }
+
+        canvas.drawCircle(badgeCenterX, badgeCenterY, badgeRadius, badgeFill)
+        canvas.drawCircle(badgeCenterX, badgeCenterY, badgeRadius, badgeBorder)
+
+        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.color = android.graphics.Color.WHITE
+            textSize = sizePx * 0.22f
+            typeface = Typeface.DEFAULT_BOLD
+            textAlign = Paint.Align.CENTER
+        }
+        val text = if (count > 9) "9+" else count.toString()
+        val textBounds = Rect()
+        textPaint.getTextBounds(text, 0, text.length, textBounds)
+        canvas.drawText(text, badgeCenterX, badgeCenterY + textBounds.height() / 2f, textPaint)
+    }
+
     return bitmap
 }
 
