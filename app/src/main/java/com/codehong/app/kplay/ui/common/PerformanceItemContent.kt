@@ -29,13 +29,18 @@ import com.codehong.library.widget.util.HongDateUtil.formatPerformancePeriod
 @Composable
 fun PerformanceItemContent(
     item: PerformanceInfoItem,
-    onClick: () -> Unit
+    onClick: (() -> Unit)? = null
 ) {
+    val modifier = if (onClick != null) {
+        Modifier.clickPress(onClick = onClick)
+    } else {
+        Modifier
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickPress(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .then(modifier),
         verticalAlignment = Alignment.CenterVertically
     ) {
         HongImageCompose(
