@@ -42,7 +42,6 @@ import com.codehong.app.kplay.manager.BitmapManager
 import com.codehong.app.kplay.ui.common.PerformanceItemContent
 import com.codehong.app.kplay.util.Util
 import com.codehong.app.kplay.util.Util.centerAreaLatLng
-import com.codehong.library.debugtool.log.TimberUtil
 import com.codehong.library.widget.R
 import com.codehong.library.widget.extensions.hongBackground
 import com.codehong.library.widget.image.def.HongImageBuilder
@@ -77,15 +76,15 @@ fun MyLocationContent(
     selectedAreaName: String = "서울",
     onPerformanceClick: (PerformanceInfoItem) -> Unit
 ) {
-    LaunchedEffect(performanceGroupList) {
-        TimberUtil.d("MyLocation ▶ venue 그룹 수: ${performanceGroupList.size}")
-        performanceGroupList.forEach { group ->
-            TimberUtil.d("MyLocation ▶ [${group.placeName}] ${group.performanceList.size}건 lat=${group.lat} lng=${group.lng}")
-            group.performanceList.forEach { item ->
-                TimberUtil.d("MyLocation - id=${item.id} | name=${item.name} | ${item.startDate}~${item.endDate}")
-            }
-        }
-    }
+//    LaunchedEffect(performanceGroupList) {
+//        TimberUtil.d("MyLocation ▶ venue 그룹 수: ${performanceGroupList.size}")
+//        performanceGroupList.forEach { group ->
+//            TimberUtil.d("MyLocation ▶ [${group.placeName}] ${group.performanceList.size}건 lat=${group.lat} lng=${group.lng}")
+//            group.performanceList.forEach { item ->
+//                TimberUtil.d("MyLocation - id=${item.id} | name=${item.name} | ${item.startDate}~${item.endDate}")
+//            }
+//        }
+//    }
 
     val areaCenter = remember(selectedAreaName) {
         selectedAreaName.centerAreaLatLng()

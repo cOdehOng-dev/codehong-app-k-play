@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.codehong.app.kplay.domain.model.favorite.FavoritePerformance
+import com.codehong.app.kplay.domain.util.toPeriod
 import com.codehong.library.widget.R
 import com.codehong.library.widget.extensions.hongBackground
 import com.codehong.library.widget.image.def.HongImageBuilder
@@ -52,17 +53,14 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
-fun BookmarkContent(
+fun FavoriteContent(
     favoriteList: List<FavoritePerformance>,
     isDarkMode: Boolean,
     onItemClick: (String) -> Unit,
     onItemDelete: (String) -> Unit
 ) {
     if (favoriteList.isEmpty()) {
-        EmptyTabContent(
-            title = "찜한 공연",
-            description = "관심있는 공연을 찜해보세요"
-        )
+        EmptyContent()
     } else {
         LazyColumn(
             modifier = Modifier
@@ -91,6 +89,7 @@ fun BookmarkContent(
     }
 }
 
+// TODO 위젯으로 만들어보기
 @Composable
 private fun SwipeToDeleteItem(
     onDelete: () -> Unit,
@@ -213,7 +212,7 @@ private fun FavoritePerformanceItem(
                 )
             }
 
-            val period = buildPeriod(item.startDate, item.endDate)
+            val period = Pair(item.startDate, item.endDate).toPeriod()
             if (period.isNotBlank()) {
                 Spacer(modifier = Modifier.height(4.dp))
                 HongTextCompose(
@@ -241,10 +240,7 @@ private fun FavoritePerformanceItem(
 
 // ===== 빈 탭 공통 콘텐츠 =====
 @Composable
-private fun EmptyTabContent(
-    title: String,
-    description: String
-) {
+private fun EmptyContent() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -255,14 +251,14 @@ private fun EmptyTabContent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = title,
+                text = "찜한 공연이 없어요:(",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = HongColor.DARK_GRAY_100.toColor()
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = description,
+                text = "관심있는 공연을 찜해보세요",
                 fontSize = 14.sp,
                 color = HongColor.GRAY_50.toColor(),
                 textAlign = TextAlign.Center
@@ -270,16 +266,3 @@ private fun EmptyTabContent(
         }
     }
 }
-
-private fun buildPeriod(startDate: String?, endDate: String?): String {
-    if (startDate.isNullOrBlank() && endDate.isNullOrBlank()) return ""
-    val start = startDate?.let { formatDate(it) } ?: ""
-    val end = endDate?.let { formatDate(it) } ?: ""
-    return if (start == end) start else "$start ~ $end"
-}
-
-private fun formatDate(date: String): String {
-    if (date.length != 8) return date
-    return "${date.take(4)}.${date.substring(4, 6)}.${date.substring(6, 8)}"
-}
-

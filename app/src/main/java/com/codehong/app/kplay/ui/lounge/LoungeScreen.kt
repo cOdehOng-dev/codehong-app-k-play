@@ -38,7 +38,7 @@ import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.ui.lounge.content.SettingContent
-import com.codehong.app.kplay.ui.lounge.content.favorite.BookmarkContent
+import com.codehong.app.kplay.ui.lounge.content.favorite.FavoriteContent
 import com.codehong.app.kplay.ui.lounge.content.home.HomeContent
 import com.codehong.app.kplay.ui.lounge.content.mylocation.MyLocationContent
 import com.codehong.library.widget.R
@@ -271,7 +271,7 @@ private fun LoungeScreenContent(
                     selectedAreaName = state.selectedRegionCode.displayName,
                     onPerformanceClick = onNearbyItemClick
                 )
-                BottomTabType.BOOKMARK -> BookmarkContent(
+                BottomTabType.BOOKMARK -> FavoriteContent(
                     favoriteList = state.favoriteList,
                     isDarkMode = isDarkMode,
                     onItemClick = onFavoriteItemClick,
