@@ -1,7 +1,7 @@
 package com.codehong.app.kplay.ui.award
 
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
-import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.library.architecture.mvi.ViewEvent
 import com.codehong.library.architecture.mvi.ViewSideEffect
@@ -9,7 +9,7 @@ import com.codehong.library.architecture.mvi.ViewState
 
 data class AwardListState(
     val themeType: ThemeType = ThemeType.SYSTEM,
-    val selectedSignGuCode: SignGuCode = SignGuCode.SEOUL,
+    val selectedRegionCode: RegionCode = RegionCode.SEOUL,
     val startDate: String = "",  // yyyyMMdd
     val endDate: String = "",    // yyyyMMdd
     val currentPage: Int = 1,
@@ -21,7 +21,7 @@ data class AwardListState(
 
 sealed class AwardListEvent : ViewEvent {
     data class OnAwardClick(val item: PerformanceInfoItem) : AwardListEvent()
-    data class OnSignGuCodeSelected(val signGuCode: SignGuCode) : AwardListEvent()
+    data class OnSignGuCodeSelected(val regionCode: RegionCode) : AwardListEvent()
     data class OnDateSelected(val startDate: String, val endDate: String) : AwardListEvent()
     data object OnLoadMore : AwardListEvent()
     data object OnDateChangeClick : AwardListEvent()

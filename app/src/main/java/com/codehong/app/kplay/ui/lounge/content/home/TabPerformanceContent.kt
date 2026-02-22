@@ -13,7 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
-import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.ui.lounge.content.RowShimmer
 import com.codehong.library.widget.rule.HongSpacingInfo
 import com.codehong.library.widget.rule.color.HongColor
@@ -26,10 +26,10 @@ fun TabPerformanceContent(
     title: String,
     emptyText: String,
     isLoading: Boolean,
-    tabList: List<SignGuCode>,
-    selectedTab: SignGuCode,
+    tabList: List<RegionCode>,
+    selectedTab: RegionCode,
     performanceList: List<PerformanceInfoItem>,
-    onTabSelected: (SignGuCode) -> Unit,
+    onTabSelected: (RegionCode) -> Unit,
     onClickProduct: (PerformanceInfoItem) -> Unit,
     onClickMore: () -> Unit
 ) {
@@ -66,7 +66,7 @@ fun TabPerformanceContent(
                 )
             )
             .onTabClick { _, item ->
-                onTabSelected(item as SignGuCode)
+                onTabSelected(item as RegionCode)
             }
             .tabTextHorizontalPadding(12)
             .tabBetweenPadding(6)

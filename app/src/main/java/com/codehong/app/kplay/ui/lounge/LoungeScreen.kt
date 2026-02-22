@@ -35,7 +35,7 @@ import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
-import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.ui.lounge.content.SettingContent
 import com.codehong.app.kplay.ui.lounge.content.favorite.BookmarkContent
@@ -143,13 +143,13 @@ private fun LoungeScreenContent(
     onGenreTabSelected: (GenreCode) -> Unit,
     onGenreRankItemClick: (BoxOfficeItem) -> Unit,
     onGenreRankMoreClick: () -> Unit,
-    onFestivalTabSelected: (SignGuCode) -> Unit,
+    onFestivalTabSelected: (RegionCode) -> Unit,
     onFestivalItemClick: (PerformanceInfoItem) -> Unit,
     onFestivalMoreClick: () -> Unit,
-    onAwardedTabSelected: (SignGuCode) -> Unit,
+    onAwardedTabSelected: (RegionCode) -> Unit,
     onAwardedItemClick: (PerformanceInfoItem) -> Unit,
     onAwardedMoreClick: () -> Unit,
-    onLocalTabSelected: (SignGuCode) -> Unit,
+    onLocalTabSelected: (RegionCode) -> Unit,
     onLocalItemClick: (PerformanceInfoItem) -> Unit,
     onLocalMoreClick: () -> Unit,
     onFavoriteItemClick: (String) -> Unit,
@@ -266,9 +266,9 @@ private fun LoungeScreenContent(
                     onLocalMoreClick = onLocalMoreClick
                 )
                 BottomTabType.MY_LOCATION -> MyLocationContent(
-                    venueGroups = state.venueGroups,
+                    placeGroups = state.placeGroups,
                     isVenueGroupLoading = state.apiLoading.isVenueGroupLoading,
-                    selectedAreaName = state.selectedSignGuCode.displayName,
+                    selectedAreaName = state.selectedRegionCode.displayName,
                     onPerformanceClick = onNearbyItemClick
                 )
                 BottomTabType.BOOKMARK -> BookmarkContent(

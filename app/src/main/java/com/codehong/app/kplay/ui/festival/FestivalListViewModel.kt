@@ -46,7 +46,7 @@ class FestivalListViewModel @Inject constructor(
             is FestivalListEvent.OnSignGuCodeSelected -> {
                 setState {
                     copy(
-                        selectedSignGuCode = event.signGuCode,
+                        selectedRegionCode = event.regionCode,
                         currentPage = 1,
                         festivalList = emptyList(),
                         hasMoreData = true
@@ -103,7 +103,7 @@ class FestivalListViewModel @Inject constructor(
                 endDate = currentState.endDate,
                 currentPage = currentState.currentPage.toString(),
                 rowsPerPage = "20",
-                signGuCode = currentState.selectedSignGuCode.code
+                signGuCode = currentState.selectedRegionCode.code
             ).collect { result ->
                 val newList = result ?: emptyList()
                 setState {
@@ -129,7 +129,7 @@ class FestivalListViewModel @Inject constructor(
                 endDate = currentState.endDate,
                 currentPage = (currentState.currentPage + 1).toString(),
                 rowsPerPage = "20",
-                signGuCode = currentState.selectedSignGuCode.code
+                signGuCode = currentState.selectedRegionCode.code
             ).collect { result ->
                 val newList = result ?: emptyList()
                 setState {

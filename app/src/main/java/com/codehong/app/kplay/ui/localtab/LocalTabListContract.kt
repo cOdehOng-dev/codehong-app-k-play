@@ -2,7 +2,7 @@ package com.codehong.app.kplay.ui.localtab
 
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.GenreCode
-import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.library.architecture.mvi.ViewEvent
 import com.codehong.library.architecture.mvi.ViewSideEffect
@@ -12,7 +12,7 @@ data class LocalTabListState(
     val title: String = "",
     val themeType: ThemeType = ThemeType.SYSTEM,
     val genreCode: GenreCode? = null,
-    val selectedSignGuCode: SignGuCode = SignGuCode.SEOUL,
+    val selectedRegionCode: RegionCode = RegionCode.SEOUL,
     val startDate: String = "",
     val endDate: String = "",
     val currentPage: Int = 1,
@@ -25,7 +25,7 @@ data class LocalTabListState(
 
 sealed class LocalTabListEvent : ViewEvent {
     data class OnPerformanceClick(val item: PerformanceInfoItem) : LocalTabListEvent()
-    data class OnSignGuCodeSelected(val signGuCode: SignGuCode) : LocalTabListEvent()
+    data class OnSignGuCodeSelected(val regionCode: RegionCode) : LocalTabListEvent()
     data class OnDateSelected(val startDate: String, val endDate: String) : LocalTabListEvent()
     data object OnLoadMore : LocalTabListEvent()
     data object OnDateChangeClick : LocalTabListEvent()

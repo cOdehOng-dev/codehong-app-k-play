@@ -19,8 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.codehong.app.kplay.domain.type.GenreCode
-import com.codehong.app.kplay.domain.type.SignGuCode
-import com.codehong.app.kplay.domain.type.SignGuCode.Companion.nameToSingGuCode
+import com.codehong.app.kplay.domain.type.RegionCode
+import com.codehong.app.kplay.domain.type.RegionCode.Companion.nameToSingGuCode
 import com.codehong.app.kplay.manager.ActivityManager
 import com.codehong.app.kplay.ui.theme.CodehongappkplayTheme
 import com.codehong.library.debugtool.log.TimberUtil
@@ -44,9 +44,9 @@ class LoungeActivity : ComponentActivity() {
 
         viewModel.callRankList()
         viewModel.callGenreRankList(GenreCode.THEATER.code)
-        viewModel.callFestivalList(SignGuCode.SEOUL.code)
-        viewModel.callAwardedPerformanceList(SignGuCode.SEOUL.code)
-        viewModel.callLocalList(SignGuCode.SEOUL.code)
+        viewModel.callFestivalList(RegionCode.SEOUL.code)
+        viewModel.callAwardedPerformanceList(RegionCode.SEOUL.code)
+        viewModel.callLocalList(RegionCode.SEOUL.code)
         viewModel.callMyLocation()
 
         setContent {
@@ -130,7 +130,7 @@ class LoungeActivity : ComponentActivity() {
                         is LoungeEffect.NavigateToLocalList -> {
                             ActivityManager.openLocalList(
                                 this@LoungeActivity,
-                                effect.signGuCode.code
+                                effect.regionCode.code
                             )
                         }
                     }
@@ -156,7 +156,7 @@ class LoungeActivity : ComponentActivity() {
 
     private fun getLocationAndUpdateSignGuCode() {
         if (!hasLocationPermission()) {
-            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(SignGuCode.SEOUL))
+            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(RegionCode.SEOUL))
             return
         }
 
@@ -180,28 +180,28 @@ class LoungeActivity : ComponentActivity() {
                             val signGuCode = adminArea.nameToSingGuCode()
                             viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(signGuCode))
                         } else {
-                            val defaultSignGuCode = SignGuCode.SEOUL
-                            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
+                            val defaultRegionCode = RegionCode.SEOUL
+                            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultRegionCode))
                         }
                     } catch (e: Exception) {
                         TimberUtil.d( "Geocoder error: ${e.message}")
-                        val defaultSignGuCode = SignGuCode.SEOUL
-                        viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
+                        val defaultRegionCode = RegionCode.SEOUL
+                        viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultRegionCode))
                     }
                 } else {
                     TimberUtil.d( "Location is null, using default SEOUL")
-                    val defaultSignGuCode = SignGuCode.SEOUL
-                    viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
+                    val defaultRegionCode = RegionCode.SEOUL
+                    viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultRegionCode))
                 }
             }.addOnFailureListener { e ->
                 TimberUtil.d( "Failed to get location: ${e.message}")
-                val defaultSignGuCode = SignGuCode.SEOUL
-                viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
+                val defaultRegionCode = RegionCode.SEOUL
+                viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultRegionCode))
             }
         } catch (e: SecurityException) {
             TimberUtil.d( "Security exception: ${e.message}")
-            val defaultSignGuCode = SignGuCode.SEOUL
-            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultSignGuCode))
+            val defaultRegionCode = RegionCode.SEOUL
+            viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(defaultRegionCode))
         }
     }
 }

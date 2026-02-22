@@ -7,7 +7,6 @@ import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
 import com.codehong.app.kplay.domain.model.place.PlaceDetail
-import com.codehong.app.kplay.domain.model.place.PlaceInfoItem
 import com.codehong.app.kplay.domain.repository.PerformanceRepository
 import com.codehong.library.debugtool.log.TimberUtil
 import com.codehong.library.network.CallStatus
@@ -164,7 +163,7 @@ class PerformanceRepositoryImpl @Inject constructor(
         keyword: String,
         currentPage: String,
         rowsPerPage: String
-    ): Flow<CallStatus<List<PlaceInfoItem>?>> = flow {
+    ): Flow<CallStatus<List<PlaceDetail>?>> = flow {
         remote.searchPlace(serviceKey, currentPage, rowsPerPage, keyword)
             .onStart {
                 emit(CallStatus.Loading)

@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
-import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.ui.common.BackHeader
 import com.codehong.app.kplay.ui.common.ChangeDateButton
@@ -106,7 +106,7 @@ fun LocalTabListScreen(
 private fun LocalTabListScreenContent(
     state: LocalTabListState,
     onBackClick: () -> Unit,
-    onSignGuCodeSelected: (SignGuCode) -> Unit,
+    onSignGuCodeSelected: (RegionCode) -> Unit,
     onDateChangeClick: () -> Unit,
     onPerformanceClick: (PerformanceInfoItem) -> Unit,
     onLoadMore: () -> Unit,
@@ -140,7 +140,7 @@ private fun LocalTabListScreenContent(
     }
 
     // 탭 변경 시 스크롤 위치 초기화
-    LaunchedEffect(state.selectedSignGuCode) {
+    LaunchedEffect(state.selectedRegionCode) {
         listState.scrollToItem(0)
     }
 
@@ -163,7 +163,7 @@ private fun LocalTabListScreenContent(
             ) {
                 // 지역 탭
                 RegionScrollTab(
-                    selectedSignGuCode = state.selectedSignGuCode,
+                    selectedRegionCode = state.selectedRegionCode,
                     onSignGuCodeSelected = onSignGuCodeSelected
                 )
 

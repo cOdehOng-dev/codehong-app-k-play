@@ -1,6 +1,6 @@
 package com.codehong.app.kplay.domain.type
 
-enum class SignGuCode(
+enum class RegionCode(
     val code: String,
     val displayName: String,
     val subList: List<Pair<String, String>>
@@ -286,7 +286,7 @@ enum class SignGuCode(
     ));
 
     companion object {
-        fun String?.toCode(): SignGuCode {
+        fun String?.toCode(): RegionCode {
             return entries.find { it.code == this } ?: SEOUL
         }
         fun String?.toSignGuCodeSub(): Pair<String, String>? {
@@ -301,10 +301,10 @@ enum class SignGuCode(
             return null
         }
 
-        fun String?.nameToSingGuCode(): SignGuCode {
+        fun String?.nameToSingGuCode(): RegionCode {
             if (this.isNullOrBlank()) return SEOUL
 
-            return SignGuCode.entries.find { signGuCode ->
+            return RegionCode.entries.find { signGuCode ->
                 this.contains(signGuCode.displayName.take(2))
             } ?: SEOUL
         }

@@ -12,7 +12,7 @@ import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
-import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.ui.lounge.LoungeState
 import com.codehong.library.debugtool.log.TimberUtil
 
@@ -27,13 +27,13 @@ fun HomeContent(
     onGenreTabSelected: (GenreCode) -> Unit,
     onGenreRankItemClick: (BoxOfficeItem) -> Unit,
     onGenreRankMoreClick: () -> Unit,
-    onFestivalTabSelected: (SignGuCode) -> Unit,
+    onFestivalTabSelected: (RegionCode) -> Unit,
     onFestivalItemClick: (PerformanceInfoItem) -> Unit,
     onFestivalMoreClick: () -> Unit,
-    onAwardedTabSelected: (SignGuCode) -> Unit,
+    onAwardedTabSelected: (RegionCode) -> Unit,
     onAwardedItemClick: (PerformanceInfoItem) -> Unit,
     onAwardedMoreClick: () -> Unit,
-    onLocalTabSelected: (SignGuCode) -> Unit,
+    onLocalTabSelected: (RegionCode) -> Unit,
     onLocalItemClick: (PerformanceInfoItem) -> Unit,
     onLocalMoreClick: () -> Unit
 ) {

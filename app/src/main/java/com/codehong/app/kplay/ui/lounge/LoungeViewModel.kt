@@ -5,13 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.place.PlaceGroup
 import com.codehong.app.kplay.domain.type.BottomTabType
-import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
 import com.codehong.app.kplay.domain.usecase.FavoriteUseCase
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.app.kplay.domain.usecase.PlaceUseCase
-import com.codehong.app.kplay.ui.lounge.content.mylocation.VenueGroup
 import com.codehong.library.architecture.mvi.BaseViewModel
 import com.codehong.library.debugtool.log.TimberUtil
 import com.codehong.library.util.DateUtil
@@ -31,7 +31,7 @@ class LoungeViewModel @Inject constructor(
 ) : BaseViewModel<LoungeEvent, LoungeState, LoungeEffect>(application) {
 
     // 마지막으로 위경도 조회를 완료한 도시 코드 (캐시 키)
-    private var lastResolvedSignGuCode: SignGuCode? = null
+    private var lastResolvedRegionCode: RegionCode? = null
 
     init {
         observeFavorites()
@@ -58,11 +58,11 @@ class LoungeViewModel @Inject constructor(
                 TimberUtil.d("Tab selected: ${event.tab.label}")
                 setState { copy(selectedTab = event.tab) }
                 if (event.tab == BottomTabType.MY_LOCATION) {
-                    val currentSignGuCode = state.value.selectedSignGuCode
-                    val alreadyResolved = lastResolvedSignGuCode == currentSignGuCode
-                    val hasVenues = state.value.venueGroups.isNotEmpty()
+                    val currentSignGuCode = state.value.selectedRegionCode
+                    val alreadyResolved = lastResolvedRegionCode == currentSignGuCode
+                    val hasVenues = state.value.placeGroups.isNotEmpty()
                     if (!alreadyResolved || !hasVenues) {
-                        resolveVenueCoordinates(state.value.myAreaList)
+                        resolvePlaceGroupCoordinates(state.value.myAreaList)
                     } else {
                         TimberUtil.d("$TAG ▶ venue 이미 조회됨 (${currentSignGuCode.displayName}), skip")
                     }
@@ -102,21 +102,21 @@ class LoungeViewModel @Inject constructor(
             }
 
             is LoungeEvent.OnSignGuCodeUpdated -> {
-                TimberUtil.d("SignGuCode updated: ${event.signGuCode.displayName}")
-                if (state.value.selectedSignGuCode != event.signGuCode) {
+                TimberUtil.d("SignGuCode updated: ${event.regionCode.displayName}")
+                if (state.value.selectedRegionCode != event.regionCode) {
                     // 도시가 변경되면 venue 캐시 무효화
-                    lastResolvedSignGuCode = null
+                    lastResolvedRegionCode = null
                     setState {
                         copy(
-                            selectedSignGuCode = event.signGuCode,
-                            venueGroups = emptyList()
+                            selectedRegionCode = event.regionCode,
+                            placeGroups = emptyList()
                         )
                     }
                 } else {
-                    setState { copy(selectedSignGuCode = event.signGuCode) }
+                    setState { copy(selectedRegionCode = event.regionCode) }
                 }
-                setMyLocation(event.signGuCode.code)
-                callMyAreaListApi(event.signGuCode.code)
+                setMyLocation(event.regionCode.code)
+                callMyAreaListApi(event.regionCode.code)
             }
 
             is LoungeEvent.OnGenreTabSelected -> {
@@ -144,15 +144,15 @@ class LoungeViewModel @Inject constructor(
             }
 
             is LoungeEvent.OnFestivalTabSelected -> {
-                TimberUtil.d("Festival tab selected: ${event.signGuCode.displayName}")
+                TimberUtil.d("Festival tab selected: ${event.regionCode.displayName}")
                 setState {
                     copy(
-                        selectedFestivalTab = event.signGuCode,
+                        selectedFestivalTab = event.regionCode,
                         apiLoading = apiLoading.copy(isFestivalLoading = false),
                         festivalList = emptyList()
                     )
                 }
-                callFestivalList(event.signGuCode.code)
+                callFestivalList(event.regionCode.code)
             }
 
             is LoungeEvent.OnFestivalItemClick -> {
@@ -168,15 +168,15 @@ class LoungeViewModel @Inject constructor(
             }
 
             is LoungeEvent.OnAwardedTabSelected -> {
-                TimberUtil.d("Awarded tab selected: ${event.signGuCode.displayName}")
+                TimberUtil.d("Awarded tab selected: ${event.regionCode.displayName}")
                 setState {
                     copy(
-                        selectedAwardedTab = event.signGuCode,
+                        selectedAwardedTab = event.regionCode,
                         isAwardedLoaded = false,
                         awardedList = emptyList()
                     )
                 }
-                callAwardedPerformanceList(event.signGuCode.code)
+                callAwardedPerformanceList(event.regionCode.code)
             }
 
             is LoungeEvent.OnAwardedItemClick -> {
@@ -192,15 +192,15 @@ class LoungeViewModel @Inject constructor(
             }
 
             is LoungeEvent.OnLocalTabSelected -> {
-                TimberUtil.d("Local tab selected: ${event.signGuCode.displayName}")
+                TimberUtil.d("Local tab selected: ${event.regionCode.displayName}")
                 setState {
                     copy(
-                        selectedLocalTab = event.signGuCode,
+                        selectedLocalTab = event.regionCode,
                         apiLoading = apiLoading.copy(isLocalLoading = false),
                         localList = emptyList()
                     )
                 }
-                callLocalList(event.signGuCode.code)
+                callLocalList(event.regionCode.code)
             }
 
             is LoungeEvent.OnLocalItemClick -> {
@@ -292,54 +292,6 @@ class LoungeViewModel @Inject constructor(
                         apiLoading = apiLoading.copy(isMyAreaLoading = false)
                     )
                 }
-            }
-        }
-    }
-
-    /**
-     * 내 주변 탭 선택 시 호출.
-     * placeName 기준으로 공연장을 그룹화하고 PlaceUseCase로 위경도를 조회하여 VenueGroup 생성.
-     * 같은 도시에서 이미 핀을 찍은 적이 있으면 호출되지 않음.
-     */
-    private fun resolveVenueCoordinates(performances: List<PerformanceInfoItem>) {
-        val targetSignGuCode = state.value.selectedSignGuCode
-        viewModelScope.launch {
-            setState {
-                copy(apiLoading = apiLoading.copy(isVenueGroupLoading = true))
-            }
-
-            val grouped = performances.groupBy { it.placeName ?: "알 수 없음" }
-            val venueGroups = mutableListOf<VenueGroup>()
-
-            grouped.forEach { (placeName, items) ->
-                val detail = placeUseCase.getPlaceDetail(
-                    serviceKey = BuildConfig.KOKOR_CLIENT_ID,
-                    keyword = placeName,
-                    currentPage = "1",
-                    rowsPerPage = "5"
-                ).firstOrNull()
-
-                val lat = detail?.latitude?.toDoubleOrNull()
-                val lng = detail?.longitude?.toDoubleOrNull()
-
-                TimberUtil.d("venue=$placeName lat=$lat lng=$lng performances=${items.size}")
-
-                venueGroups.add(
-                    VenueGroup(
-                        placeName = placeName,
-                        lat = lat,
-                        lng = lng,
-                        performances = items
-                    )
-                )
-            }
-
-            lastResolvedSignGuCode = targetSignGuCode
-            setState {
-                copy(
-                    venueGroups = venueGroups,
-                    apiLoading = apiLoading.copy(isVenueGroupLoading = false)
-                )
             }
         }
     }
@@ -460,6 +412,20 @@ class LoungeViewModel @Inject constructor(
         }
     }
 
+    fun callMyLocation() {
+        val storedSignGuCodeName = performanceUseCase.getMyLocation()
+        val initialRegionCode = if (storedSignGuCodeName != null) {
+            try {
+                RegionCode.valueOf(storedSignGuCodeName)
+            } catch (e: IllegalArgumentException) {
+                RegionCode.SEOUL
+            }
+        } else {
+            RegionCode.SEOUL
+        }
+        setEvent(LoungeEvent.OnSignGuCodeUpdated(initialRegionCode))
+    }
+
     fun setMyLocation(signGuCode: String) {
         performanceUseCase.setMyLocation(signGuCode)
     }
@@ -481,17 +447,49 @@ class LoungeViewModel @Inject constructor(
         }
     }
 
-    fun callMyLocation() {
-        val storedSignGuCodeName = performanceUseCase.getMyLocation()
-        val initialSignGuCode = if (storedSignGuCodeName != null) {
-            try {
-                SignGuCode.valueOf(storedSignGuCodeName)
-            } catch (e: IllegalArgumentException) {
-                SignGuCode.SEOUL
+
+
+    /**
+     * 내 주변 탭 선택 시 호출.
+     * placeName 기준으로 공연장을 그룹화하고 PlaceUseCase로 위경도를 조회하여 VenueGroup 생성.
+     * 같은 도시에서 이미 핀을 찍은 적이 있으면 호출되지 않음.
+     */
+    private fun resolvePlaceGroupCoordinates(performanceList: List<PerformanceInfoItem>) {
+        viewModelScope.launch {
+            setState {
+                copy(apiLoading = apiLoading.copy(isVenueGroupLoading = true))
             }
-        } else {
-            SignGuCode.SEOUL
+
+            val grouped = performanceList.groupBy { it.placeName ?: "알 수 없음" }
+            val placeGroupList = mutableListOf<PlaceGroup>()
+
+            grouped.forEach { (placeName, items) ->
+                val detail = placeUseCase.getPlaceDetail(
+                    serviceKey = BuildConfig.KOKOR_CLIENT_ID,
+                    keyword = placeName,
+                    currentPage = "1",
+                    rowsPerPage = "5"
+                ).firstOrNull()
+
+                TimberUtil.d("group=$placeName lat=${detail?.lat} lng=${detail?.lng} performances=${items.size}")
+
+                placeGroupList.add(
+                    PlaceGroup(
+                        placeName = placeName,
+                        lat = detail?.lat,
+                        lng = detail?.lng,
+                        performanceList = items
+                    )
+                )
+            }
+
+            lastResolvedRegionCode = state.value.selectedRegionCode
+            setState {
+                copy(
+                    placeGroups = placeGroupList,
+                    apiLoading = apiLoading.copy(isVenueGroupLoading = false)
+                )
+            }
         }
-        setEvent(LoungeEvent.OnSignGuCodeUpdated(initialSignGuCode))
     }
 }

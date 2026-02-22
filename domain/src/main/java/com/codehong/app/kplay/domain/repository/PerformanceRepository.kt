@@ -4,7 +4,6 @@ import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
 import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
 import com.codehong.app.kplay.domain.model.place.PlaceDetail
-import com.codehong.app.kplay.domain.model.place.PlaceInfoItem
 import com.codehong.library.network.CallStatus
 import kotlinx.coroutines.flow.Flow
 
@@ -61,7 +60,7 @@ interface PerformanceRepository {
         keyword: String,
         currentPage: String,
         rowsPerPage: String
-    ): Flow<CallStatus<List<PlaceInfoItem>?>>
+    ): Flow<CallStatus<List<PlaceDetail>?>>
 
     fun getPlaceDetail(
         serviceKey: String,

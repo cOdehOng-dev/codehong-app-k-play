@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.place.PlaceGroup
 import com.codehong.library.debugtool.log.TimberUtil
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
@@ -69,16 +70,16 @@ private val GrayColor = Color(0xFF999999)
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 fun MyLocationContent(
-    venueGroups: List<VenueGroup>,
+    placeGroups: List<PlaceGroup>,
     isVenueGroupLoading: Boolean = false,
     selectedAreaName: String = "서울",
     onPerformanceClick: (PerformanceInfoItem) -> Unit
 ) {
-    LaunchedEffect(venueGroups) {
-        TimberUtil.d("MyLocation ▶ venue 그룹 수: ${venueGroups.size}")
-        venueGroups.forEach { group ->
-            TimberUtil.d("MyLocation ▶ [${group.placeName}] ${group.performances.size}건 lat=${group.lat} lng=${group.lng}")
-            group.performances.forEach { item ->
+    LaunchedEffect(placeGroups) {
+        TimberUtil.d("MyLocation ▶ venue 그룹 수: ${placeGroups.size}")
+        placeGroups.forEach { group ->
+            TimberUtil.d("MyLocation ▶ [${group.placeName}] ${group.performanceList.size}건 lat=${group.lat} lng=${group.lng}")
+            group.performanceList.forEach { item ->
                 TimberUtil.d("MyLocation   - id=${item.id} | name=${item.name} | ${item.startDate}~${item.endDate}")
             }
         }
@@ -89,15 +90,15 @@ fun MyLocationContent(
     }
 
     // 각 VenueGroup에 실제 좌표 or 오프셋 좌표를 매핑
-    val groupsWithPosition = remember(venueGroups, areaCenter) {
-        venueGroups.mapIndexed { index, group ->
+    val groupsWithPosition = remember(placeGroups, areaCenter) {
+        placeGroups.mapIndexed { index, group ->
             val lat = group.lat ?: (areaCenter.latitude + generateOffset(group.hashCode(), index, true))
             val lng = group.lng ?: (areaCenter.longitude + generateOffset(group.hashCode(), index, false))
             group to LatLng(lat, lng)
         }
     }
 
-    var selectedGroup by remember { mutableStateOf<VenueGroup?>(null) }
+    var selectedGroup by remember { mutableStateOf<PlaceGroup?>(null) }
     var selectedPosition by remember { mutableStateOf<LatLng?>(null) }
 
     val cameraPositionState = rememberCameraPositionState {
@@ -120,7 +121,7 @@ fun MyLocationContent(
 
     // 선택 그룹이 바뀌면 pager를 0으로 리셋하기 위한 상태
     val pagerState = rememberPagerState(initialPage = 0) {
-        selectedGroup?.performances?.size ?: 0
+        selectedGroup?.performanceList?.size ?: 0
     }
 
     LaunchedEffect(selectedGroup?.placeName) {
@@ -145,7 +146,7 @@ fun MyLocationContent(
             groupsWithPosition.forEach { (group, position) ->
                 key(group.placeName) {
                     val isSelected = selectedGroup?.placeName == group.placeName
-                    val count = group.performances.size
+                    val count = group.performanceList.size
 
                     val overlayImage = remember(count) {
                         overlayCache.getOrPut(count) {
@@ -215,7 +216,7 @@ fun MyLocationContent(
                     pageSpacing = 8.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) { page ->
-                    val item = group.performances.getOrNull(page) ?: return@HorizontalPager
+                    val item = group.performanceList.getOrNull(page) ?: return@HorizontalPager
                     PerformanceInfoCard(
                         item = item,
                         onClick = { onPerformanceClick(item) }

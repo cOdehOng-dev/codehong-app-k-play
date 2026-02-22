@@ -1,7 +1,6 @@
 package com.codehong.app.kplay.domain.usecase
 
 import com.codehong.app.kplay.domain.model.place.PlaceDetail
-import com.codehong.app.kplay.domain.model.place.PlaceInfoItem
 import com.codehong.app.kplay.domain.repository.PerformanceRepository
 import com.codehong.app.kplay.domain.repository.PlaceDetailCacheRepository
 import com.codehong.library.network.CallStatus
@@ -19,7 +18,7 @@ class PlaceUseCase @Inject constructor(
         keyword: String,
         currentPage: String,
         rowsPerPage: String
-    ): Flow<List<PlaceInfoItem>?> = flow {
+    ): Flow<List<PlaceDetail>?> = flow {
         repository.searchPlace(serviceKey, keyword, currentPage, rowsPerPage).collect { status ->
             when (status) {
                 is CallStatus.Loading -> {}

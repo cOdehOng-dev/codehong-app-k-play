@@ -6,4 +6,10 @@ data class PlaceDetail(
     val placeAddress: String? = null,
     val latitude: String? = null,
     val longitude: String? = null
-)
+) {
+    val lat: Double?
+        get() = latitude?.toDoubleOrNull()
+
+    val lng: Double?
+        get() = longitude?.toDoubleOrNull()
+}

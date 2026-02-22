@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.type.GenreCode.Companion.toCode as toGenreCode
-import com.codehong.app.kplay.domain.type.SignGuCode
-import com.codehong.app.kplay.domain.type.SignGuCode.Companion.toCode as toSignGuCode
+import com.codehong.app.kplay.domain.type.RegionCode
+import com.codehong.app.kplay.domain.type.RegionCode.Companion.toCode as toSignGuCode
 import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
 import com.codehong.library.architecture.mvi.BaseViewModel
@@ -35,7 +35,7 @@ class LocalTabListViewModel @Inject constructor(
             copy(
                 title = genreCode?.displayName ?: "지역별 공연",
                 genreCode = genreCode,
-                selectedSignGuCode = signGuCode ?: SignGuCode.SEOUL,
+                selectedRegionCode = signGuCode ?: RegionCode.SEOUL,
                 startDate = startDate,
                 endDate = endDate
             )
@@ -58,7 +58,7 @@ class LocalTabListViewModel @Inject constructor(
             is LocalTabListEvent.OnSignGuCodeSelected -> {
                 setState {
                     copy(
-                        selectedSignGuCode = event.signGuCode,
+                        selectedRegionCode = event.regionCode,
                         currentPage = 1,
                         performanceList = emptyList(),
                         hasMoreData = true
@@ -119,7 +119,7 @@ class LocalTabListViewModel @Inject constructor(
                 endDate = currentState.endDate,
                 currentPage = currentState.currentPage.toString(),
                 rowsPerPage = "20",
-                signGuCode = currentState.selectedSignGuCode.code,
+                signGuCode = currentState.selectedRegionCode.code,
                 genreCode = currentState.genreCode?.code
             ).collect { result ->
                 val newList = result ?: emptyList()
@@ -146,7 +146,7 @@ class LocalTabListViewModel @Inject constructor(
                 endDate = currentState.endDate,
                 currentPage = (currentState.currentPage + 1).toString(),
                 rowsPerPage = "20",
-                signGuCode = currentState.selectedSignGuCode.code,
+                signGuCode = currentState.selectedRegionCode.code,
                 genreCode = currentState.genreCode?.code
             ).collect { result ->
                 val newList = result ?: emptyList()

@@ -47,7 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.codehong.app.kplay.domain.model.PerformanceInfoItem
-import com.codehong.app.kplay.domain.type.SignGuCode
+import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.ui.common.ChangeDateButton
 
@@ -86,7 +86,7 @@ fun AwardListScreen(
 private fun AwardListScreenContent(
     state: AwardListState,
     onBackClick: () -> Unit,
-    onSignGuCodeSelected: (SignGuCode) -> Unit,
+    onSignGuCodeSelected: (RegionCode) -> Unit,
     onDateChangeClick: () -> Unit,
     onAwardClick: (PerformanceInfoItem) -> Unit,
     onLoadMore: () -> Unit
@@ -117,7 +117,7 @@ private fun AwardListScreenContent(
     }
 
     // 탭 변경 시 스크롤 위치 초기화
-    LaunchedEffect(state.selectedSignGuCode) {
+    LaunchedEffect(state.selectedRegionCode) {
         listState.scrollToItem(0)
     }
 
@@ -140,7 +140,7 @@ private fun AwardListScreenContent(
         ) {
             // 지역 탭
             SignGuCodeTabRow(
-                selectedSignGuCode = state.selectedSignGuCode,
+                selectedRegionCode = state.selectedRegionCode,
                 onSignGuCodeSelected = onSignGuCodeSelected
             )
 
@@ -277,16 +277,16 @@ private fun AwardListHeader(
 // ===== 지역 탭 (타원형 스타일) =====
 @Composable
 private fun SignGuCodeTabRow(
-    selectedSignGuCode: SignGuCode,
-    onSignGuCodeSelected: (SignGuCode) -> Unit
+    selectedRegionCode: RegionCode,
+    onSignGuCodeSelected: (RegionCode) -> Unit
 ) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(SignGuCode.entries) { signGuCode ->
-            val isSelected = signGuCode == selectedSignGuCode
+        items(RegionCode.entries) { signGuCode ->
+            val isSelected = signGuCode == selectedRegionCode
             SignGuCodeTabChip(
                 text = signGuCode.displayName,
                 isSelected = isSelected,
