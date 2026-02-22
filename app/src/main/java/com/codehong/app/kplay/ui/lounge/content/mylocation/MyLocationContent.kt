@@ -50,6 +50,9 @@ import com.codehong.library.widget.rule.HongScaleType
 import com.codehong.library.widget.rule.color.HongColor
 import com.codehong.library.widget.rule.color.HongColor.Companion.toColor
 import com.codehong.library.widget.rule.radius.HongRadiusInfo
+import com.codehong.library.widget.rule.typo.HongTypo
+import com.codehong.library.widget.text.def.HongTextBuilder
+import com.codehong.library.widget.text.def.HongTextCompose
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.CameraUpdate
@@ -212,10 +215,12 @@ fun MyLocationContent(
                             color = HongColor.MAIN_ORANGE_100.toColor(),
                             strokeWidth = 2.dp
                         )
-                        Text(
-                            text = "공연장 위치 조회 중...",
-                            fontSize = 12.sp,
-                            color = HongColor.DARK_GRAY_100.toColor()
+                        HongTextCompose(
+                            option = HongTextBuilder()
+                                .text("공연장 위치 조회 중...")
+                                .typography(HongTypo.CONTENTS_12)
+                                .color(HongColor.DARK_GRAY_100)
+                                .applyOption()
                         )
                     }
                 }
