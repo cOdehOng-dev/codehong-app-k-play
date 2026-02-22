@@ -61,10 +61,12 @@ class LoungeViewModel @Inject constructor(
                     val currentSignGuCode = state.value.selectedRegionCode
                     val alreadyResolved = lastResolvedRegionCode == currentSignGuCode
                     val hasVenues = state.value.performanceGroups.isNotEmpty()
-                    if (!alreadyResolved || !hasVenues) {
-                        resolvePlaceGroupCoordinates(state.value.myAreaList)
-                    } else {
+                    if (alreadyResolved && hasVenues) {
                         TimberUtil.d("$TAG ▶ venue 이미 조회됨 (${currentSignGuCode.displayName}), skip")
+                    } else {
+                        // 로딩 상태 선점 후 위치 권한 요청
+                        setState { copy(apiLoading = apiLoading.copy(isVenueGroupLoading = true)) }
+                        setEffect { LoungeEffect.RequestMyLocationTabPermission }
                     }
                 }
                 if (event.tab == BottomTabType.SETTINGS) {
@@ -268,7 +270,8 @@ class LoungeViewModel @Inject constructor(
     }
 
     /**
-     * 내 주변 공연 검색 api
+     * 내 주변 공연 검색 api.
+     * MY_LOCATION 탭이 활성화된 상태에서 완료되면 venue 그룹 위경도 조회도 자동으로 트리거한다.
      */
     fun callMyAreaListApi(myAreaCode: String) {
         val startDate = DateUtil.getToday(Consts.YYYY_MM_DD_FORMAT)
@@ -291,6 +294,14 @@ class LoungeViewModel @Inject constructor(
                         myAreaList = myAreaList ?: emptyList(),
                         apiLoading = apiLoading.copy(isMyAreaLoading = false)
                     )
+                }
+            }
+            // MY_LOCATION 탭이 활성화된 경우 venue 그룹 위경도 조회
+            if (state.value.selectedTab == BottomTabType.MY_LOCATION) {
+                val alreadyResolved = lastResolvedRegionCode == state.value.selectedRegionCode
+                val hasVenues = state.value.performanceGroups.isNotEmpty()
+                if (!alreadyResolved || !hasVenues) {
+                    resolvePlaceGroupCoordinates(state.value.myAreaList)
                 }
             }
         }

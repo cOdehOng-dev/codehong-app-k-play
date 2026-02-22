@@ -65,9 +65,6 @@ import com.naver.maps.map.compose.rememberUpdatedMarkerState
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.MarkerIcons
 
-private val DarkGrayColor = Color(0xFF333333)
-private val GrayColor = Color(0xFF999999)
-
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 fun MyLocationContent(
@@ -76,15 +73,6 @@ fun MyLocationContent(
     selectedAreaName: String = "서울",
     onPerformanceClick: (PerformanceInfoItem) -> Unit
 ) {
-//    LaunchedEffect(performanceGroupList) {
-//        TimberUtil.d("MyLocation ▶ venue 그룹 수: ${performanceGroupList.size}")
-//        performanceGroupList.forEach { group ->
-//            TimberUtil.d("MyLocation ▶ [${group.placeName}] ${group.performanceList.size}건 lat=${group.lat} lng=${group.lng}")
-//            group.performanceList.forEach { item ->
-//                TimberUtil.d("MyLocation - id=${item.id} | name=${item.name} | ${item.startDate}~${item.endDate}")
-//            }
-//        }
-//    }
 
     val areaCenter = remember(selectedAreaName) {
         selectedAreaName.centerAreaLatLng()
@@ -227,7 +215,7 @@ fun MyLocationContent(
                         Text(
                             text = "공연장 위치 조회 중...",
                             fontSize = 12.sp,
-                            color = DarkGrayColor
+                            color = HongColor.DARK_GRAY_100.toColor()
                         )
                     }
                 }
@@ -260,7 +248,7 @@ fun MyLocationContent(
                         Text(
                             text = selectedAreaName.fullArea(),
                             fontSize = 12.sp,
-                            color = DarkGrayColor
+                            color = HongColor.DARK_GRAY_100.toColor()
                         )
                     }
                 }

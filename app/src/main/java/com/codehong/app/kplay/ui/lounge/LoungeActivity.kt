@@ -65,18 +65,19 @@ class LoungeActivity : ComponentActivity() {
             val locationPermissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
             ) { permissions ->
-                val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-                val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+                val granted = (permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false)
+                        || (permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false)
 
-                if (fineLocationGranted || coarseLocationGranted) {
-                    TimberUtil.d( "Location permission granted")
+                if (granted) {
+                    TimberUtil.d("MyLocation tab permission granted")
                     getLocationAndUpdateSignGuCode()
                 } else {
-                    TimberUtil.d("Location permission denied")
+                    TimberUtil.d("MyLocation tab permission denied — fallback to Seoul")
                     HongToastUtil.showToast(
                         context,
-                        "위치 권한이 거부되어 이전 설정 또는 서울 기준으로 조회합니다"
+                        "위치 권한이 거부되어 서울특별시 기준으로 조회합니다"
                     )
+                    viewModel.setEvent(LoungeEvent.OnSignGuCodeUpdated(RegionCode.SEOUL))
                 }
             }
 
@@ -103,6 +104,18 @@ class LoungeActivity : ComponentActivity() {
                             ).show()
                         }
                         is LoungeEffect.RequestLocationPermission -> {
+                            if (hasLocationPermission()) {
+                                getLocationAndUpdateSignGuCode()
+                            } else {
+                                locationPermissionLauncher.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                    )
+                                )
+                            }
+                        }
+                        is LoungeEffect.RequestMyLocationTabPermission -> {
                             if (hasLocationPermission()) {
                                 getLocationAndUpdateSignGuCode()
                             } else {
