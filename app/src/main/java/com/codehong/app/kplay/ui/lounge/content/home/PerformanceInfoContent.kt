@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.codehong.app.kplay.domain.extensions.extractParenthesesContent
-import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.app.kplay.ui.common.Badge
 import com.codehong.library.widget.extensions.clickPress
 import com.codehong.library.widget.image.def.HongImageBuilder

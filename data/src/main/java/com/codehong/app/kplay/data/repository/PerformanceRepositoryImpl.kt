@@ -4,7 +4,7 @@ import com.codehong.app.kplay.data.datasource.PerformanceLocalDataSource
 import com.codehong.app.kplay.data.datasource.PerformanceRemoteDataSource
 import com.codehong.app.kplay.data.mapper.asDomain
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
-import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
 import com.codehong.app.kplay.domain.model.place.PlaceDetail
 import com.codehong.app.kplay.domain.repository.PerformanceRepository

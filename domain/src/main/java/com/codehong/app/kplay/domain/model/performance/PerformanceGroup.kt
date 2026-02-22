@@ -1,8 +1,8 @@
-package com.codehong.app.kplay.domain.model.place
+package com.codehong.app.kplay.domain.model.performance
 
-import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 
-data class PlaceGroup(
+data class PerformanceGroup(
     val placeName: String? = null,
     val lat: Double? = null,
     val lng: Double? = null,

@@ -1,14 +1,14 @@
 package com.codehong.app.kplay.ui.lounge
 
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
-import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.app.kplay.domain.model.favorite.FavoritePerformance
 import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType
-import com.codehong.app.kplay.domain.model.place.PlaceGroup
+import com.codehong.app.kplay.domain.model.performance.PerformanceGroup
 import com.codehong.library.architecture.mvi.ViewEvent
 import com.codehong.library.architecture.mvi.ViewSideEffect
 import com.codehong.library.architecture.mvi.ViewState
@@ -36,7 +36,7 @@ data class LoungeState(
     val localTabList: List<RegionCode> = RegionCode.entries.toList(),
     val apiLoading: LoungeApiLoading = LoungeApiLoading(),
     val favoriteList: List<FavoritePerformance> = emptyList(),
-    val placeGroups: List<PlaceGroup> = emptyList(),
+    val performanceGroups: List<PerformanceGroup> = emptyList(),
     val cacheSizeText: String = ""
 ) : ViewState
 

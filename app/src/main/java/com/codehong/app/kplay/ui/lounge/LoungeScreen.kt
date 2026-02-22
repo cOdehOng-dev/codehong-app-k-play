@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.codehong.app.kplay.domain.model.BottomTabItem
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
-import com.codehong.app.kplay.domain.model.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
@@ -266,7 +266,7 @@ private fun LoungeScreenContent(
                     onLocalMoreClick = onLocalMoreClick
                 )
                 BottomTabType.MY_LOCATION -> MyLocationContent(
-                    placeGroups = state.placeGroups,
+                    performanceGroups = state.performanceGroups,
                     isVenueGroupLoading = state.apiLoading.isVenueGroupLoading,
                     selectedAreaName = state.selectedRegionCode.displayName,
                     onPerformanceClick = onNearbyItemClick

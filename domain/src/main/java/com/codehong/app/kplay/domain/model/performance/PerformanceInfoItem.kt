@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.domain.model
+package com.codehong.app.kplay.domain.model.performance
 
 data class PerformanceInfoItem(
     val id: String? = null,

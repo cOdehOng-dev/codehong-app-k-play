@@ -14,7 +14,7 @@ interface FavoritePerformanceDao {
     @Query("SELECT * FROM ${RoomConst.TABLE_FAVORITE_PERFORMANCE} ORDER BY rowid DESC")
     fun getAllFavorites(): Flow<List<FavoritePerformanceEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: FavoritePerformanceEntity)
 
     @Query("DELETE FROM ${RoomConst.TABLE_FAVORITE_PERFORMANCE} WHERE id = :id")

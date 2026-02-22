@@ -46,8 +46,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.codehong.app.kplay.domain.model.PerformanceInfoItem
-import com.codehong.app.kplay.domain.model.place.PlaceGroup
+import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.performance.PerformanceGroup
 import com.codehong.library.debugtool.log.TimberUtil
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
@@ -70,14 +70,14 @@ private val GrayColor = Color(0xFF999999)
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 fun MyLocationContent(
-    placeGroups: List<PlaceGroup>,
+    performanceGroups: List<PerformanceGroup>,
     isVenueGroupLoading: Boolean = false,
     selectedAreaName: String = "서울",
     onPerformanceClick: (PerformanceInfoItem) -> Unit
 ) {
-    LaunchedEffect(placeGroups) {
-        TimberUtil.d("MyLocation ▶ venue 그룹 수: ${placeGroups.size}")
-        placeGroups.forEach { group ->
+    LaunchedEffect(performanceGroups) {
+        TimberUtil.d("MyLocation ▶ venue 그룹 수: ${performanceGroups.size}")
+        performanceGroups.forEach { group ->
             TimberUtil.d("MyLocation ▶ [${group.placeName}] ${group.performanceList.size}건 lat=${group.lat} lng=${group.lng}")
             group.performanceList.forEach { item ->
                 TimberUtil.d("MyLocation   - id=${item.id} | name=${item.name} | ${item.startDate}~${item.endDate}")
@@ -90,15 +90,15 @@ fun MyLocationContent(
     }
 
     // 각 VenueGroup에 실제 좌표 or 오프셋 좌표를 매핑
-    val groupsWithPosition = remember(placeGroups, areaCenter) {
-        placeGroups.mapIndexed { index, group ->
+    val groupsWithPosition = remember(performanceGroups, areaCenter) {
+        performanceGroups.mapIndexed { index, group ->
             val lat = group.lat ?: (areaCenter.latitude + generateOffset(group.hashCode(), index, true))
             val lng = group.lng ?: (areaCenter.longitude + generateOffset(group.hashCode(), index, false))
             group to LatLng(lat, lng)
         }
     }
 
-    var selectedGroup by remember { mutableStateOf<PlaceGroup?>(null) }
+    var selectedGroup by remember { mutableStateOf<PerformanceGroup?>(null) }
     var selectedPosition by remember { mutableStateOf<LatLng?>(null) }
 
     val cameraPositionState = rememberCameraPositionState {

@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
-import com.codehong.app.kplay.domain.model.PerformanceInfoItem
-import com.codehong.app.kplay.domain.model.place.PlaceGroup
+import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
+import com.codehong.app.kplay.domain.model.performance.PerformanceGroup
 import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
@@ -60,7 +60,7 @@ class LoungeViewModel @Inject constructor(
                 if (event.tab == BottomTabType.MY_LOCATION) {
                     val currentSignGuCode = state.value.selectedRegionCode
                     val alreadyResolved = lastResolvedRegionCode == currentSignGuCode
-                    val hasVenues = state.value.placeGroups.isNotEmpty()
+                    val hasVenues = state.value.performanceGroups.isNotEmpty()
                     if (!alreadyResolved || !hasVenues) {
                         resolvePlaceGroupCoordinates(state.value.myAreaList)
                     } else {
@@ -109,7 +109,7 @@ class LoungeViewModel @Inject constructor(
                     setState {
                         copy(
                             selectedRegionCode = event.regionCode,
-                            placeGroups = emptyList()
+                            performanceGroups = emptyList()
                         )
                     }
                 } else {
@@ -461,7 +461,7 @@ class LoungeViewModel @Inject constructor(
             }
 
             val grouped = performanceList.groupBy { it.placeName ?: "알 수 없음" }
-            val placeGroupList = mutableListOf<PlaceGroup>()
+            val performanceGroupList = mutableListOf<PerformanceGroup>()
 
             grouped.forEach { (placeName, items) ->
                 val detail = placeUseCase.getPlaceDetail(
@@ -473,8 +473,8 @@ class LoungeViewModel @Inject constructor(
 
                 TimberUtil.d("group=$placeName lat=${detail?.lat} lng=${detail?.lng} performances=${items.size}")
 
-                placeGroupList.add(
-                    PlaceGroup(
+                performanceGroupList.add(
+                    PerformanceGroup(
                         placeName = placeName,
                         lat = detail?.lat,
                         lng = detail?.lng,
@@ -486,7 +486,7 @@ class LoungeViewModel @Inject constructor(
             lastResolvedRegionCode = state.value.selectedRegionCode
             setState {
                 copy(
-                    placeGroups = placeGroupList,
+                    performanceGroups = performanceGroupList,
                     apiLoading = apiLoading.copy(isVenueGroupLoading = false)
                 )
             }
