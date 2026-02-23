@@ -1,14 +1,14 @@
 package com.codehong.app.kplay.ui.lounge
 
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
-import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.app.kplay.domain.model.favorite.FavoritePerformance
+import com.codehong.app.kplay.domain.model.performance.PerformanceGroup
+import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType
-import com.codehong.app.kplay.domain.model.performance.PerformanceGroup
 import com.codehong.library.architecture.mvi.ViewEvent
 import com.codehong.library.architecture.mvi.ViewSideEffect
 import com.codehong.library.architecture.mvi.ViewState
@@ -86,6 +86,6 @@ data class LoungeApiLoading(
     val isGenreRankingLoading: Boolean = true,
     val isFestivalLoading: Boolean = true,
     val isAwardLoading: Boolean = true,
-    val isVenueGroupLoading: Boolean = false
+    val isPlaceGroupLoading: Boolean = false
 )
 

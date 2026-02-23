@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,7 +18,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,8 +31,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.codehong.app.kplay.domain.model.performance.PerformanceGroup
 import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.app.kplay.domain.util.fullArea
@@ -43,6 +41,7 @@ import com.codehong.app.kplay.ui.common.PerformanceItemContent
 import com.codehong.app.kplay.util.Util
 import com.codehong.app.kplay.util.Util.centerAreaLatLng
 import com.codehong.library.widget.R
+import com.codehong.library.widget.extensions.disableRippleClickable
 import com.codehong.library.widget.extensions.hongBackground
 import com.codehong.library.widget.image.def.HongImageBuilder
 import com.codehong.library.widget.image.def.HongImageCompose
@@ -72,7 +71,7 @@ import com.naver.maps.map.util.MarkerIcons
 @Composable
 fun MyLocationContent(
     performanceGroupList: List<PerformanceGroup>,
-    isVenueGroupLoading: Boolean = false,
+    isPlaceGroupLoading: Boolean = false,
     selectedAreaName: String = "서울",
     onPerformanceClick: (PerformanceInfoItem) -> Unit
 ) {
@@ -144,7 +143,7 @@ fun MyLocationContent(
                     val count = group.performanceList.size
 
                     // 마커 크기 (선택 여부에 따라)
-                    val markerWidthDp = if (isSelected) 40f else 32f
+                    val markerWidthDp = if (isSelected) 40f else 36f
                     val markerHeightDp = if (isSelected) 54f else 44f
 
                     // 메인 핀 마커 (네이버 기본 핀, 오렌지 색상)
@@ -161,9 +160,6 @@ fun MyLocationContent(
                         }
                     )
 
-                    // 뱃지 마커: anchor 클램핑 문제 우회
-                    // - 메인 핀과 동일한 크기·anchor(0.5, 1.0)의 투명 비트맵을 겹침
-                    // - 비트맵 우측 상단(80%, 20%)에만 뱃지 원을 그려 핀 우측 상단처럼 표시
                     if (count > 1) {
                         val badgeIcon = remember(count) {
                             badgeCache.getOrPut(count) {
@@ -173,7 +169,7 @@ fun MyLocationContent(
                         Marker(
                             state = rememberUpdatedMarkerState(position = position),
                             icon = badgeIcon,
-                            anchor = Offset(0.4f, 1.1f),
+                            anchor = Offset(0.35f, 1.0f),
                             width = markerWidthDp.dp,
                             height = markerHeightDp.dp,
                             zIndex = 1,
@@ -196,7 +192,7 @@ fun MyLocationContent(
         ) {
             // 공연장 위치 조회 로딩 인디케이터
             AnimatedVisibility(
-                visible = isVenueGroupLoading,
+                visible = isPlaceGroupLoading,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -216,7 +212,7 @@ fun MyLocationContent(
                             strokeWidth = 2.dp
                         )
                         HongTextCompose(
-                            option = HongTextBuilder()
+                            HongTextBuilder()
                                 .text("공연장 위치 조회 중...")
                                 .typography(HongTypo.CONTENTS_12)
                                 .color(HongColor.DARK_GRAY_100)
@@ -228,14 +224,16 @@ fun MyLocationContent(
 
             // 로딩 완료 후 현재 지역 공연 pill
             AnimatedVisibility(
-                visible = !isVenueGroupLoading,
+                visible = !isPlaceGroupLoading,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.9f))
+                        .hongBackground(
+                            color = HongColor.WHITE_90,
+                            radius = HongRadiusInfo(20)
+                        )
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Row(
@@ -250,10 +248,13 @@ fun MyLocationContent(
                                 .scaleType(HongScaleType.CENTER_CROP)
                                 .applyOption()
                         )
-                        Text(
-                            text = selectedAreaName.fullArea(),
-                            fontSize = 12.sp,
-                            color = HongColor.DARK_GRAY_100.toColor()
+
+                        HongTextCompose(
+                            HongTextBuilder()
+                                .text(selectedAreaName.fullArea())
+                                .typography(HongTypo.CONTENTS_12)
+                                .color(HongColor.DARK_GRAY_100)
+                                .applyOption()
                         )
                     }
                 }
@@ -301,9 +302,90 @@ private fun PerformanceInfoCard(
                 color = HongColor.WHITE_100,
                 radius = HongRadiusInfo(16)
             )
-            .clickable { onClick() },
+            .disableRippleClickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         PerformanceItemContent(item = item)
     }
+}
+
+// ===== Preview =====
+
+private val previewPerformanceItems = listOf(
+    PerformanceInfoItem(
+        id = "PF001",
+        name = "뮤지컬 레미제라블",
+        startDate = "2026.01.01",
+        endDate = "2026.03.31",
+        placeName = "블루스퀘어 신한카드홀",
+        area = "서울",
+        genre = "뮤지컬"
+    ),
+    PerformanceInfoItem(
+        id = "PF002",
+        name = "연극 햄릿",
+        startDate = "2026.02.01",
+        endDate = "2026.04.30",
+        placeName = "블루스퀘어 신한카드홀",
+        area = "서울",
+        genre = "연극"
+    )
+)
+
+private val previewPerformanceGroups = listOf(
+    PerformanceGroup(
+        placeName = "블루스퀘어 신한카드홀",
+        lat = 37.5280,
+        lng = 126.9847,
+        performanceList = previewPerformanceItems
+    ),
+    PerformanceGroup(
+        placeName = "LG아트센터 서울",
+        lat = 37.5115,
+        lng = 127.0595,
+        performanceList = listOf(
+            PerformanceInfoItem(
+                id = "PF003",
+                name = "오케스트라 정기공연",
+                startDate = "2026.02.15",
+                endDate = "2026.02.28",
+                placeName = "LG아트센터 서울",
+                area = "서울",
+                genre = "클래식"
+            )
+        )
+    )
+)
+
+@OptIn(ExperimentalNaverMapApi::class)
+@Preview(showBackground = true, name = "공연장 위치 조회 중")
+@Composable
+private fun MyLocationContentLoadingPreview() {
+    MyLocationContent(
+        performanceGroupList = emptyList(),
+        isPlaceGroupLoading = true,
+        selectedAreaName = "서울",
+        onPerformanceClick = {}
+    )
+}
+
+@OptIn(ExperimentalNaverMapApi::class)
+@Preview(showBackground = true, name = "공연장 로딩 완료")
+@Composable
+private fun MyLocationContentLoadedPreview() {
+    MyLocationContent(
+        performanceGroupList = previewPerformanceGroups,
+        isPlaceGroupLoading = false,
+        selectedAreaName = "서울",
+        onPerformanceClick = {}
+    )
+}
+
+@Preview(showBackground = true, name = "공연 정보 카드")
+@Composable
+private fun PerformanceInfoCardPreview() {
+    PerformanceInfoCard(
+        item = previewPerformanceItems.first(),
+        onClick = {}
+    )
 }

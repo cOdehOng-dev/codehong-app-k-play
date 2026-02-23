@@ -267,7 +267,7 @@ private fun LoungeScreenContent(
                 )
                 BottomTabType.MY_LOCATION -> MyLocationContent(
                     performanceGroupList = state.performanceGroups,
-                    isVenueGroupLoading = state.apiLoading.isVenueGroupLoading,
+                    isPlaceGroupLoading = state.apiLoading.isPlaceGroupLoading,
                     selectedAreaName = state.selectedRegionCode.displayName,
                     onPerformanceClick = onNearbyItemClick
                 )

@@ -65,7 +65,7 @@ class LoungeViewModel @Inject constructor(
                         TimberUtil.d("$TAG ▶ venue 이미 조회됨 (${currentSignGuCode.displayName}), skip")
                     } else {
                         // 로딩 상태 선점 후 위치 권한 요청
-                        setState { copy(apiLoading = apiLoading.copy(isVenueGroupLoading = true)) }
+                        setState { copy(apiLoading = apiLoading.copy(isPlaceGroupLoading = true)) }
                         setEffect { LoungeEffect.RequestMyLocationTabPermission }
                     }
                 }
@@ -468,7 +468,7 @@ class LoungeViewModel @Inject constructor(
     private fun resolvePlaceGroupCoordinates(performanceList: List<PerformanceInfoItem>) {
         viewModelScope.launch {
             setState {
-                copy(apiLoading = apiLoading.copy(isVenueGroupLoading = true))
+                copy(apiLoading = apiLoading.copy(isPlaceGroupLoading = true))
             }
 
             val grouped = performanceList.groupBy { it.placeName ?: "알 수 없음" }
@@ -498,7 +498,7 @@ class LoungeViewModel @Inject constructor(
             setState {
                 copy(
                     performanceGroups = performanceGroupList,
-                    apiLoading = apiLoading.copy(isVenueGroupLoading = false)
+                    apiLoading = apiLoading.copy(isPlaceGroupLoading = false)
                 )
             }
         }
