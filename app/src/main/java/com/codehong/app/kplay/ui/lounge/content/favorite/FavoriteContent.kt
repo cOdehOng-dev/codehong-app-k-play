@@ -117,7 +117,7 @@ private fun SwipeToDeleteItem(
                 .align(Alignment.CenterEnd)
                 .width(deleteButtonWidthDp)
                 .fillMaxHeight()
-                .background(Color.Red)
+                .hongBackground(HongColor.RED_100)
                 .clickable {
                     coroutineScope.launch {
                         offsetX.animateTo(0f, animationSpec = spring(stiffness = Spring.StiffnessMedium))
@@ -126,11 +126,12 @@ private fun SwipeToDeleteItem(
                 },
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "삭제",
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
+            HongTextCompose(
+                HongTextBuilder()
+                    .text("삭제")
+                    .typography(HongTypo.BODY_14_B)
+                    .color(HongColor.WHITE_100)
+                    .applyOption()
             )
         }
 
