@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +50,8 @@ import com.codehong.library.widget.rule.color.HongColor
 import com.codehong.library.widget.rule.color.HongColor.Companion.toColor
 import com.codehong.library.widget.rule.radius.HongRadiusInfo
 import com.codehong.library.widget.rule.typo.HongTypo
+import com.codehong.library.widget.swipe.HongSwipeContainer
+import com.codehong.library.widget.swipe.HongSwipeContainerBuilder
 import com.codehong.library.widget.text.def.HongTextBuilder
 import com.codehong.library.widget.text.def.HongTextCompose
 import kotlinx.coroutines.launch
@@ -75,15 +76,33 @@ fun FavoriteContent(
                 items = favoriteList,
                 key = { it.id }
             ) { item ->
-                SwipeToDeleteItem(
-                    onDelete = { onItemDelete(item.id) }
-                ) {
-                    FavoritePerformanceItem(
-                        item = item,
-                        isDarkMode = isDarkMode,
-                        onClick = { onItemClick(item.id) }
-                    )
-                }
+                HongSwipeContainer(
+                    HongSwipeContainerBuilder()
+                        .buttonText("삭제")
+                        .onClickButton {
+                            onItemDelete(item.id)
+                        }
+                        .onClick {
+                            onItemClick(item.id)
+                        }
+                        .content {
+                            FavoritePerformanceItem(
+                                item = item,
+                                isDarkMode = isDarkMode,
+                                onClick = { onItemClick(item.id) }
+                            )
+                        }
+                        .applyOption()
+                )
+//                SwipeToDeleteItem(
+//                    onClickButton = { onItemDelete(item.id) }
+//                ) {
+//                    FavoritePerformanceItem(
+//                        item = item,
+//                        isDarkMode = isDarkMode,
+//                        onClick = { onItemClick(item.id) }
+//                    )
+//                }
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = if (isDarkMode) HongColor.DARK_GRAY_100.toColor() else HongColor.GRAY_10.toColor()
@@ -96,23 +115,18 @@ fun FavoriteContent(
 // TODO 위젯으로 만들어보기
 @Composable
 private fun SwipeToDeleteItem(
-    onDelete: () -> Unit,
+    onClickButton: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    val deleteButtonWidthDp = 80.dp
+    val buttonWidthDp = 80.dp
     val density = LocalDensity.current
-    val deleteButtonWidthPx = with(density) { deleteButtonWidthDp.toPx() }
+    val buttonWidthPx = with(density) { buttonWidthDp.toPx() }
 
     // onSizeChanged로 컨테이너 실제 너비 측정 (BoxWithConstraints 대신)
     var containerWidthPx by remember { mutableStateOf(0f) }
 
     val offsetX = remember { Animatable(0f) }
     val coroutineScope = rememberCoroutineScope()
-
-    // containerWidthPx > 0 가드: 측정 전 isPastThreshold 오작동 방지
-    val isPastThreshold by remember {
-        derivedStateOf { containerWidthPx > 0f && offsetX.value <= -(containerWidthPx * 0.7f) }
-    }
 
     val draggableState = rememberDraggableState { delta ->
         coroutineScope.launch {
@@ -140,34 +154,31 @@ private fun SwipeToDeleteItem(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(HongColor.RED_100.toColor())
+                .hongBackground(color = HongColor.RED_100)
                 .clickable {
                     coroutineScope.launch {
                         offsetX.animateTo(0f, animationSpec = spring(stiffness = Spring.StiffnessMedium))
                     }
-                    onDelete()
+                    onClickButton()
                 }
         ) {
             // offset { } 은 placement 단계에서 실행되므로 offsetX.value 를 읽어도 recomposition 없이 re-layout만 발생
             // 버튼 중심 = 오른쪽 끝에서 (노출 너비 / 2) → 항상 노출 영역 중앙 유지
+            val buttonSize = 50.dp
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .offset {
-                        val buttonHalfWidthPx = 25.dp.toPx()
+                        val buttonHalfWidthPx = (buttonSize / 2).toPx()
                         // CenterEnd 기준에서 왼쪽으로 이동: (노출영역 중심 - 버튼 반폭) 만큼
                         IntOffset(
                             x = (buttonHalfWidthPx + offsetX.value / 2).roundToInt(),
                             y = 0
                         )
                     }
-                    .width(50.dp)
-                    .height(50.dp)
+                    .width(buttonSize)
+                    .height(buttonSize),
                     // 풀스와이프 임계값 초과 시 색상 반전으로 "놓으면 삭제" 피드백
-                    .hongBackground(
-                        color = HongColor.RED_100,
-                        radius = HongRadiusInfo(10)
-                    ),
                 contentAlignment = Alignment.Center
             ) {
                 HongTextCompose(
@@ -194,7 +205,7 @@ private fun SwipeToDeleteItem(
                             when {
                                 // 풀스와이프: 컨테이너 70% 초과 OR 빠른 스와이프 → 화면 끝까지 슬라이드 후 삭제
                                 offsetX.value <= -fullSwipeThreshold ||
-                                (velocity < -1000f && offsetX.value < -deleteButtonWidthPx * 0.5f) -> {
+                                (velocity < -1000f && offsetX.value < -buttonWidthPx * 0.5f) -> {
                                     offsetX.animateTo(
                                         -containerWidthPx,
                                         animationSpec = spring(
@@ -202,12 +213,12 @@ private fun SwipeToDeleteItem(
                                             stiffness = Spring.StiffnessHigh
                                         )
                                     )
-                                    onDelete()
+                                    onClickButton()
                                 }
                                 // 절반 이상 당겼으면 삭제 버튼 노출 유지
-                                offsetX.value < -deleteButtonWidthPx / 2f -> {
+                                offsetX.value < -buttonWidthPx / 2f -> {
                                     offsetX.animateTo(
-                                        -deleteButtonWidthPx,
+                                        -buttonWidthPx,
                                         animationSpec = spring(stiffness = Spring.StiffnessMedium)
                                     )
                                 }
