@@ -269,6 +269,8 @@ private fun LoungeScreenContent(
                     performanceGroupList = state.performanceGroups,
                     isPlaceGroupLoading = state.apiLoading.isPlaceGroupLoading,
                     selectedAreaName = state.selectedRegionCode.displayName,
+                    userLat = state.userLat,
+                    userLng = state.userLng,
                     onPerformanceClick = onNearbyItemClick
                 )
                 BottomTabType.BOOKMARK -> FavoriteContent(

@@ -238,6 +238,10 @@ class LoungeViewModel @Inject constructor(
                     loadCacheSize()
                 }
             }
+
+            is LoungeEvent.OnUserLocationObtained -> {
+                setState { copy(userLat = event.lat, userLng = event.lng) }
+            }
         }
     }
 

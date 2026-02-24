@@ -67,12 +67,17 @@ import com.naver.maps.map.compose.rememberUpdatedMarkerState
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.MarkerIcons
 
+private const val SEOUL_CITY_HALL_LAT = 37.5665
+private const val SEOUL_CITY_HALL_LNG = 126.9780
+
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 fun MyLocationContent(
     performanceGroupList: List<PerformanceGroup>,
     isPlaceGroupLoading: Boolean = false,
     selectedAreaName: String = "서울",
+    userLat: Double? = null,
+    userLng: Double? = null,
     onPerformanceClick: (PerformanceInfoItem) -> Unit
 ) {
 
@@ -109,6 +114,23 @@ fun MyLocationContent(
 
     LaunchedEffect(areaCenter) {
         cameraPositionState.move(CameraUpdate.scrollTo(areaCenter))
+    }
+
+    // 공연 그룹 로드 완료 시 기준 위치에서 가장 가까운 핀으로 이동
+    // 위치 권한 있음: userLat/userLng 사용, 없음: 서울시청 기준
+    LaunchedEffect(performanceGroupList) {
+        if (groupsWithPosition.isNotEmpty()) {
+            val refLat = userLat ?: SEOUL_CITY_HALL_LAT
+            val refLng = userLng ?: SEOUL_CITY_HALL_LNG
+            val nearest = groupsWithPosition.minByOrNull { (_, pos) ->
+                val dLat = pos.latitude - refLat
+                val dLng = pos.longitude - refLng
+                dLat * dLat + dLng * dLng
+            }?.second
+            nearest?.let {
+                cameraPositionState.move(CameraUpdate.scrollTo(it))
+            }
+        }
     }
 
     // 선택 그룹이 바뀌면 pager를 0으로 리셋하기 위한 상태

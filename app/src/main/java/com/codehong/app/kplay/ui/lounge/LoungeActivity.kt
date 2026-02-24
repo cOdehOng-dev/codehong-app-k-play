@@ -177,6 +177,7 @@ class LoungeActivity : ComponentActivity() {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     TimberUtil.d( "Location: ${location.latitude}, ${location.longitude}")
+                    viewModel.setEvent(LoungeEvent.OnUserLocationObtained(location.latitude, location.longitude))
                     val geocoder = Geocoder(this, Locale.KOREA)
                     try {
                         @Suppress("DEPRECATION")

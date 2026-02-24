@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,11 +24,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -96,13 +100,33 @@ private fun SwipeToDeleteItem(
     content: @Composable () -> Unit
 ) {
     val deleteButtonWidthDp = 80.dp
-    val deleteButtonWidthPx = with(LocalDensity.current) { deleteButtonWidthDp.toPx() }
+    val density = LocalDensity.current
+    val deleteButtonWidthPx = with(density) { deleteButtonWidthDp.toPx() }
+
+    // onSizeChanged로 컨테이너 실제 너비 측정 (BoxWithConstraints 대신)
+    var containerWidthPx by remember { mutableStateOf(0f) }
+
     val offsetX = remember { Animatable(0f) }
     val coroutineScope = rememberCoroutineScope()
 
+    // containerWidthPx > 0 가드: 측정 전 isPastThreshold 오작동 방지
+    val isPastThreshold by remember {
+        derivedStateOf { containerWidthPx > 0f && offsetX.value <= -(containerWidthPx * 0.7f) }
+    }
+
     val draggableState = rememberDraggableState { delta ->
         coroutineScope.launch {
-            offsetX.snapTo((offsetX.value + delta).coerceIn(-deleteButtonWidthPx, 0f))
+            if (containerWidthPx <= 0f) return@launch
+            val newRaw = offsetX.value + delta
+            // 85% 지점까지 자유 드래그, 이후 rubber-band
+            val newValue = if (newRaw < -containerWidthPx * 0.85f) {
+                val overscroll = newRaw + containerWidthPx * 0.85f
+                (-containerWidthPx * 0.85f + overscroll * 0.3f)
+                    .coerceAtLeast(-containerWidthPx)
+            } else {
+                newRaw.coerceIn(-containerWidthPx, 0f)
+            }
+            offsetX.snapTo(newValue)
         }
     }
 
@@ -110,49 +134,91 @@ private fun SwipeToDeleteItem(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
+            .onSizeChanged { size -> containerWidthPx = size.width.toFloat() }
     ) {
-        // 삭제 버튼 (배경)
+        // 삭제 영역: 컨테이너 전체를 채우고, 콘텐츠가 밀릴수록 같이 늘어나는 효과
         Box(
             modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .width(deleteButtonWidthDp)
-                .fillMaxHeight()
-                .hongBackground(HongColor.RED_100)
+                .fillMaxSize()
+                .background(HongColor.RED_100.toColor())
                 .clickable {
                     coroutineScope.launch {
                         offsetX.animateTo(0f, animationSpec = spring(stiffness = Spring.StiffnessMedium))
                     }
                     onDelete()
-                },
-            contentAlignment = Alignment.Center
+                }
         ) {
-            HongTextCompose(
-                HongTextBuilder()
-                    .text("삭제")
-                    .typography(HongTypo.BODY_14_B)
-                    .color(HongColor.WHITE_100)
-                    .applyOption()
-            )
+            // offset { } 은 placement 단계에서 실행되므로 offsetX.value 를 읽어도 recomposition 없이 re-layout만 발생
+            // 버튼 중심 = 오른쪽 끝에서 (노출 너비 / 2) → 항상 노출 영역 중앙 유지
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .offset {
+                        val buttonHalfWidthPx = 25.dp.toPx()
+                        // CenterEnd 기준에서 왼쪽으로 이동: (노출영역 중심 - 버튼 반폭) 만큼
+                        IntOffset(
+                            x = (buttonHalfWidthPx + offsetX.value / 2).roundToInt(),
+                            y = 0
+                        )
+                    }
+                    .width(50.dp)
+                    .height(50.dp)
+                    // 풀스와이프 임계값 초과 시 색상 반전으로 "놓으면 삭제" 피드백
+                    .hongBackground(
+                        color = HongColor.RED_100,
+                        radius = HongRadiusInfo(10)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                HongTextCompose(
+                    HongTextBuilder()
+                        .text("삭제")
+                        .typography(HongTypo.BODY_14_B)
+                        .color(HongColor.WHITE_100)
+                        .applyOption()
+                )
+            }
         }
 
-        // 콘텐츠 (전경)
+        // 콘텐츠 (전경) - 밀릴수록 빨간 영역이 늘어나 보임
         Box(
             modifier = Modifier
+                .fillMaxWidth()
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
                 .draggable(
                     state = draggableState,
                     orientation = Orientation.Horizontal,
-                    onDragStopped = {
+                    onDragStopped = { velocity ->
                         coroutineScope.launch {
-                            val targetOffset = if (offsetX.value < -deleteButtonWidthPx / 2) {
-                                -deleteButtonWidthPx
-                            } else {
-                                0f
+                            val fullSwipeThreshold = containerWidthPx * 0.7f
+                            when {
+                                // 풀스와이프: 컨테이너 70% 초과 OR 빠른 스와이프 → 화면 끝까지 슬라이드 후 삭제
+                                offsetX.value <= -fullSwipeThreshold ||
+                                (velocity < -1000f && offsetX.value < -deleteButtonWidthPx * 0.5f) -> {
+                                    offsetX.animateTo(
+                                        -containerWidthPx,
+                                        animationSpec = spring(
+                                            dampingRatio = Spring.DampingRatioNoBouncy,
+                                            stiffness = Spring.StiffnessHigh
+                                        )
+                                    )
+                                    onDelete()
+                                }
+                                // 절반 이상 당겼으면 삭제 버튼 노출 유지
+                                offsetX.value < -deleteButtonWidthPx / 2f -> {
+                                    offsetX.animateTo(
+                                        -deleteButtonWidthPx,
+                                        animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                                    )
+                                }
+                                // 그 외: 원위치
+                                else -> {
+                                    offsetX.animateTo(
+                                        0f,
+                                        animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                                    )
+                                }
                             }
-                            offsetX.animateTo(
-                                targetOffset,
-                                animationSpec = spring(stiffness = Spring.StiffnessMedium)
-                            )
                         }
                     }
                 )

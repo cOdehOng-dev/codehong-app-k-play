@@ -37,7 +37,9 @@ data class LoungeState(
     val apiLoading: LoungeApiLoading = LoungeApiLoading(),
     val favoriteList: List<FavoritePerformance> = emptyList(),
     val performanceGroups: List<PerformanceGroup> = emptyList(),
-    val cacheSizeText: String = ""
+    val cacheSizeText: String = "",
+    val userLat: Double? = null,
+    val userLng: Double? = null
 ) : ViewState
 
 sealed class LoungeEvent : ViewEvent {
@@ -64,6 +66,7 @@ sealed class LoungeEvent : ViewEvent {
     data class OnFavoriteItemClick(val id: String) : LoungeEvent()
     data class OnFavoriteItemDelete(val id: String) : LoungeEvent()
     data object OnCacheDeleteConfirmed : LoungeEvent()
+    data class OnUserLocationObtained(val lat: Double, val lng: Double) : LoungeEvent()
 }
 
 sealed class LoungeEffect : ViewSideEffect {
