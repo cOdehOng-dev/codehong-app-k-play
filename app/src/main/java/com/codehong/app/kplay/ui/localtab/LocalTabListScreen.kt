@@ -8,6 +8,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -36,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,6 +49,7 @@ import com.codehong.app.kplay.ui.common.ChangeDateButton
 import com.codehong.app.kplay.ui.common.PerformanceItemContent
 import com.codehong.app.kplay.ui.common.RegionScrollTab
 import com.codehong.app.kplay.ui.lounge.content.ColumnShimmer
+import com.codehong.library.util.extensions.toYyyyMmDd
 import com.codehong.library.widget.button.text.HongButtonTextBuilder
 import com.codehong.library.widget.button.text.HongButtonTextCompose
 import com.codehong.library.widget.calendar.HongCalendarBuilder
@@ -57,7 +58,6 @@ import com.codehong.library.widget.calendar.HongCalendarOption
 import com.codehong.library.widget.calendar.model.HongCalendarDayOfWeekLangType
 import com.codehong.library.widget.calendar.model.HongCalendarInitialSelectedInfo
 import com.codehong.library.widget.extensions.hongBackground
-import com.codehong.library.util.extensions.toYyyyMmDd
 import com.codehong.library.widget.progress.HongProgress
 import com.codehong.library.widget.rule.HongLayoutParam
 import com.codehong.library.widget.rule.HongSpacingInfo
@@ -73,13 +73,13 @@ import com.codehong.library.widget.util.HongDateUtil
 @Composable
 fun LocalTabListScreen(
     viewModel: LocalTabListViewModel = hiltViewModel(),
-    onBackClick: () -> Unit = {}
+    onClickBack: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LocalTabListScreenContent(
         state = state,
-        onBackClick = onBackClick,
+        onClickBack = onClickBack,
         onSignGuCodeSelected = { signGuCode ->
             viewModel.setEvent(LocalTabListEvent.OnSignGuCodeSelected(signGuCode))
         },
@@ -105,7 +105,7 @@ fun LocalTabListScreen(
 @Composable
 private fun LocalTabListScreenContent(
     state: LocalTabListState,
-    onBackClick: () -> Unit,
+    onClickBack: () -> Unit,
     onSignGuCodeSelected: (RegionCode) -> Unit,
     onDateChangeClick: () -> Unit,
     onPerformanceClick: (PerformanceInfoItem) -> Unit,
@@ -144,7 +144,10 @@ private fun LocalTabListScreenContent(
         listState.scrollToItem(0)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
@@ -153,7 +156,7 @@ private fun LocalTabListScreenContent(
                 .hongBackground(bgColor),
             containerColor = bgColor.toColor(),
             topBar = {
-                BackHeader(state.title) { onBackClick() }
+                BackHeader(state.title) { onClickBack() }
             }
         ) { paddingValues ->
             Column(
@@ -163,8 +166,8 @@ private fun LocalTabListScreenContent(
             ) {
                 // 지역 탭
                 RegionScrollTab(
-                    selectedRegionCode = state.selectedRegionCode,
-                    onSignGuCodeSelected = onSignGuCodeSelected
+                    selected = state.selectedRegionCode,
+                    onSelect = onSignGuCodeSelected
                 )
 
                 // 날짜 선택 영역
@@ -236,6 +239,7 @@ private fun LocalTabListScreenContent(
             }
         }
 
+        // 달력 컨텐츠
         AnimatedVisibility(
             visible = state.isShowCalendar,
             enter = fadeIn(),
@@ -251,8 +255,6 @@ private fun LocalTabListScreenContent(
                     ) { onDismissCalendar() }
             )
         }
-
-        // 달력 컨텐츠
         AnimatedVisibility(
             visible = state.isShowCalendar,
             modifier = Modifier.align(Alignment.BottomCenter),
@@ -405,7 +407,7 @@ private fun LocalTabListScreenContent(
 private fun LocalTabListScreenPreview() {
     LocalTabListScreenContent(
         state = LocalTabListState(),
-        onBackClick = {},
+        onClickBack = {},
         onSignGuCodeSelected = {},
         onDateChangeClick = {},
         onPerformanceClick = {},

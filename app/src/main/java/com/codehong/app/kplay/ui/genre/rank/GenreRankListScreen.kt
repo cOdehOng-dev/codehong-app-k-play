@@ -1,54 +1,82 @@
 package com.codehong.app.kplay.ui.genre.rank
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.ThemeType
+import com.codehong.app.kplay.ui.common.BackHeader
+import com.codehong.app.kplay.ui.common.Badge
 import com.codehong.app.kplay.ui.common.ChangeDateButton
+import com.codehong.app.kplay.ui.common.ScrollTab
+import com.codehong.app.kplay.ui.lounge.content.ColumnShimmer
+import com.codehong.library.util.extensions.toYyyyMmDd
+import com.codehong.library.widget.button.text.HongButtonTextBuilder
+import com.codehong.library.widget.button.text.HongButtonTextCompose
+import com.codehong.library.widget.calendar.HongCalendarBuilder
+import com.codehong.library.widget.calendar.HongCalendarCompose
+import com.codehong.library.widget.calendar.HongCalendarOption
+import com.codehong.library.widget.calendar.model.HongCalendarDayOfWeekLangType
+import com.codehong.library.widget.calendar.model.HongCalendarInitialSelectedInfo
+import com.codehong.library.widget.extensions.clickPress
+import com.codehong.library.widget.extensions.hongBackground
+import com.codehong.library.widget.extensions.toHexCode
+import com.codehong.library.widget.image.def.HongImageBuilder
+import com.codehong.library.widget.image.def.HongImageCompose
+import com.codehong.library.widget.progress.HongProgress
+import com.codehong.library.widget.rule.HongLayoutParam
+import com.codehong.library.widget.rule.HongScaleType
+import com.codehong.library.widget.rule.HongSpacingInfo
+import com.codehong.library.widget.rule.HongTextOverflow
+import com.codehong.library.widget.rule.color.HongColor
+import com.codehong.library.widget.rule.color.HongColor.Companion.toColor
+import com.codehong.library.widget.rule.radius.HongRadiusInfo
+import com.codehong.library.widget.rule.typo.HongFont
+import com.codehong.library.widget.rule.typo.HongTypo
+import com.codehong.library.widget.text.def.HongTextBuilder
+import com.codehong.library.widget.text.def.HongTextCompose
+import com.codehong.library.widget.util.HongDateUtil
 
 // 배민 스타일 컬러
 private val BaeminPrimary = Color(0xFF2AC1BC)
@@ -64,13 +92,13 @@ private val BronzeColor = Color(0xFFCD7F32)
 @Composable
 fun GenreRankListScreen(
     viewModel: GenreRankListViewModel = hiltViewModel(),
-    onBackClick: () -> Unit = {}
+    onClickBack: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     GenreRankListScreenContent(
         state = state,
-        onBackClick = onBackClick,
+        onClickBack = onClickBack,
         onGenreCodeSelected = { genreCode ->
             viewModel.setEvent(GenreRankListEvent.OnGenreCodeSelected(genreCode))
         },
@@ -82,6 +110,13 @@ fun GenreRankListScreen(
         },
         onLoadMore = {
             viewModel.setEvent(GenreRankListEvent.OnLoadMore)
+        },
+        onSelectDate = { startDate, endDate ->
+            viewModel.setEvent(GenreRankListEvent.OnDateSelected(startDate, endDate))
+            viewModel.hideCalendar()
+        },
+        onDismissCalendar = {
+            viewModel.hideCalendar()
         }
     )
 }
@@ -89,21 +124,25 @@ fun GenreRankListScreen(
 @Composable
 private fun GenreRankListScreenContent(
     state: GenreRankListState,
-    onBackClick: () -> Unit,
+    onClickBack: () -> Unit,
     onGenreCodeSelected: (GenreCode) -> Unit,
     onDateChangeClick: () -> Unit,
     onRankItemClick: (BoxOfficeItem) -> Unit,
-    onLoadMore: () -> Unit
+    onLoadMore: () -> Unit,
+    onSelectDate: (startDate: String, endDate: String) -> Unit,
+    onDismissCalendar: () -> Unit = {}
 ) {
     val isDarkMode = when (state.themeType) {
         ThemeType.LIGHT -> false
         ThemeType.DARK -> true
         ThemeType.SYSTEM -> isSystemInDarkTheme()
     }
-    val bgColor = if (isDarkMode) Color(0xFF000000) else BaeminBackground
-    val titleColor = if (isDarkMode) Color.White else BaeminDarkGray
+    val bgColor = if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100
 
     val listState = rememberLazyListState()
+
+    var selectStartDate by remember { mutableStateOf(state.startDate) }
+    var selectEndDate by remember { mutableStateOf(state.endDate) }
 
     // Infinite scroll 감지
     val shouldLoadMore by remember {
@@ -125,293 +164,325 @@ private fun GenreRankListScreenContent(
         listState.scrollToItem(0)
     }
 
-    Scaffold(
-        containerColor = bgColor,
-        topBar = {
-            GenreRankListHeader(
-                title = "${state.initialGenreCode.displayName} 랭킹",
-                bgColor = bgColor,
-                titleColor = titleColor,
-                onBackClick = onBackClick
-            )
-        }
-    ) { paddingValues ->
-        Column(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            // 장르 탭
-            GenreCodeTabRow(
-                selectedGenreCode = state.selectedGenreCode,
-                onGenreCodeSelected = onGenreCodeSelected
-            )
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .hongBackground(bgColor),
+            containerColor = bgColor.toColor(),
+            topBar = {
+                BackHeader("${state.initialGenreCode.displayName} 랭킹") { onClickBack() }
+            }
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                // 장르 탭
+                ScrollTab(
+                    selected = state.selectedGenreCode,
+                    onSelect = onGenreCodeSelected
+                )
 
-            // 날짜 선택 영역
-            ChangeDateButton(
-                startDate = state.startDate,
-                endDate = state.endDate,
-                onDateChangeClick = onDateChangeClick
-            )
+                // 날짜 선택 영역
+                ChangeDateButton(
+                    startDate = state.startDate,
+                    endDate = state.endDate,
+                    onDateChangeClick = onDateChangeClick
+                )
 
-            // 랭킹 리스트
-            if (state.isLoading && state.genreRankList.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = BaeminPrimary)
-                }
-            } else if (state.genreRankList.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "검색 결과가 없습니다.",
-                        fontSize = 16.sp,
-                        color = BaeminGray
-                    )
-                }
-            } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    itemsIndexed(
-                        items = state.genreRankList,
-                        key = { index, item -> item.performanceId ?: index }
-                    ) { index, item ->
-                        GenreRankListItem(
-                            item = item,
-                            rank = index + 1,
-                            onClick = { onRankItemClick(item) }
-                        )
-                        if (index < state.genreRankList.lastIndex) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                thickness = 1.dp,
-                                color = Color(0xFFEEEEEE)
-                            )
-                        }
+                // 랭킹 리스트
+                if (state.isLoading && state.genreRankList.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        ColumnShimmer()
                     }
-
-                    // 로딩 인디케이터 (더보기)
-                    if (state.isLoadingMore) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(
-                                    color = BaeminPrimary,
-                                    modifier = Modifier.size(24.dp)
+                } else if (state.genreRankList.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        HongTextCompose(
+                            option = HongTextBuilder()
+                                .text("공연이 없어요 :(")
+                                .typography(HongTypo.BODY_17)
+                                .color(HongColor.GRAY_50)
+                                .applyOption()
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        itemsIndexed(
+                            items = state.genreRankList,
+                            key = { index, item -> item.performanceId ?: index }
+                        ) { index, item ->
+                            GenreRankListItemContent(
+                                item = item,
+                                rank = index + 1,
+                                onClick = { onRankItemClick(item) }
+                            )
+                            if (index < state.genreRankList.lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    thickness = 1.dp,
+                                    color = HongColor.GRAY_10.toColor()
                                 )
                             }
                         }
-                    }
 
-                    // 하단 여백
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // 하단 여백
+                        item {
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                     }
                 }
+            }
+        }
+        // 로딩 인디케이터 (더보기)
+        if (state.isLoadingMore) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                HongProgress()
+            }
+        }
+
+        // 달력 컨텐츠
+        AnimatedVisibility(
+            visible = state.isShowCalendar,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onDismissCalendar() }
+            )
+        }
+
+        AnimatedVisibility(
+            visible = state.isShowCalendar,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = slideInVertically(initialOffsetY = { it }),
+            exit = slideOutVertically(targetOffsetY = { it })
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                    .background(Color.White)
+                    .navigationBarsPadding()
+            ) {
+                // 핸들바
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(40.dp)
+                            .height(4.dp)
+                            .clip(CircleShape)
+                            .hongBackground(HongColor.GRAY_30)
+                    )
+                }
+
+                HongCalendarCompose(
+                    option = HongCalendarBuilder()
+                        .height(400)
+                        .backgroundColor(HongColor.WHITE_100.hex)
+                        .initialSelectedInfo(
+                            HongCalendarInitialSelectedInfo(
+                                startDate = state.startDate,
+                                endDate = state.endDate
+                            )
+                        )
+                        .dayOfWeekTextOption(
+                            HongTextBuilder()
+                                .size(13)
+                                .color("#666666")
+                                .fontType(HongFont.PRETENDARD_400)
+                                .applyOption()
+                        )
+                        .dayOfWeekLangType(HongCalendarDayOfWeekLangType.KOR)
+                        .yearMonthTextOption(
+                            HongTextBuilder()
+                                .size(19)
+                                .color(HongColor.BLACK_100.hex)
+                                .fontType(HongFont.PRETENDARD_700)
+                                .applyOption()
+                        )
+                        .yearMonthPattern("yyyy.MM")
+                        .startDayTextOption(
+                            HongTextBuilder()
+                                .size(17)
+                                .color(HongColor.WHITE_100.hex)
+                                .backgroundColor(HongCalendarOption.DEFAULT_SELECT_START_DAY_BACKGROUND_COLOR)
+                                .fontType(HongFont.PRETENDARD_700)
+                                .applyOption()
+                        )
+                        .endDayTextOption(
+                            HongTextBuilder()
+                                .size(17)
+                                .color(HongColor.WHITE_100.hex)
+                                .backgroundColor(HongCalendarOption.DEFAULT_SELECT_END_DAY_BACKGROUND_COLOR)
+                                .fontType(HongFont.PRETENDARD_700)
+                                .applyOption()
+                        )
+                        .rangeDaysTextOption(
+                            HongTextBuilder()
+                                .size(17)
+                                .color(HongColor.MAIN_ORANGE_100.hex)
+                                .backgroundColor(HongCalendarOption.DEFAULT_SELECT_RANGE_DAYS_BACKGROUND_COLOR)
+                                .fontType(HongFont.PRETENDARD_700)
+                                .applyOption()
+                        )
+                        .holidaysTextOption(
+                            HongTextBuilder()
+                                .size(17)
+                                .color("#ff322e")
+                                .fontType(HongFont.PRETENDARD_700)
+                                .applyOption()
+                        )
+                        .pastDaysTextOption(
+                            HongTextBuilder()
+                                .size(17)
+                                .color("#cccccc")
+                                .fontType(HongFont.PRETENDARD_700)
+                                .applyOption()
+                        )
+                        .selectTodayTextOption(
+                            HongTextBuilder()
+                                .size(8)
+                                .color(HongColor.WHITE_100.hex)
+                                .fontType(HongFont.PRETENDARD_700)
+                                .applyOption()
+                        )
+                        .unselectTodayTextOption(
+                            HongTextBuilder()
+                                .size(8)
+                                .color("#545457")
+                                .fontType(HongFont.PRETENDARD_700)
+                                .applyOption()
+                        )
+                        .defaultDayTextOption(
+                            HongTextBuilder()
+                                .size(17)
+                                .color(HongColor.BLACK_100.hex)
+                                .fontType(HongFont.PRETENDARD_700)
+                                .applyOption()
+                        )
+                        .spacingHorizontal(16)
+                        .bottomSpacingWeek(20)
+                        .holidayList(HongDateUtil.KOREAN_HOLIDAY_LIST)
+                        .dayOfWeekBottomLineColorHex("#eeeeee")
+                        .onSelected { startDate, endDate ->
+                            if (startDate == null || endDate == null) {
+                                return@onSelected
+                            }
+
+                            selectStartDate = startDate.toYyyyMmDd()
+                            selectEndDate = endDate.toYyyyMmDd()
+                        }
+                        .applyOption(),
+                )
+
+                HongButtonTextCompose(
+                    HongButtonTextBuilder()
+                        .margin(HongSpacingInfo(left = 16f, right = 16f, top = 12f, bottom = 12f))
+                        .width(HongLayoutParam.MATCH_PARENT.value)
+                        .height(52)
+                        .text("적용하기")
+                        .textTypo(HongTypo.BODY_18_B)
+                        .textColor(HongColor.WHITE_100)
+                        .backgroundColor(HongColor.MAIN_ORANGE_100.hex)
+                        .radius(HongRadiusInfo(all = 12))
+                        .onClick { onSelectDate(selectStartDate, selectEndDate) }
+                        .applyOption()
+                )
             }
         }
     }
 }
 
-// ===== Header =====
-@Composable
-private fun GenreRankListHeader(
-    title: String,
-    bgColor: Color,
-    titleColor: Color,
-    onBackClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .background(bgColor)
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .clickable(onClick = onBackClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "←",
-                fontSize = 24.sp,
-                color = titleColor
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = title,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = titleColor
-        )
-    }
-}
-
-// ===== 장르 탭 (타원형 스타일) =====
-@Composable
-private fun GenreCodeTabRow(
-    selectedGenreCode: GenreCode,
-    onGenreCodeSelected: (GenreCode) -> Unit
-) {
-    LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(GenreCode.entries) { genreCode ->
-            val isSelected = genreCode == selectedGenreCode
-            GenreCodeTabChip(
-                text = genreCode.displayName,
-                isSelected = isSelected,
-                onClick = { onGenreCodeSelected(genreCode) }
-            )
-        }
-    }
-}
-
-@Composable
-private fun GenreCodeTabChip(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(
-                color = if (isSelected) BaeminPrimary else BaeminBackground
-            )
-            .border(
-                width = 1.dp,
-                color = BaeminPrimary,
-                shape = RoundedCornerShape(50)
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            fontSize = 12.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = if (isSelected) Color.White else BaeminPrimary
-        )
-    }
-}
-
-// ===== 날짜 선택 영역 =====
-@Composable
-private fun DateSelectionRow(
-    startDate: String,
-    endDate: String,
-    onDateChangeClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        // 날짜 정보 (MM.dd ~ MM.dd)
-        Text(
-            text = formatDateDisplay(startDate, endDate),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = BaeminDarkGray
-        )
-
-        // 날짜 변경 버튼
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFFF5F5F5))
-                .clickable(onClick = onDateChangeClick)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-        ) {
-            Text(
-                text = "날짜 변경",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                color = BaeminPrimary
-            )
-        }
-    }
-}
-
-// yyyyMMdd -> MM.dd 형식으로 변환
-private fun formatDateDisplay(startDate: String, endDate: String): String {
-    val formattedStart = formatToMMdd(startDate)
-    val formattedEnd = formatToMMdd(endDate)
-    return "$formattedStart ~ $formattedEnd"
-}
-
-private fun formatToMMdd(date: String): String {
-    if (date.length != 8) return date
-    val month = date.substring(4, 6)
-    val day = date.substring(6, 8)
-    return "$month.$day"
-}
-
 // ===== 랭킹 리스트 아이템 =====
 @Composable
-private fun GenreRankListItem(
+private fun GenreRankListItemContent(
     item: BoxOfficeItem,
     rank: Int,
-    onClick: () -> Unit
+    onClick: (() -> Unit)? = null
 ) {
+    val modifier = if (onClick != null) {
+        Modifier.clickPress(onClick = onClick)
+    } else {
+        Modifier
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .then(modifier),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 순위 텍스트
-        val rankColor = when (rank) {
-            1 -> GoldColor
-            2 -> SilverColor
-            3 -> BronzeColor
-            else -> BaeminDarkGray
+        Box {
+            HongImageCompose(
+                HongImageBuilder()
+                    .width(100)
+                    .height(130)
+                    .radius(HongRadiusInfo(8))
+                    .imageInfo(item.posterUrl)
+                    .scaleType(HongScaleType.CENTER_CROP)
+                    .applyOption()
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+            ) {
+                HongTextCompose(
+                    option = HongTextBuilder()
+                        .text("$rank")
+                        .margin(
+                            HongSpacingInfo(
+                                left = 5f,
+                                bottom = 5f
+                            )
+                        )
+                        .typography(HongTypo.TITLE_36_B)
+                        .color(
+                            when (rank) {
+                                1 -> GoldColor.toHexCode()
+                                2 -> SilverColor.toHexCode()
+                                3 -> BronzeColor.toHexCode()
+                                else -> HongColor.WHITE_100.hex
+                            }
+                        )
+                        .applyOption()
+                )
+            }
         }
-
-        Text(
-            text = "$rank",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = rankColor,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.width(32.dp)
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        // 포스터 이미지
-        AsyncImage(
-            model = item.posterUrl,
-            contentDescription = item.performanceName,
-            modifier = Modifier
-                .size(100.dp, 130.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            contentScale = ContentScale.Crop
-        )
 
         Spacer(modifier = Modifier.width(12.dp))
 
@@ -420,63 +491,60 @@ private fun GenreRankListItem(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // 장르, 지역 뱃지
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                if (!item.category.isNullOrBlank()) {
-                    SmallBadge(text = item.category)
-                }
-                if (!item.area.isNullOrBlank()) {
-                    SmallBadge(text = item.area)
-                }
-            }
-
             // 공연명
-            Text(
-                text = item.performanceName ?: "",
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = BaeminDarkGray,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+            HongTextCompose(
+                option = HongTextBuilder()
+                    .margin(HongSpacingInfo(bottom = 8f))
+                    .text(item.performanceName)
+                    .typography(HongTypo.BODY_15_B)
+                    .color(HongColor.BLACK_100)
+                    .maxLines(2)
+                    .overflow(HongTextOverflow.ELLIPSIS)
+                    .applyOption()
             )
 
             // 장소명
-            Text(
-                text = item.placeName ?: "",
-                fontSize = 13.sp,
-                color = BaeminGray,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+            HongTextCompose(
+                option = HongTextBuilder()
+                    .margin(HongSpacingInfo(bottom = 6f))
+                    .text(item.placeName)
+                    .typography(HongTypo.BODY_13)
+                    .color(HongColor.DARK_GRAY_100)
+                    .maxLines(1)
+                    .overflow(HongTextOverflow.ELLIPSIS)
+                    .applyOption()
             )
 
             // 공연 기간
-            Text(
-                text = item.performancePeriod ?: "",
-                fontSize = 12.sp,
-                color = BaeminPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+            HongTextCompose(
+                option = HongTextBuilder()
+                    .margin(HongSpacingInfo(bottom = 6f))
+                    .text(item.performancePeriod)
+                    .typography(HongTypo.CONTENTS_12)
+                    .color(HongColor.GRAY_50)
+                    .maxLines(1)
+                    .overflow(HongTextOverflow.ELLIPSIS)
+                    .applyOption()
             )
-        }
-    }
-}
 
-@Composable
-private fun SmallBadge(text: String?) {
-    if (text.isNullOrEmpty()) return
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(Color(0xFFF5F5F5))
-            .padding(horizontal = 6.dp, vertical = 2.dp)
-    ) {
-        Text(
-            text = text,
-            fontSize = 10.sp,
-            color = BaeminGray
-        )
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // 카테고리, 지역 뱃지
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                item.category
+                    .takeIf { !it.isNullOrBlank() }
+                    ?.let {
+                        Badge(text = it)
+                    }
+                item.area
+                    .takeIf { !it.isNullOrBlank() }
+                    ?.let {
+                        Badge(text = it)
+                    }
+            }
+        }
     }
 }
 
@@ -485,10 +553,11 @@ private fun SmallBadge(text: String?) {
 private fun GenreRankListScreenPreview() {
     GenreRankListScreenContent(
         state = GenreRankListState(),
-        onBackClick = {},
+        onClickBack = {},
         onGenreCodeSelected = {},
         onDateChangeClick = {},
         onRankItemClick = {},
-        onLoadMore = {}
+        onLoadMore = {},
+        onSelectDate = { _, _ -> }
     )
 }

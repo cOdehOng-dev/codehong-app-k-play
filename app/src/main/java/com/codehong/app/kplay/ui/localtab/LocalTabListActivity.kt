@@ -30,7 +30,7 @@ class LocalTabListActivity : ComponentActivity() {
             }
 
             LocalTabListScreen(
-                onBackClick = { finish() }
+                onClickBack = { finish() }
             )
         }
     }

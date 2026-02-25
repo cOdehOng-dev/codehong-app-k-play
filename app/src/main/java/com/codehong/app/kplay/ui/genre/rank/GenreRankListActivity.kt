@@ -25,16 +25,12 @@ class GenreRankListActivity : ComponentActivity() {
                                 id = effect.performanceId
                             )
                         }
-                        is GenreRankListEffect.ShowDatePicker -> {
-                            // TODO: 달력 다이얼로그 표시
-                            // 날짜 선택 후 viewModel.setEvent(GenreRankListEvent.OnDateSelected(startDate, endDate)) 호출
-                        }
                     }
                 }
             }
 
             GenreRankListScreen(
-                onBackClick = { finish() }
+                onClickBack = { finish() }
             )
         }
     }

@@ -1,6 +1,9 @@
 package com.codehong.app.kplay.util
 
 import com.naver.maps.geometry.LatLng
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -35,5 +38,18 @@ object Util {
         val angle = (index * 137.5 + abs(seed) % 360) * Math.PI / 180
         val distance = 0.008 + (abs(seed) % 100) * 0.0004
         return if (isLat) distance * cos(angle) else distance * sin(angle)
+    }
+
+
+    fun getDefaultDateRange(): Pair<String, String> {
+        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
+        val calendar = Calendar.getInstance()
+
+        val startDate = dateFormat.format(calendar.time)
+
+        calendar.add(Calendar.MONTH, 1)
+        val endDate = dateFormat.format(calendar.time)
+
+        return startDate to endDate
     }
 }

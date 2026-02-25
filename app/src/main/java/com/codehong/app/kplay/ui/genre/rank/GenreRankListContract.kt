@@ -17,7 +17,8 @@ data class GenreRankListState(
     val genreRankList: List<BoxOfficeItem> = emptyList(),
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
-    val hasMoreData: Boolean = true
+    val hasMoreData: Boolean = true,
+    val isShowCalendar: Boolean = false
 ) : ViewState
 
 sealed class GenreRankListEvent : ViewEvent {
@@ -30,5 +31,4 @@ sealed class GenreRankListEvent : ViewEvent {
 
 sealed class GenreRankListEffect : ViewSideEffect {
     data class NavigateToDetail(val performanceId: String) : GenreRankListEffect()
-    data object ShowDatePicker : GenreRankListEffect()
 }

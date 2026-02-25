@@ -5,18 +5,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
-import com.codehong.app.kplay.domain.type.GenreCode.Companion.toCode as toGenreCode
-import com.codehong.app.kplay.domain.type.RegionCode
-import com.codehong.app.kplay.domain.type.RegionCode.Companion.toCode as toSignGuCode
 import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
+import com.codehong.app.kplay.util.Util
 import com.codehong.library.architecture.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 import javax.inject.Inject
+import com.codehong.app.kplay.domain.type.GenreCode.Companion.toCode as toGenreCode
+import com.codehong.app.kplay.domain.type.RegionCode.Companion.toCode as toSignGuCode
 
 @HiltViewModel
 class LocalTabListViewModel @Inject constructor(
@@ -29,13 +26,13 @@ class LocalTabListViewModel @Inject constructor(
         val genreCode = savedStateHandle.get<String>(Consts.EXTRA_GENRE_CODE).toGenreCode()
         val signGuCode = savedStateHandle.get<String>(Consts.EXTRA_SIGN_GU_CODE).toSignGuCode()
 
-        val (startDate, endDate) = getDefaultDateRange()
+        val (startDate, endDate) = Util.getDefaultDateRange()
 
         setState {
             copy(
                 title = genreCode?.displayName ?: "지역별 공연",
                 genreCode = genreCode,
-                selectedRegionCode = signGuCode ?: RegionCode.SEOUL,
+                selectedRegionCode = signGuCode,
                 startDate = startDate,
                 endDate = endDate
             )
@@ -91,18 +88,6 @@ class LocalTabListViewModel @Inject constructor(
 
     fun hideCalendar() {
         setState { copy(isShowCalendar = false) }
-    }
-
-    private fun getDefaultDateRange(): Pair<String, String> {
-        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.KOREA)
-        val calendar = Calendar.getInstance()
-
-        val startDate = dateFormat.format(calendar.time)
-
-        calendar.add(Calendar.MONTH, 1)
-        val endDate = dateFormat.format(calendar.time)
-
-        return startDate to endDate
     }
 
     fun callPerformanceListApi() {

@@ -1,6 +1,6 @@
 package com.codehong.app.kplay.ui.performance.detail
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,19 +15,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.unit.dp
-import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
+import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailCastContent
 import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailInfoContent
 import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailNoticeContent
@@ -37,6 +34,7 @@ import com.codehong.app.kplay.ui.performance.detail.content.PerformanceDetailTim
 import com.codehong.library.widget.R
 import com.codehong.library.widget.button.text.HongButtonTextBuilder
 import com.codehong.library.widget.button.text.HongButtonTextCompose
+import com.codehong.library.widget.extensions.clickPress
 import com.codehong.library.widget.extensions.hongBackground
 import com.codehong.library.widget.extensions.hongSpacing
 import com.codehong.library.widget.header.icon.HongHeaderIcon
@@ -76,14 +74,14 @@ fun PerformanceDetailScreen(
             .navigationBarsPadding()
             .hongBackground(if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100),
         topBar = {
-            PerformanceDetailTopBar(
+            Header(
                 title = state.performanceDetail?.name,
                 isDarkMode = isDarkMode,
                 onBackClick = { onEvent(PerformanceDetailEvent.OnBackClick) }
             )
         },
         bottomBar = {
-            PerformanceDetailBottomBar(
+            TabBar(
                 isDarkMode = isDarkMode,
                 isFavorite = state.isFavorite,
                 onBookingClick = { onEvent(PerformanceDetailEvent.OnBookingClick) },
@@ -101,7 +99,7 @@ fun PerformanceDetailScreen(
                 HongProgress()
             }
         } else if (state.performanceDetail != null) {
-            PerformanceDetailBody(
+            Content(
                 state = state,
                 isDarkMode = isDarkMode,
                 modifier = Modifier.padding(innerPadding)
@@ -109,14 +107,14 @@ fun PerformanceDetailScreen(
         }
     }
 
-    PerformanceDetailReservationPicker(
+    ReservationPicker(
         state = state,
         onEvent = onEvent
     )
 }
 
 @Composable
-private fun PerformanceDetailTopBar(
+private fun Header(
     title: String?,
     isDarkMode: Boolean,
     onBackClick: () -> Unit
@@ -135,7 +133,7 @@ private fun PerformanceDetailTopBar(
 }
 
 @Composable
-private fun PerformanceDetailBottomBar(
+private fun TabBar(
     isDarkMode: Boolean,
     isFavorite: Boolean,
     onBookingClick: () -> Unit,
@@ -172,13 +170,8 @@ private fun PerformanceDetailBottomBar(
                 modifier = Modifier
                     .weight(2f)
                     .size(52.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .hongBackground(
-                        if (isFavorite) HongColor.MAIN_ORANGE_100
-                        else if (isDarkMode) HongColor.DARK_GRAY_100
-                        else HongColor.GRAY_10
-                    )
-                    .clickable { onFavoriteClick() },
+                    .hongBackground(if (isDarkMode) HongColor.DARK_GRAY_100 else HongColor.WHITE_100)
+                    .clickPress { onFavoriteClick() },
                 contentAlignment = Alignment.Center
             ) {
                 HongImageCompose(
@@ -186,7 +179,7 @@ private fun PerformanceDetailBottomBar(
                         .width(24)
                         .height(24)
                         .imageInfo(R.drawable.honglib_ic_favorite)
-                        .imageColor(if (isFavorite) HongColor.WHITE_100 else HongColor.GRAY_50)
+                        .imageColor(if (isFavorite) HongColor.MAIN_ORANGE_100 else HongColor.GRAY_50)
                         .scaleType(HongScaleType.CENTER_CROP)
                         .applyOption()
                 )
@@ -196,7 +189,7 @@ private fun PerformanceDetailBottomBar(
 }
 
 @Composable
-private fun PerformanceDetailBody(
+private fun Content(
     state: PerformanceDetailState,
     isDarkMode: Boolean,
     modifier: Modifier = Modifier
@@ -209,7 +202,7 @@ private fun PerformanceDetailBody(
             .hongBackground(if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100)
             .verticalScroll(rememberScrollState())
     ) {
-        PerformanceDetailPosterSection(posterUrl = performanceDetail.posterUrl)
+        PosterContent(posterUrl = performanceDetail.posterUrl)
 
         HongTextCompose(
             option = HongTextBuilder()
@@ -223,9 +216,9 @@ private fun PerformanceDetailBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        PerformanceDetailInfoSection(
+        InfoContent(
             period = state.period,
-            performanceDetail = performanceDetail,
+            detail = performanceDetail,
             isDarkMode = isDarkMode
         )
 
@@ -246,7 +239,9 @@ private fun PerformanceDetailBody(
 }
 
 @Composable
-private fun PerformanceDetailPosterSection(posterUrl: String?) {
+private fun PosterContent(
+    posterUrl: String?
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -279,9 +274,9 @@ private fun PerformanceDetailPosterSection(posterUrl: String?) {
 }
 
 @Composable
-private fun PerformanceDetailInfoSection(
+private fun InfoContent(
     period: String,
-    performanceDetail: PerformanceDetail,
+    detail: PerformanceDetail,
     isDarkMode: Boolean = false
 ) {
     Column(
@@ -292,29 +287,29 @@ private fun PerformanceDetailInfoSection(
             PerformanceDetailInfoContent(label = "공연 기간", value = it, isDarkMode = isDarkMode)
         }
 
-        performanceDetail.facilityName?.takeIf { it.isNotBlank() }?.let {
+        detail.facilityName?.takeIf { it.isNotBlank() }?.let {
             PerformanceDetailInfoContent(label = "공연장", value = it, isDarkMode = isDarkMode)
         }
-        performanceDetail.runtime?.takeIf { it.isNotBlank() && it != "0분" }?.let {
+        detail.runtime?.takeIf { it.isNotBlank() && it != "0분" }?.let {
             PerformanceDetailInfoContent(label = "러닝타임", value = it, isDarkMode = isDarkMode)
         }
 
-        performanceDetail.ageLimit?.takeIf { it.isNotBlank() }?.let {
+        detail.ageLimit?.takeIf { it.isNotBlank() }?.let {
             PerformanceDetailInfoContent(label = "관람등급", value = it, isDarkMode = isDarkMode)
         }
 
-        performanceDetail.hostCompany?.takeIf { it.isNotBlank() }?.let {
+        detail.hostCompany?.takeIf { it.isNotBlank() }?.let {
             PerformanceDetailInfoContent(label = "주최", value = it, isDarkMode = isDarkMode)
         }
 
-        performanceDetail.sponsorCompany?.takeIf { it.isNotBlank() }?.let {
+        detail.sponsorCompany?.takeIf { it.isNotBlank() }?.let {
             PerformanceDetailInfoContent(label = "주관", value = it, isDarkMode = isDarkMode)
         }
     }
 }
 
 @Composable
-private fun PerformanceDetailReservationPicker(
+private fun ReservationPicker(
     state: PerformanceDetailState,
     onEvent: (PerformanceDetailEvent) -> Unit
 ) {
@@ -332,7 +327,8 @@ private fun PerformanceDetailReservationPicker(
                 onEvent(PerformanceDetailEvent.OnHideBookingPicker)
             }
             .onConfirm { selectedFirstOption, _ ->
-                val selectUrl = state.realSiteList.firstOrNull { it.name == selectedFirstOption.second }?.url
+                val selectUrl =
+                    state.realSiteList.firstOrNull { it.name == selectedFirstOption.second }?.url
                 onEvent(PerformanceDetailEvent.OnBookingSiteClick(selectUrl))
             }
             .applyOption(),

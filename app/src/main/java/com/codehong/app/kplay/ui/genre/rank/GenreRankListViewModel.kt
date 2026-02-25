@@ -80,8 +80,8 @@ class GenreRankListViewModel @Inject constructor(
                     loadMore()
                 }
             }
-            is GenreRankListEvent.OnDateChangeClick -> {
-                setEffect { GenreRankListEffect.ShowDatePicker }
+            is GenreRankListEvent.OnDateChangeClick -> {   
+                setState { copy(isShowCalendar = true) }
             }
         }
     }
@@ -116,6 +116,10 @@ class GenreRankListViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun hideCalendar() {
+        setState { copy(isShowCalendar = false) }
     }
 
     private fun loadMore() {
