@@ -80,7 +80,7 @@ class GenreRankListViewModel @Inject constructor(
                     loadMore()
                 }
             }
-            is GenreRankListEvent.OnDateChangeClick -> {   
+            is GenreRankListEvent.OnDateChangeClick -> {
                 setState { copy(isShowCalendar = true) }
             }
         }

@@ -128,7 +128,10 @@ class LoungeActivity : ComponentActivity() {
                             }
                         }
                         is LoungeEffect.NavigateToFestivalList -> {
-                            ActivityManager.openFestivalList(this@LoungeActivity)
+                            ActivityManager.openFestivalList(
+                                this@LoungeActivity,
+                                effect.regionCode.code
+                            )
                         }
                         is LoungeEffect.NavigateToAwardedList -> {
                             // 수상작 리스트 페이지 이동

@@ -49,7 +49,7 @@ import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.app.kplay.ui.common.BackHeader
 import com.codehong.app.kplay.ui.common.Badge
 import com.codehong.app.kplay.ui.common.ChangeDateButton
-import com.codehong.app.kplay.ui.common.ScrollTab
+import com.codehong.app.kplay.ui.common.GenreScrollTab
 import com.codehong.app.kplay.ui.lounge.content.ColumnShimmer
 import com.codehong.library.util.extensions.toYyyyMmDd
 import com.codehong.library.widget.button.text.HongButtonTextBuilder
@@ -185,7 +185,7 @@ private fun GenreRankListScreenContent(
                     .padding(paddingValues)
             ) {
                 // 장르 탭
-                ScrollTab(
+                GenreScrollTab(
                     selected = state.selectedGenreCode,
                     onSelect = onGenreCodeSelected
                 )

@@ -7,6 +7,7 @@ import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
 import com.codehong.app.kplay.domain.usecase.PerformanceUseCase
+import com.codehong.app.kplay.ui.localtab.LocalTabType.Companion.toLocalTabType
 import com.codehong.app.kplay.util.Util
 import com.codehong.library.architecture.mvi.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,13 +25,21 @@ class LocalTabListViewModel @Inject constructor(
 
     init {
         val genreCode = savedStateHandle.get<String>(Consts.EXTRA_GENRE_CODE).toGenreCode()
-        val signGuCode = savedStateHandle.get<String>(Consts.EXTRA_SIGN_GU_CODE).toSignGuCode()
+        val signGuCode = savedStateHandle.get<String>(Consts.EXTRA_REGION_CODE).toSignGuCode()
+
+        val type = savedStateHandle.get<String>(Consts.EXTRA_LOCAL_TAB_TYPE).toLocalTabType()
+
+        val title = when (type) {
+            LocalTabType.GENRE -> genreCode?.displayName ?: LocalTabType.GENRE.title
+            LocalTabType.REGION -> LocalTabType.REGION.title
+            LocalTabType.FESTIVAL -> LocalTabType.FESTIVAL.title
+        }
 
         val (startDate, endDate) = Util.getDefaultDateRange()
 
         setState {
             copy(
-                title = genreCode?.displayName ?: "지역별 공연",
+                title = title,
                 genreCode = genreCode,
                 selectedRegionCode = signGuCode,
                 startDate = startDate,

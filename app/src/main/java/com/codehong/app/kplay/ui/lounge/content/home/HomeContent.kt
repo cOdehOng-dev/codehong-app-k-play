@@ -60,7 +60,7 @@ fun HomeContent(
             )
         }
 
-        // 카테고리 그리드
+        // 장르 그리드
         item(key = "genre_list") {
             GenreListContent(
                 genreList = state.categories,

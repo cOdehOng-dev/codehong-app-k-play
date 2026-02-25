@@ -46,7 +46,7 @@ fun RegionScrollTab(
 }
 
 @Composable
-fun ScrollTab(
+fun GenreScrollTab(
     selected: GenreCode,
     onSelect: (GenreCode) -> Unit
 ) {

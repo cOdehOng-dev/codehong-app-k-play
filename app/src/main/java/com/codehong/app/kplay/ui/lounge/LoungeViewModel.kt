@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
 import com.codehong.app.kplay.domain.Consts
-import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.app.kplay.domain.model.performance.PerformanceGroup
+import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.BottomTabType
 import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
@@ -166,7 +166,7 @@ class LoungeViewModel @Inject constructor(
 
             is LoungeEvent.OnFestivalMoreClick -> {
                 TimberUtil.d("Festival more clicked")
-                setEffect { LoungeEffect.NavigateToFestivalList }
+                setEffect { LoungeEffect.NavigateToFestivalList(state.value.selectedFestivalTab) }
             }
 
             is LoungeEvent.OnAwardedTabSelected -> {

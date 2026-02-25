@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.Intent
 import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.ui.award.AwardListActivity
-import com.codehong.app.kplay.ui.festival.FestivalListActivity
 import com.codehong.app.kplay.ui.genre.rank.GenreRankListActivity
 import com.codehong.app.kplay.ui.localtab.LocalTabListActivity
+import com.codehong.app.kplay.ui.localtab.LocalTabType
 import com.codehong.app.kplay.ui.performance.detail.PerformanceDetailActivity
 
 object ActivityManager {
@@ -35,20 +35,37 @@ object ActivityManager {
 
         val intent = Intent(context, LocalTabListActivity::class.java).apply {
             putExtra(Consts.EXTRA_GENRE_CODE, genreCode)
+            putExtra(Consts.EXTRA_LOCAL_TAB_TYPE, LocalTabType.GENRE.type)
         }
         context.startActivity(intent)
     }
 
     fun openFestivalList(
         context: Context?,
-        signGuCode: String? = null
+        regionCode: String?
     ) {
         if (context == null) {
             return
         }
 
-        val intent = Intent(context, FestivalListActivity::class.java).apply {
-            signGuCode?.let { putExtra(Consts.SIGN_GU_CODE, it) }
+        val intent = Intent(context, LocalTabListActivity::class.java).apply {
+            putExtra(Consts.EXTRA_REGION_CODE, regionCode)
+            putExtra(Consts.EXTRA_LOCAL_TAB_TYPE, LocalTabType.FESTIVAL.type)
+        }
+        context.startActivity(intent)
+    }
+
+    fun openLocalList(
+        context: Context?,
+        regionCode: String?
+    ) {
+        if (context == null) {
+            return
+        }
+
+        val intent = Intent(context, LocalTabListActivity::class.java).apply {
+            putExtra(Consts.EXTRA_REGION_CODE, regionCode)
+            putExtra(Consts.EXTRA_LOCAL_TAB_TYPE, LocalTabType.REGION.type)
         }
         context.startActivity(intent)
     }
@@ -67,19 +84,7 @@ object ActivityManager {
         context.startActivity(intent)
     }
 
-    fun openLocalList(
-        context: Context?,
-        signGuCode: String? = null
-    ) {
-        if (context == null) {
-            return
-        }
 
-        val intent = Intent(context, LocalTabListActivity::class.java).apply {
-            signGuCode?.let { putExtra(Consts.EXTRA_SIGN_GU_CODE, it) }
-        }
-        context.startActivity(intent)
-    }
 
     fun openAwardList(
         context: Context?
