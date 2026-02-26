@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import com.codehong.app.kplay.domain.Consts
-import com.codehong.app.kplay.ui.award.AwardListActivity
 import com.codehong.app.kplay.ui.genre.rank.GenreRankListActivity
 import com.codehong.app.kplay.ui.localtab.LocalTabListActivity
 import com.codehong.app.kplay.ui.localtab.LocalTabType
@@ -91,13 +90,17 @@ object ActivityManager {
 
 
     fun openAwardList(
-        context: Context?
+        context: Context?,
+        regionCode: String?
     ) {
         if (context == null) {
             return
         }
 
-        val intent = Intent(context, AwardListActivity::class.java)
+        val intent = Intent(context, LocalTabListActivity::class.java).apply {
+            putExtra(Consts.EXTRA_REGION_CODE, regionCode)
+            putExtra(Consts.EXTRA_LOCAL_TAB_TYPE, LocalTabType.AWARD.type)
+        }
         context.startActivity(intent)
     }
 

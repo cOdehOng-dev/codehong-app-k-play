@@ -1,7 +1,10 @@
 package com.codehong.app.kplay.ui.common
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.library.widget.extensions.clickPress
+import com.codehong.library.widget.extensions.hongBackground
 import com.codehong.library.widget.image.def.HongImageBuilder
 import com.codehong.library.widget.image.def.HongImageCompose
 import com.codehong.library.widget.rule.HongScaleType
@@ -98,6 +102,11 @@ fun PerformanceItemContent(
 
             Spacer(modifier = Modifier.height(6.dp))
 
+            if (!item.awards.isNullOrBlank()) {
+                AwardBadges(awards = item.awards)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             // 장르, 지역 뱃지
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -112,6 +121,48 @@ fun PerformanceItemContent(
                     ?.let {
                         Badge(text = it)
                     }
+            }
+
+
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AwardBadges(awards: String?) {
+    if (awards.isNullOrBlank()) return
+
+    // <br> 또는 <br/> 또는 <br /> 태그로 분리
+    val awardList = awards
+        .split(Regex(" <br\\s*/?>", RegexOption.IGNORE_CASE))
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+        .take(2)
+
+    if (awardList.isEmpty()) return
+
+    // FlowRow: 공간이 부족하면 자동으로 다음 줄로 이동
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        awardList.forEach { award ->
+            Box(
+                modifier = Modifier
+                    .hongBackground(
+                        color = HongColor.MAIN_ORANGE_30,
+                        radius = HongRadiusInfo(4)
+                    )
+                    .padding(horizontal = 6.dp, vertical = 3.dp)
+            ) {
+                HongTextCompose(
+                    option = HongTextBuilder()
+                        .text(award)
+                        .typography(HongTypo.CONTENTS_10_B)
+                        .color(HongColor.RED_100)
+                        .applyOption()
+                )
             }
         }
     }

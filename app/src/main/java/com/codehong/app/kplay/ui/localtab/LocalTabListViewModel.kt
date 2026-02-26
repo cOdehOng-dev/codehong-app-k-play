@@ -1,6 +1,7 @@
 package com.codehong.app.kplay.ui.localtab
 
 import android.app.Application
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.codehong.app.kplay.BuildConfig
@@ -23,16 +24,20 @@ class LocalTabListViewModel @Inject constructor(
     private val performanceUseCase: PerformanceUseCase
 ) : BaseViewModel<LocalTabListEvent, LocalTabListState, LocalTabListEffect>(application) {
 
+
+    private val type = mutableStateOf(LocalTabType.REGION)
+
     init {
         val genreCode = savedStateHandle.get<String>(Consts.EXTRA_GENRE_CODE).toGenreCode()
         val signGuCode = savedStateHandle.get<String>(Consts.EXTRA_REGION_CODE).toSignGuCode()
 
-        val type = savedStateHandle.get<String>(Consts.EXTRA_LOCAL_TAB_TYPE).toLocalTabType()
+        type.value = savedStateHandle.get<String>(Consts.EXTRA_LOCAL_TAB_TYPE).toLocalTabType()
 
-        val title = when (type) {
+        val title = when (type.value) {
             LocalTabType.GENRE -> genreCode?.displayName ?: LocalTabType.GENRE.title
             LocalTabType.REGION -> LocalTabType.REGION.title
             LocalTabType.FESTIVAL -> LocalTabType.FESTIVAL.title
+            LocalTabType.AWARD -> LocalTabType.AWARD.title
         }
 
         val (startDate, endDate) = Util.getDefaultDateRange()
@@ -47,7 +52,7 @@ class LocalTabListViewModel @Inject constructor(
             )
         }
 
-        callPerformanceListApi()
+        callPerformanceListApi(type.value)
     }
 
     override fun createInitialState(): LocalTabListState = LocalTabListState(
@@ -70,7 +75,7 @@ class LocalTabListViewModel @Inject constructor(
                         hasMoreData = true
                     )
                 }
-                callPerformanceListApi()
+                callPerformanceListApi(type.value)
             }
             is LocalTabListEvent.OnDateSelected -> {
                 setState {
@@ -82,7 +87,7 @@ class LocalTabListViewModel @Inject constructor(
                         hasMoreData = true
                     )
                 }
-                callPerformanceListApi()
+                callPerformanceListApi(type.value)
             }
             is LocalTabListEvent.OnLoadMore -> {
                 if (!state.value.isLoadingMore && state.value.hasMoreData) {
@@ -99,7 +104,7 @@ class LocalTabListViewModel @Inject constructor(
         setState { copy(isShowCalendar = false) }
     }
 
-    fun callPerformanceListApi() {
+    fun callPerformanceListApi(type: LocalTabType) {
         val currentState = state.value
 
         if (currentState.isLoading) return
@@ -107,24 +112,45 @@ class LocalTabListViewModel @Inject constructor(
         setState { copy(isLoading = true) }
 
         viewModelScope.launch {
-            performanceUseCase.getPerformanceList(
-                service = BuildConfig.KOKOR_CLIENT_ID,
-                startDate = currentState.startDate,
-                endDate = currentState.endDate,
-                currentPage = currentState.currentPage.toString(),
-                rowsPerPage = "20",
-                signGuCode = currentState.selectedRegionCode.code,
-                genreCode = currentState.genreCode?.code
-            ).collect { result ->
-                val newList = result ?: emptyList()
-                setState {
-                    copy(
-                        performanceList = newList,
-                        isLoading = false,
-                        hasMoreData = newList.size >= 20
-                    )
+            if (type == LocalTabType.AWARD) {
+                performanceUseCase.getAwardedPerformanceList(
+                    serviceKey = BuildConfig.KOKOR_CLIENT_ID,
+                    startDate = currentState.startDate,
+                    endDate = currentState.endDate,
+                    currentPage = currentState.currentPage.toString(),
+                    rowsPerPage = "20",
+                    signGuCode = currentState.selectedRegionCode.code
+                ).collect { result ->
+                    val newList = result ?: emptyList()
+                    setState {
+                        copy(
+                            performanceList = newList,
+                            isLoading = false,
+                            hasMoreData = newList.size >= 20
+                        )
+                    }
+                }
+            } else {
+                performanceUseCase.getPerformanceList(
+                    service = BuildConfig.KOKOR_CLIENT_ID,
+                    startDate = currentState.startDate,
+                    endDate = currentState.endDate,
+                    currentPage = currentState.currentPage.toString(),
+                    rowsPerPage = "20",
+                    signGuCode = currentState.selectedRegionCode.code,
+                    genreCode = currentState.genreCode?.code
+                ).collect { result ->
+                    val newList = result ?: emptyList()
+                    setState {
+                        copy(
+                            performanceList = newList,
+                            isLoading = false,
+                            hasMoreData = newList.size >= 20
+                        )
+                    }
                 }
             }
+
         }
     }
 

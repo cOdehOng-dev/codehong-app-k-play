@@ -93,7 +93,7 @@ sealed class LoungeEffect : ViewSideEffect {
     data object RequestLocationPermission : LoungeEffect()
     data object RequestMyLocationTabPermission : LoungeEffect()
     data class NavigateToFestivalList(val regionCode: RegionCode) : LoungeEffect()
-    data object NavigateToAwardedList : LoungeEffect()
+    data class NavigateToAwardedList(val regionCode: RegionCode) : LoungeEffect()
     data class NavigateToGenreRankList(val genreCode: GenreCode) : LoungeEffect()
     data class NavigateToLocalList(val regionCode: RegionCode) : LoungeEffect()
 }

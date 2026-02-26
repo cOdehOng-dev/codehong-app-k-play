@@ -18,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.RegionCode.Companion.nameToSingGuCode
 import com.codehong.app.kplay.manager.ActivityManager
@@ -135,7 +134,10 @@ class LoungeActivity : ComponentActivity() {
                         }
                         is LoungeEffect.NavigateToAwardedList -> {
                             // 수상작 리스트 페이지 이동
-                            ActivityManager.openAwardList(this@LoungeActivity)
+                            ActivityManager.openAwardList(
+                                this@LoungeActivity,
+                                effect.regionCode.code
+                            )
                         }
                         is LoungeEffect.NavigateToGenreRankList -> {
                             ActivityManager.openGenreRankList(

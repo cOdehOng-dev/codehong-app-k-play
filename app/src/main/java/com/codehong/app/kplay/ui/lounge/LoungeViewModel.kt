@@ -191,7 +191,7 @@ class LoungeViewModel @Inject constructor(
 
             is LoungeEvent.OnAwardedMoreClick -> {
                 TimberUtil.d("Awarded more clicked")
-                setEffect { LoungeEffect.NavigateToAwardedList }
+                setEffect { LoungeEffect.NavigateToAwardedList(state.value.selectedAwardTab) }
             }
 
             is LoungeEvent.OnLocalTabSelected -> {
