@@ -52,7 +52,7 @@ class PerformanceDetailActivity : ComponentActivity() {
                             }
 
                             is PerformanceDetailEffect.OpenBookingSitePage -> {
-                                ActivityManager.openExternalUrl(this@PerformanceDetailActivity, effect.site)
+                                ActivityManager.openCustomTab(this@PerformanceDetailActivity, effect.site)
                             }
 
                             is PerformanceDetailEffect.ShowFavoriteToast -> {

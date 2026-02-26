@@ -43,10 +43,10 @@ class LoungeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         viewModel.callRankList()
-        viewModel.callGenreRankList(GenreCode.THEATER.code)
-        viewModel.callFestivalList(RegionCode.SEOUL.code)
-        viewModel.callAwardedPerformanceList(RegionCode.SEOUL.code)
-        viewModel.callLocalList(RegionCode.SEOUL.code)
+        viewModel.callAllGenreRankList()
+        viewModel.callAllFestivalList()
+        viewModel.callAllAwardedPerformanceList()
+        viewModel.callAllLocalList()
         viewModel.callMyLocation()
 
         setContent {

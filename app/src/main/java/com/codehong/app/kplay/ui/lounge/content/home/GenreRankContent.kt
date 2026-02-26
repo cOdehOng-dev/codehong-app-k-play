@@ -24,14 +24,14 @@ import com.codehong.library.widget.tab.scroll.HongTabScrollCompose
 @Composable
 fun GenreRankContent(
     isLoading: Boolean,
-    genreList: List<GenreCode>,
+    tabList: List<GenreCode>,
     selectedTab: GenreCode,
     genreRankList: List<BoxOfficeItem>,
     onSelectedTab: (GenreCode) -> Unit,
     onClickProduct: (BoxOfficeItem) -> Unit,
     onClickMore: () -> Unit
 ) {
-    val selectedIndex = genreList.indexOf(selectedTab).coerceAtLeast(0)
+    val selectedIndex = tabList.indexOf(selectedTab).coerceAtLeast(0)
 
     val scrollState = rememberScrollState()
 
@@ -52,8 +52,8 @@ fun GenreRankContent(
                     right = 16f
                 )
             )
-            .tabList(genreList)
-            .tabTextList(genreList.map { it.displayName })
+            .tabList(tabList)
+            .tabTextList(tabList.map { it.displayName })
             .initialSelectIndex(selectedIndex)
             .selectBackgroundColor(HongColor.MAIN_ORANGE_100.hex)
             .radius(

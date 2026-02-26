@@ -27,6 +27,8 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":domain"))
 
+    implementation("androidx.browser:browser:1.8.0")
+
     implementation(codehonglibs.widget)
     implementation(codehonglibs.network)
     implementation(codehonglibs.architecture)

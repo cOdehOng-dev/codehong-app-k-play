@@ -53,7 +53,7 @@ fun HomeContent(
         item(key = "top_banner") {
             TopBannerContent(
                 isLoading = state.apiLoading.isMonthRankLoading,
-                bannerList = state.rankList.take(6),
+                bannerList = state.displayRankList.take(6),
                 onBannerClick = { item ->
                     item.performanceId?.let { onRankItemClick(item) }
                 }
@@ -63,7 +63,7 @@ fun HomeContent(
         // 장르 그리드
         item(key = "genre_list") {
             GenreListContent(
-                genreList = state.categories,
+                genreList = state.genreTabList,
                 onClickGenre = onCategoryClick
             )
         }
@@ -80,27 +80,28 @@ fun HomeContent(
         }
 
         // 순위 리스트
-        item(key = "rank_list") {
+        item(key = "rank") {
             TabRankPerformanceContent(
                 title = "${state.currentMonth}월 인기 순위 Top50",
                 emptyText = "랭킹 정보가 없어요",
                 isLoading = state.apiLoading.isMonthRankLoading,
+                tabList = state.rankTabList,
                 selectedTab = state.selectedRankTab,
-                tabList = state.rankList,
+                rankList = state.displayRankList,
                 onSelectedTab = onRankTabSelected,
                 onClickProduct = onRankItemClick
             )
         }
 
         // 지역별 공연 섹션
-        item(key = "local_content") {
+        item(key = "local") {
             TabPerformanceContent(
                 title = "지역별 공연이에요",
                 emptyText = "지역별 공연 정보가 없어요",
                 isLoading = state.apiLoading.isLocalLoading,
                 tabList = state.localTabList,
                 selectedTab = state.selectedLocalTab,
-                performanceList = state.localList,
+                performanceList = state.displayLocalList,
                 onTabSelected = onLocalTabSelected,
                 onClickMore = onLocalMoreClick,
                 onClickProduct = onLocalItemClick
@@ -111,9 +112,9 @@ fun HomeContent(
         item(key = "genre_rank") {
             GenreRankContent(
                 isLoading = state.apiLoading.isGenreRankingLoading,
-                genreList = state.categories,
+                tabList = state.genreTabList,
                 selectedTab = state.selectedGenreTab,
-                genreRankList = state.genreRankList,
+                genreRankList = state.displayGenreRankList,
                 onSelectedTab = onGenreTabSelected,
                 onClickProduct = onGenreRankItemClick,
                 onClickMore = onGenreRankMoreClick
@@ -123,14 +124,14 @@ fun HomeContent(
 
 
         // 축제 섹션
-        item(key = "festival_section") {
+        item(key = "festival") {
             TabPerformanceContent(
                 title = "축제 공연은 어때요?",
                 emptyText = "축제 공연 정보가 없어요",
                 isLoading = state.apiLoading.isFestivalLoading,
                 tabList = state.festivalTabList,
                 selectedTab = state.selectedFestivalTab,
-                performanceList = state.festivalList,
+                performanceList = state.displayFestivalList,
                 onTabSelected = onFestivalTabSelected,
                 onClickMore = onFestivalMoreClick,
                 onClickProduct = onFestivalItemClick
@@ -138,14 +139,14 @@ fun HomeContent(
         }
 
         // 수상작 섹션
-        item(key = "awarded_section") {
+        item(key = "award") {
             TabPerformanceContent(
                 title = "수상작은 어때요?",
                 emptyText = "수상작 정보가 없어요",
                 isLoading = state.apiLoading.isAwardLoading,
-                tabList = state.awardedTabs,
-                selectedTab = state.selectedAwardedTab,
-                performanceList = state.awardedList,
+                tabList = state.awardTabList,
+                selectedTab = state.selectedAwardTab,
+                performanceList = state.displayAwardList,
                 onTabSelected = onAwardedTabSelected,
                 onClickMore = onAwardedMoreClick,
                 onClickProduct = onAwardedItemClick
@@ -154,7 +155,7 @@ fun HomeContent(
 
         // 하단 여백
         item(key = "bottom_spacer") {
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }

@@ -7,6 +7,7 @@ import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.domain.model.performance.PerformanceGroup
 import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.app.kplay.domain.type.BottomTabType
+import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType.Companion.toThemeType
 import com.codehong.app.kplay.domain.usecase.FavoriteUseCase
@@ -56,11 +57,11 @@ class LoungeViewModel @Inject constructor(
         when (event) {
             is LoungeEvent.OnTabSelected -> {
                 TimberUtil.d("Tab selected: ${event.tab.label}")
-                setState { copy(selectedTab = event.tab) }
+                setState { copy(currentTab = event.tab) }
                 if (event.tab == BottomTabType.MY_LOCATION) {
                     val currentSignGuCode = state.value.selectedRegionCode
                     val alreadyResolved = lastResolvedRegionCode == currentSignGuCode
-                    val hasVenues = state.value.performanceGroups.isNotEmpty()
+                    val hasVenues = state.value.performanceGroupList.isNotEmpty()
                     if (alreadyResolved && hasVenues) {
                         TimberUtil.d("$TAG ▶ venue 이미 조회됨 (${currentSignGuCode.displayName}), skip")
                     } else {
@@ -111,7 +112,7 @@ class LoungeViewModel @Inject constructor(
                     setState {
                         copy(
                             selectedRegionCode = event.regionCode,
-                            performanceGroups = emptyList()
+                            performanceGroupList = emptyList()
                         )
                     }
                 } else {
@@ -123,14 +124,14 @@ class LoungeViewModel @Inject constructor(
 
             is LoungeEvent.OnGenreTabSelected -> {
                 TimberUtil.d("Genre tab selected: ${event.genreCode.displayName}")
+                val cached = state.value.entireGenreRankList[event.genreCode]
                 setState {
                     copy(
                         selectedGenreTab = event.genreCode,
-                        genreRankList = emptyList(),
-                        apiLoading = apiLoading.copy(isGenreRankingLoading = false),
+                        displayGenreRankList = cached ?: emptyList(),
+                        apiLoading = apiLoading.copy(isGenreRankingLoading = cached == null)
                     )
                 }
-                callGenreRankList(event.genreCode.code)
             }
 
             is LoungeEvent.OnGenreRankItemClick -> {
@@ -147,14 +148,14 @@ class LoungeViewModel @Inject constructor(
 
             is LoungeEvent.OnFestivalTabSelected -> {
                 TimberUtil.d("Festival tab selected: ${event.regionCode.displayName}")
+                val cached = state.value.entireFestivalList[event.regionCode]
                 setState {
                     copy(
                         selectedFestivalTab = event.regionCode,
-                        apiLoading = apiLoading.copy(isFestivalLoading = false),
-                        festivalList = emptyList()
+                        displayFestivalList = cached ?: emptyList(),
+                        apiLoading = apiLoading.copy(isFestivalLoading = cached == null)
                     )
                 }
-                callFestivalList(event.regionCode.code)
             }
 
             is LoungeEvent.OnFestivalItemClick -> {
@@ -171,14 +172,14 @@ class LoungeViewModel @Inject constructor(
 
             is LoungeEvent.OnAwardedTabSelected -> {
                 TimberUtil.d("Awarded tab selected: ${event.regionCode.displayName}")
+                val cached = state.value.entireAwardedList[event.regionCode]
                 setState {
                     copy(
-                        selectedAwardedTab = event.regionCode,
-                        isAwardedLoaded = false,
-                        awardedList = emptyList()
+                        selectedAwardTab = event.regionCode,
+                        displayAwardList = cached ?: emptyList(),
+                        apiLoading = apiLoading.copy(isAwardLoading = cached == null)
                     )
                 }
-                callAwardedPerformanceList(event.regionCode.code)
             }
 
             is LoungeEvent.OnAwardedItemClick -> {
@@ -195,14 +196,14 @@ class LoungeViewModel @Inject constructor(
 
             is LoungeEvent.OnLocalTabSelected -> {
                 TimberUtil.d("Local tab selected: ${event.regionCode.displayName}")
+                val cached = state.value.entireLocalList[event.regionCode]
                 setState {
                     copy(
                         selectedLocalTab = event.regionCode,
-                        apiLoading = apiLoading.copy(isLocalLoading = false),
-                        localList = emptyList()
+                        displayLocalList = cached ?: emptyList(),
+                        apiLoading = apiLoading.copy(isLocalLoading = cached == null)
                     )
                 }
-                callLocalList(event.regionCode.code)
             }
 
             is LoungeEvent.OnLocalItemClick -> {
@@ -264,7 +265,7 @@ class LoungeViewModel @Inject constructor(
 
                 setState {
                     copy(
-                        rankList = rankList ?: emptyList(),
+                        displayRankList = rankList ?: emptyList(),
                         currentMonth = DateUtil.getCurrentMonth(),
                         apiLoading = apiLoading.copy(isMonthRankLoading = false)
                     )
@@ -301,9 +302,9 @@ class LoungeViewModel @Inject constructor(
                 }
             }
             // MY_LOCATION 탭이 활성화된 경우 venue 그룹 위경도 조회
-            if (state.value.selectedTab == BottomTabType.MY_LOCATION) {
+            if (state.value.currentTab == BottomTabType.MY_LOCATION) {
                 val alreadyResolved = lastResolvedRegionCode == state.value.selectedRegionCode
-                val hasVenues = state.value.performanceGroups.isNotEmpty()
+                val hasVenues = state.value.performanceGroupList.isNotEmpty()
                 if (!alreadyResolved || !hasVenues) {
                     resolvePlaceGroupCoordinates(state.value.myAreaList)
                 }
@@ -312,116 +313,154 @@ class LoungeViewModel @Inject constructor(
     }
 
     /**
-     * 지역별 공연 리스트 api
+     * 지역별 공연 리스트 api - 화면 진입 시 전체 지역 데이터를 병렬로 미리 로드
      */
-    fun callLocalList(areaCode: String) {
+    fun callAllLocalList() {
         val startDate = DateUtil.getPreviousMonthFirstDay(Consts.YYYY_MM_DD_FORMAT)
         val endDate = DateUtil.getPreviousMonthLastDay(Consts.YYYY_MM_DD_FORMAT)
 
+        setState { copy(apiLoading = apiLoading.copy(isLocalLoading = true)) }
+
         viewModelScope.launch {
-            setState {
-                copy(
-                    apiLoading = apiLoading.copy(isLocalLoading = true)
-                )
-            }
-            performanceUseCase.getPerformanceList(
-                service = BuildConfig.KOKOR_CLIENT_ID,
-                startDate = startDate,
-                endDate = endDate,
-                currentPage = "1",
-                rowsPerPage = "10",
-                signGuCode = areaCode,
-            ).collect { localList ->
-                setState {
-                    copy(
-                        localList = localList ?: emptyList(),
-                        apiLoading = apiLoading.copy(isLocalLoading = false)
-                    )
+            RegionCode.entries.forEach { regionCode ->
+                launch {
+                    performanceUseCase.getPerformanceList(
+                        service = BuildConfig.KOKOR_CLIENT_ID,
+                        startDate = startDate,
+                        endDate = endDate,
+                        currentPage = "1",
+                        rowsPerPage = "10",
+                        signGuCode = regionCode.code,
+                    ).collect { list ->
+                        val updatedCache = state.value.entireLocalList + (regionCode to (list ?: emptyList()))
+                        val selectedTab = state.value.selectedLocalTab
+                        setState {
+                            copy(
+                                entireLocalList = updatedCache,
+                                displayLocalList = if (regionCode == selectedTab) (list ?: emptyList()) else displayLocalList,
+                                apiLoading = if (regionCode == selectedTab) {
+                                    apiLoading.copy(isLocalLoading = false)
+                                } else {
+                                    apiLoading
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 
     /**
-     * 장르별 랭킹 리스트 api
+     * 장르별 랭킹 리스트 api - 화면 진입 시 전체 장르 데이터를 병렬로 미리 로드
      */
-    fun callGenreRankList(genreCode: String) {
+    fun callAllGenreRankList() {
         val startDate = DateUtil.getPreviousMonthFirstDay(Consts.YYYY_MM_DD_FORMAT)
         val endDate = DateUtil.getPreviousMonthLastDay(Consts.YYYY_MM_DD_FORMAT)
 
+        setState { copy(apiLoading = apiLoading.copy(isGenreRankingLoading = true)) }
+
         viewModelScope.launch {
-            setState {
-                copy(
-                    apiLoading = apiLoading.copy(isGenreRankingLoading = true)
-                )
-            }
-            performanceUseCase.getRankList(
-                serviceKey = BuildConfig.KOKOR_CLIENT_ID,
-                startDate = startDate,
-                endDate = endDate,
-                genreCode = genreCode
-            ).collect { rankList ->
-                setState {
-                    copy(
-                        genreRankList = rankList ?: emptyList(),
-                        apiLoading = apiLoading.copy(isGenreRankingLoading = false)
-                    )
+            GenreCode.entries.forEach { genreCode ->
+                launch {
+                    performanceUseCase.getRankList(
+                        serviceKey = BuildConfig.KOKOR_CLIENT_ID,
+                        startDate = startDate,
+                        endDate = endDate,
+                        genreCode = genreCode.code
+                    ).collect { list ->
+                        val updatedCache = state.value.entireGenreRankList + (genreCode to (list ?: emptyList()))
+                        val selectedTab = state.value.selectedGenreTab
+                        setState {
+                            copy(
+                                entireGenreRankList = updatedCache,
+                                displayGenreRankList = if (genreCode == selectedTab) (list ?: emptyList()) else displayGenreRankList,
+                                apiLoading = if (genreCode == selectedTab) {
+                                    apiLoading.copy(isGenreRankingLoading = false)
+                                } else {
+                                    apiLoading
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 
-    fun callFestivalList(signGuCode: String) {
+    /**
+     * 축제 공연 리스트 api - 화면 진입 시 전체 지역 데이터를 병렬로 미리 로드
+     */
+    fun callAllFestivalList() {
         val startDate = DateUtil.getPreviousMonthFirstDay(Consts.YYYY_MM_DD_FORMAT)
         val endDate = DateUtil.getPreviousMonthLastDay(Consts.YYYY_MM_DD_FORMAT)
 
+        setState { copy(apiLoading = apiLoading.copy(isFestivalLoading = true)) }
+
         viewModelScope.launch {
-            setState {
-                copy(
-                    apiLoading = apiLoading.copy(isFestivalLoading = true)
-                )
-            }
-            performanceUseCase.getFestivalList(
-                serviceKey = BuildConfig.KOKOR_CLIENT_ID,
-                startDate = startDate,
-                endDate = endDate,
-                currentPage = "1",
-                rowsPerPage = "10",
-                signGuCode = signGuCode
-            ).collect { festivalList ->
-                setState {
-                    copy(
-                        festivalList = festivalList ?: emptyList(),
-                        apiLoading = apiLoading.copy(isFestivalLoading = false)
-                    )
+            RegionCode.entries.forEach { regionCode ->
+                launch {
+                    performanceUseCase.getFestivalList(
+                        serviceKey = BuildConfig.KOKOR_CLIENT_ID,
+                        startDate = startDate,
+                        endDate = endDate,
+                        currentPage = "1",
+                        rowsPerPage = "10",
+                        signGuCode = regionCode.code
+                    ).collect { list ->
+                        val updatedCache = state.value.entireFestivalList + (regionCode to (list ?: emptyList()))
+                        val selectedTab = state.value.selectedFestivalTab
+                        setState {
+                            copy(
+                                entireFestivalList = updatedCache,
+                                displayFestivalList = if (regionCode == selectedTab) (list ?: emptyList()) else displayFestivalList,
+                                apiLoading = if (regionCode == selectedTab) {
+                                    apiLoading.copy(isFestivalLoading = false)
+                                } else {
+                                    apiLoading
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 
-    fun callAwardedPerformanceList(signGuCode: String) {
+    /**
+     * 수상작 공연 리스트 api - 화면 진입 시 전체 지역 데이터를 병렬로 미리 로드
+     */
+    fun callAllAwardedPerformanceList() {
         val startDate = DateUtil.getPreviousMonthFirstDay(Consts.YYYY_MM_DD_FORMAT)
         val endDate = DateUtil.getPreviousMonthLastDay(Consts.YYYY_MM_DD_FORMAT)
 
+        setState { copy(apiLoading = apiLoading.copy(isAwardLoading = true)) }
+
         viewModelScope.launch {
-            setState {
-                copy(
-                    apiLoading = apiLoading.copy(isAwardLoading = true)
-                )
-            }
-            performanceUseCase.getAwardedPerformanceList(
-                serviceKey = BuildConfig.KOKOR_CLIENT_ID,
-                startDate = startDate,
-                endDate = endDate,
-                currentPage = "1",
-                rowsPerPage = "10",
-                signGuCode = signGuCode
-            ).collect { awardedList ->
-                setState {
-                    copy(
-                        awardedList = awardedList ?: emptyList(),
-                        apiLoading = apiLoading.copy(isAwardLoading = false)
-                    )
+            RegionCode.entries.forEach { regionCode ->
+                launch {
+                    performanceUseCase.getAwardedPerformanceList(
+                        serviceKey = BuildConfig.KOKOR_CLIENT_ID,
+                        startDate = startDate,
+                        endDate = endDate,
+                        currentPage = "1",
+                        rowsPerPage = "10",
+                        signGuCode = regionCode.code
+                    ).collect { list ->
+                        val updatedCache = state.value.entireAwardedList + (regionCode to (list ?: emptyList()))
+                        val selectedTab = state.value.selectedAwardTab
+                        setState {
+                            copy(
+                                entireAwardedList = updatedCache,
+                                displayAwardList = if (regionCode == selectedTab) (list ?: emptyList()) else displayAwardList,
+                                apiLoading = if (regionCode == selectedTab) {
+                                    apiLoading.copy(isAwardLoading = false)
+                                } else {
+                                    apiLoading
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -501,7 +540,7 @@ class LoungeViewModel @Inject constructor(
             lastResolvedRegionCode = state.value.selectedRegionCode
             setState {
                 copy(
-                    performanceGroups = performanceGroupList,
+                    performanceGroupList = performanceGroupList,
                     apiLoading = apiLoading.copy(isPlaceGroupLoading = false)
                 )
             }

@@ -14,32 +14,49 @@ import com.codehong.library.architecture.mvi.ViewSideEffect
 import com.codehong.library.architecture.mvi.ViewState
 
 data class LoungeState(
-    val selectedTab: BottomTabType = BottomTabType.HOME,
+    val currentTab: BottomTabType = BottomTabType.HOME,
     val themeType: ThemeType = ThemeType.SYSTEM,
-    val categories: List<GenreCode> = GenreCode.entries.toList(),
-    val rankList: List<BoxOfficeItem> = emptyList(),
-    val selectedRankTab: RankTab = RankTab.TOP_1_10,
-    val currentMonth: Int = 1,
+
     val myAreaList: List<PerformanceInfoItem> = emptyList(),
     val selectedRegionCode: RegionCode = RegionCode.SEOUL,
+
+    val currentMonth: Int = 1,
+
+    val rankTabList: List<RankTab> = RankTab.entries.toList(),
+    val selectedRankTab: RankTab = RankTab.TOP_1_10,
+    val displayRankList: List<BoxOfficeItem> = emptyList(),
+
+    val genreTabList: List<GenreCode> = GenreCode.entries.toList(),
     val selectedGenreTab: GenreCode = GenreCode.THEATER,
-    val genreRankList: List<BoxOfficeItem> = emptyList(),
-    val festivalList: List<PerformanceInfoItem> = emptyList(),
-    val selectedFestivalTab: RegionCode = RegionCode.SEOUL,
+    val displayGenreRankList: List<BoxOfficeItem> = emptyList(),
+    val entireGenreRankList: Map<GenreCode, List<BoxOfficeItem>> = emptyMap(),
+
     val festivalTabList: List<RegionCode> = RegionCode.entries.toList(),
-    val awardedList: List<PerformanceInfoItem> = emptyList(),
-    val isAwardedLoaded: Boolean = false,
-    val selectedAwardedTab: RegionCode = RegionCode.SEOUL,
-    val awardedTabs: List<RegionCode> = RegionCode.entries.toList(),
-    val localList: List<PerformanceInfoItem> = emptyList(),
-    val selectedLocalTab: RegionCode = RegionCode.SEOUL,
+    val selectedFestivalTab: RegionCode = RegionCode.SEOUL,
+    val displayFestivalList: List<PerformanceInfoItem> = emptyList(),
+    val entireFestivalList: Map<RegionCode, List<PerformanceInfoItem>> = emptyMap(),
+
+    val awardTabList: List<RegionCode> = RegionCode.entries.toList(),
+    val selectedAwardTab: RegionCode = RegionCode.SEOUL,
+    val displayAwardList: List<PerformanceInfoItem> = emptyList(),
+    val entireAwardedList: Map<RegionCode, List<PerformanceInfoItem>> = emptyMap(),
+
     val localTabList: List<RegionCode> = RegionCode.entries.toList(),
-    val apiLoading: LoungeApiLoading = LoungeApiLoading(),
+    val selectedLocalTab: RegionCode = RegionCode.SEOUL,
+    val displayLocalList: List<PerformanceInfoItem> = emptyList(),
+    val entireLocalList: Map<RegionCode, List<PerformanceInfoItem>> = emptyMap(),
+
+
     val favoriteList: List<FavoritePerformance> = emptyList(),
-    val performanceGroups: List<PerformanceGroup> = emptyList(),
+    val performanceGroupList: List<PerformanceGroup> = emptyList(),
+
+
     val cacheSizeText: String = "",
     val userLat: Double? = null,
-    val userLng: Double? = null
+    val userLng: Double? = null,
+
+
+    val apiLoading: LoungeApiLoading = LoungeApiLoading(),
 ) : ViewState
 
 sealed class LoungeEvent : ViewEvent {

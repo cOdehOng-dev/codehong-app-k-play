@@ -32,15 +32,15 @@ fun TabRankPerformanceContent(
     title: String,
     emptyText: String,
     isLoading: Boolean,
+    tabList: List<RankTab>,
     selectedTab: RankTab,
-    tabList: List<BoxOfficeItem>,
+    rankList: List<BoxOfficeItem>,
     onSelectedTab: (RankTab) -> Unit,
     onClickProduct: (BoxOfficeItem) -> Unit,
 ) {
-    val rankTabList = RankTab.entries
-    val selectedIndex = rankTabList.indexOf(selectedTab).coerceAtLeast(0)
+    val selectedIndex = tabList.indexOf(selectedTab).coerceAtLeast(0)
 
-    val filteredTabList = tabList.filter { item ->
+    val filteredTabList = rankList.filter { item ->
         val rank = item.rank?.toIntOrNull() ?: 0
         rank in selectedTab.startRank..selectedTab.endRank
     }
@@ -70,8 +70,8 @@ fun TabRankPerformanceContent(
                     right = 16f
                 )
             )
-            .tabList(rankTabList)
-            .tabTextList(rankTabList.map { it.display })
+            .tabList(tabList)
+            .tabTextList(tabList.map { it.display })
             .initialSelectIndex(selectedIndex)
             .selectBackgroundColor(HongColor.MAIN_ORANGE_100.hex)
             .radius(

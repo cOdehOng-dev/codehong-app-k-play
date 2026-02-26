@@ -2,12 +2,16 @@ package com.codehong.app.kplay.manager
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.content.ContextCompat
 import com.codehong.app.kplay.domain.Consts
 import com.codehong.app.kplay.ui.award.AwardListActivity
 import com.codehong.app.kplay.ui.genre.rank.GenreRankListActivity
 import com.codehong.app.kplay.ui.localtab.LocalTabListActivity
 import com.codehong.app.kplay.ui.localtab.LocalTabType
 import com.codehong.app.kplay.ui.performance.detail.PerformanceDetailActivity
+import com.codehong.library.widget.R
 
 object ActivityManager {
 
@@ -97,7 +101,7 @@ object ActivityManager {
         context.startActivity(intent)
     }
 
-    fun openExternalUrl(
+    fun openCustomTab(
         context: Context?,
         url: String?
     ) {
@@ -105,9 +109,13 @@ object ActivityManager {
             return
         }
 
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = android.net.Uri.parse(url)
-        }
-        context.startActivity(intent)
+        val customTabsIntent = CustomTabsIntent.Builder()
+            .setToolbarColor(ContextCompat.getColor(context, R.color.honglib_color_ff8224))
+            .setShowTitle(true)
+            .setStartAnimations(context, R.anim.honglib_popup_in, 0)
+            .setExitAnimations(context, 0, R.anim.honglib_popup_out)
+            .build()
+
+        customTabsIntent.launchUrl(context, Uri.parse(url))
     }
 }

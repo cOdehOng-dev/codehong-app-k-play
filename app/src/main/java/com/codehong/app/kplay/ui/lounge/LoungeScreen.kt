@@ -37,10 +37,10 @@ import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.domain.type.ThemeType
-import com.codehong.app.kplay.ui.lounge.content.SettingContent
 import com.codehong.app.kplay.ui.lounge.content.favorite.FavoriteContent
 import com.codehong.app.kplay.ui.lounge.content.home.HomeContent
 import com.codehong.app.kplay.ui.lounge.content.mylocation.MyLocationContent
+import com.codehong.app.kplay.ui.lounge.content.setting.SettingContent
 import com.codehong.library.widget.R
 import com.codehong.library.widget.extensions.hongBackground
 import com.codehong.library.widget.image.def.HongImageBuilder
@@ -190,7 +190,7 @@ private fun LoungeScreenContent(
                         tonalElevation = 0.dp
                     ) {
                         tabList.forEach { tabItem ->
-                            val isSelected = state.selectedTab == tabItem.tab
+                            val isSelected = state.currentTab == tabItem.tab
                             val interactionSource = remember { MutableInteractionSource() }
                             val isPressed by interactionSource.collectIsPressedAsState()
                             val scale by animateFloatAsState(
@@ -244,7 +244,7 @@ private fun LoungeScreenContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when (state.selectedTab) {
+            when (state.currentTab) {
                 BottomTabType.HOME -> HomeContent(
                     state = state,
                     onCategoryClick = onCategoryClick,
@@ -266,7 +266,7 @@ private fun LoungeScreenContent(
                     onLocalMoreClick = onLocalMoreClick
                 )
                 BottomTabType.MY_LOCATION -> MyLocationContent(
-                    performanceGroupList = state.performanceGroups,
+                    performanceGroupList = state.performanceGroupList,
                     isPlaceGroupLoading = state.apiLoading.isPlaceGroupLoading,
                     selectedAreaName = state.selectedRegionCode.displayName,
                     userLat = state.userLat,
