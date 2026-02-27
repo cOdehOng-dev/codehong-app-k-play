@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.genre.rank
+package com.codehong.app.kplay.ui.genre
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn

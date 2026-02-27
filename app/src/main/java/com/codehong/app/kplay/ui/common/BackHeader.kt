@@ -18,9 +18,9 @@ fun BackHeader(
             .titleColor(HongColor.BLACK_100)
             .titleTypo(HongTypo.BODY_17_B)
             .title(title)
-            .backIcon(R.drawable.honglib_ic_arrow_left)
-            .backIconColor(HongColor.BLACK_100)
-            .onBack { onBackClick() }
+            .icon(R.drawable.honglib_ic_arrow_left)
+            .iconColor(HongColor.BLACK_100)
+            .onClickBack { onBackClick() }
             .applyOption()
     )
 }

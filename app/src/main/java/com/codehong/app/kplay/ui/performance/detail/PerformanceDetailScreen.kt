@@ -125,9 +125,9 @@ private fun Header(
             .titleColor(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
             .titleTypo(HongTypo.BODY_17_B)
             .title(title)
-            .backIcon(R.drawable.honglib_ic_arrow_left)
-            .backIconColor(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
-            .onBack { onBackClick() }
+            .icon(R.drawable.honglib_ic_arrow_left)
+            .iconColor(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
+            .onClickBack { onBackClick() }
             .applyOption()
     )
 }
@@ -156,7 +156,7 @@ private fun TabBar(
                     HongButtonTextBuilder()
                         .width(HongLayoutParam.MATCH_PARENT.value)
                         .height(52)
-                        .text("예매하기")
+                        .text("예매처로 가기")
                         .textTypo(HongTypo.BODY_18_B)
                         .textColor(HongColor.WHITE_100)
                         .backgroundColor(HongColor.MAIN_ORANGE_100.hex)

@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.genre.rank
+package com.codehong.app.kplay.ui.genre
 
 import com.codehong.app.kplay.domain.model.BoxOfficeItem
 import com.codehong.app.kplay.domain.type.GenreCode

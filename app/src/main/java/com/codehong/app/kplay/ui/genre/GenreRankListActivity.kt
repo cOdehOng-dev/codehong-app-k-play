@@ -1,4 +1,4 @@
-package com.codehong.app.kplay.ui.genre.rank
+package com.codehong.app.kplay.ui.genre
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

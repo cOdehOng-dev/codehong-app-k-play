@@ -33,13 +33,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.map.MapActivity"/>
-        <activity android:name=".main.MainActivity"/>
-
         <activity android:name=".ui.performance.detail.PerformanceDetailActivity"/>
         <activity android:name=".ui.localtab.LocalTabListActivity"/>
 
-        <activity android:name=".ui.genre.rank.GenreRankListActivity"/>
+        <activity android:name=".ui.genre.GenreRankListActivity"/>
     </application>
 
 </manifest>

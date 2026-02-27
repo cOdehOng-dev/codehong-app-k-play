@@ -142,9 +142,13 @@ fun MyLocationContent(
         pagerState.scrollToPage(0)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         NaverMap(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             cameraPositionState = cameraPositionState,
             locationSource = locationSource,
             properties = MapProperties(locationTrackingMode = LocationTrackingMode.NoFollow),

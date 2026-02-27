@@ -28,12 +28,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.codehong.app.kplay.domain.type.ThemeType
 import com.codehong.library.widget.extensions.hongBackground
+import com.codehong.library.widget.header.icon.HongHeaderIcon
+import com.codehong.library.widget.header.icon.HongHeaderIconBuilder
 import com.codehong.library.widget.rule.color.HongColor
 import com.codehong.library.widget.rule.color.HongColor.Companion.toColor
 import com.codehong.library.widget.rule.typo.HongTypo
@@ -48,7 +49,6 @@ fun SettingContent(
     onThemeChanged: (ThemeType) -> Unit,
     onCacheDeleteConfirmed: () -> Unit
 ) {
-    val context = LocalContext.current
     val bgColor = if (isDarkMode) HongColor.BLACK_100 else HongColor.WHITE_100
     val titleColor = if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100
     val dividerColor = if (isDarkMode) HongColor.DARK_GRAY_100 else HongColor.GRAY_10
@@ -69,7 +69,6 @@ fun SettingContent(
     }
 
     if (showCacheDeleteDialog) {
-
         CacheDeleteDialog(
             isDarkMode = isDarkMode,
             cacheSizeText = cacheSizeText,
@@ -86,25 +85,12 @@ fun SettingContent(
             .fillMaxSize()
             .hongBackground(bgColor)
     ) {
-        // 헤더
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(
-                text = "설정",
-                modifier = Modifier.padding(horizontal = 20.dp),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = titleColor.toColor()
-            )
-        }
-
-        HorizontalDivider(
-            thickness = 1.dp,
-            color = dividerColor.toColor()
+        HongHeaderIcon(
+            HongHeaderIconBuilder()
+                .title("설정")
+                .titleTypo(HongTypo.BODY_16_B)
+                .titleColor(HongColor.BLACK_100.hex)
+                .applyOption()
         )
 
         // 스크롤 가능한 설정 목록

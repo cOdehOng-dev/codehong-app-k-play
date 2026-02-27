@@ -6,7 +6,7 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import com.codehong.app.kplay.domain.Consts
-import com.codehong.app.kplay.ui.genre.rank.GenreRankListActivity
+import com.codehong.app.kplay.ui.genre.GenreRankListActivity
 import com.codehong.app.kplay.ui.localtab.LocalTabListActivity
 import com.codehong.app.kplay.ui.localtab.LocalTabType
 import com.codehong.app.kplay.ui.performance.detail.PerformanceDetailActivity
