@@ -127,7 +127,7 @@ private fun Header(
             .title(title)
             .icon(R.drawable.honglib_ic_arrow_left)
             .iconColor(if (isDarkMode) HongColor.WHITE_100 else HongColor.BLACK_100)
-            .onClickBack { onBackClick() }
+            .onClickIcon { onBackClick() }
             .applyOption()
     )
 }

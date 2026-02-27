@@ -20,7 +20,7 @@ fun BackHeader(
             .title(title)
             .icon(R.drawable.honglib_ic_arrow_left)
             .iconColor(HongColor.BLACK_100)
-            .onClickBack { onBackClick() }
+            .onClickIcon { onBackClick() }
             .applyOption()
     )
 }
