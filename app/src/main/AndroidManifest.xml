@@ -37,6 +37,8 @@
         <activity android:name=".ui.localtab.LocalTabListActivity"/>
 
         <activity android:name=".ui.genre.GenreRankListActivity"/>
+
+        <activity android:name=".ui.search.SearchActivity"/>
     </application>
 
 </manifest>

@@ -14,11 +14,11 @@ import com.codehong.app.kplay.domain.type.GenreCode
 import com.codehong.app.kplay.domain.type.RankTab
 import com.codehong.app.kplay.domain.type.RegionCode
 import com.codehong.app.kplay.ui.lounge.LoungeState
-import com.codehong.library.debugtool.log.TimberUtil
 
 @Composable
 fun HomeContent(
     state: LoungeState,
+    onClickSearch: () -> Unit,
     onCategoryClick: (GenreCode) -> Unit,
     onRankTabSelected: (RankTab) -> Unit,
     onRankItemClick: (BoxOfficeItem) -> Unit,
@@ -46,7 +46,7 @@ fun HomeContent(
     ) {
         item(key = "search_bar") {
             LoungeHeaderContent {
-                TimberUtil.d("Search clicked")
+                onClickSearch()
             }
         }
         // TOP 배너

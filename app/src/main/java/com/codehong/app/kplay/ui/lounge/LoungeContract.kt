@@ -61,6 +61,8 @@ data class LoungeState(
 
 sealed class LoungeEvent : ViewEvent {
     data class OnTabSelected(val tab: BottomTabType) : LoungeEvent()
+
+    data object OnClickSearch: LoungeEvent()
     data class OnCategoryClick(val genreCode: GenreCode) : LoungeEvent()
     data class OnRankTabSelected(val rankTab: RankTab) : LoungeEvent()
     data class OnRankItemClick(val item: BoxOfficeItem) : LoungeEvent()
@@ -96,6 +98,8 @@ sealed class LoungeEffect : ViewSideEffect {
     data class NavigateToAwardedList(val regionCode: RegionCode) : LoungeEffect()
     data class NavigateToGenreRankList(val genreCode: GenreCode) : LoungeEffect()
     data class NavigateToLocalList(val regionCode: RegionCode) : LoungeEffect()
+
+    data object NavigateTorToSearch : LoungeEffect()
 }
 
 

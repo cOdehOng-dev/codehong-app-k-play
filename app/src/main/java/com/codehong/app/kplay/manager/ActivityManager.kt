@@ -10,9 +10,21 @@ import com.codehong.app.kplay.ui.genre.GenreRankListActivity
 import com.codehong.app.kplay.ui.localtab.LocalTabListActivity
 import com.codehong.app.kplay.ui.localtab.LocalTabType
 import com.codehong.app.kplay.ui.performance.detail.PerformanceDetailActivity
+import com.codehong.app.kplay.ui.search.SearchActivity
 import com.codehong.library.widget.R
 
 object ActivityManager {
+
+    fun openSearch(
+        context: Context?
+    ) {
+        if (context == null) {
+            return
+        }
+
+        val intent = Intent(context, SearchActivity::class.java)
+        context.startActivity(intent)
+    }
 
     fun openPerformanceDetail(
         context: Context?,

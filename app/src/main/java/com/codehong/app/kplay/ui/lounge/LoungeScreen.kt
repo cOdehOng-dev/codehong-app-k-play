@@ -67,6 +67,9 @@ fun LoungeScreen(
         onThemeChanged = { themeType ->
             viewModel.setEvent(LoungeEvent.OnThemeChanged(themeType))
         },
+        onClickSearch = {
+            viewModel.setEvent(LoungeEvent.OnClickSearch)
+        },
         onCategoryClick = { cateCode ->
             viewModel.setEvent(LoungeEvent.OnCategoryClick(cateCode))
         },
@@ -135,6 +138,7 @@ private fun LoungeScreenContent(
     state: LoungeState,
     onTabSelected: (BottomTabType) -> Unit,
     onThemeChanged: (ThemeType) -> Unit,
+    onClickSearch: () -> Unit,
     onCategoryClick: (GenreCode) -> Unit,
     onRankTabSelected: (RankTab) -> Unit,
     onRankItemClick: (BoxOfficeItem) -> Unit,
@@ -247,6 +251,7 @@ private fun LoungeScreenContent(
             when (state.currentTab) {
                 BottomTabType.HOME -> HomeContent(
                     state = state,
+                    onClickSearch = onClickSearch,
                     onCategoryClick = onCategoryClick,
                     onRankTabSelected = onRankTabSelected,
                     onRankItemClick = onRankItemClick,
@@ -300,6 +305,7 @@ private fun LoungeScreenPreview() {
         state = LoungeState(),
         onTabSelected = {},
         onThemeChanged = {},
+        onClickSearch = {},
         onCategoryClick = {},
         onRankTabSelected = {},
         onRankItemClick = {},

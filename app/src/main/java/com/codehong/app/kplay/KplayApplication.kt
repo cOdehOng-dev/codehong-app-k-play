@@ -3,6 +3,7 @@ package com.codehong.app.kplay
 import android.app.Application
 import com.codehong.library.debugtool.log.TimberConfig
 import com.codehong.library.debugtool.log.TimberUtil
+import com.codehong.library.kplayui.ReactNativeHostManager
 import com.codehong.library.network.NetworkConfig
 import com.codehong.library.network.NetworkManager
 import com.jakewharton.threetenabp.AndroidThreeTen
@@ -36,5 +37,8 @@ class KplayApplication : Application() {
                 .isEnabledLoggingJsonFormatter(true)
                 .build()
         )
+
+        ReactNativeHostManager.initialize(this)
+
     }
 }

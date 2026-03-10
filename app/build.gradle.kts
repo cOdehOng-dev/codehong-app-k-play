@@ -59,6 +59,10 @@ dependencies {
     implementation(libs.androidx.media3.datasource)
     implementation(libs.google.android.gms.location)
 
+    implementation("com.codehong.library:kplayui:0.0.15-local")
+
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

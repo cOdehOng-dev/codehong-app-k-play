@@ -83,6 +83,9 @@ class LoungeActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 viewModel.effect.collect { effect ->
                     when (effect) {
+                        is LoungeEffect.NavigateTorToSearch -> {
+                            ActivityManager.openSearch(this@LoungeActivity)
+                        }
                         is LoungeEffect.NavigateToCategory -> {
                             ActivityManager.openGenreList(
                                 this@LoungeActivity,

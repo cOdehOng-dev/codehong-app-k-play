@@ -75,6 +75,10 @@ class LoungeViewModel @Inject constructor(
                 }
             }
 
+            is LoungeEvent.OnClickSearch -> {
+                setEffect { LoungeEffect.NavigateTorToSearch }
+            }
+
             is LoungeEvent.OnCategoryClick -> {
                 TimberUtil.d("Category clicked: ${event.genreCode.displayName} (code: ${event.genreCode.code})")
                 setEffect { LoungeEffect.NavigateToCategory(event.genreCode) }
