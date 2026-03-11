@@ -4,6 +4,7 @@ network = "0.0.1-20260310.133539-SNAPSHOT"
 util = "0.0.1-20260310.133605-SNAPSHOT"
 architecture = "0.0.1-20260310.133703-SNAPSHOT"
 debugtool = "0.0.1-20260310.133512-SNAPSHOT"
+react-native-ui = "0.0.16-local"
 
 [plugins]
 
@@ -13,6 +14,7 @@ network = { group = "com.codehong.library", name = "network", version.ref = "net
 util = { group = "com.codehong.library", name = "util", version.ref = "util" }
 architecture = { group = "com.codehong.library", name = "architecture", version.ref = "architecture" }
 debugtool = { group = "com.codehong.library", name = "debugtool", version.ref = "debugtool" }
+react-native-ui = { group = "com.codehong.library", name = "kplayui", version.ref = "react-native-ui" }
 
 [bundles]
 

@@ -27,8 +27,6 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":domain"))
 
-    implementation("androidx.browser:browser:1.8.0")
-
     implementation(codehonglibs.widget)
     implementation(codehonglibs.network)
     implementation(codehonglibs.architecture)
@@ -38,10 +36,16 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.browser)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.exoplayer.hls)
+    implementation(libs.androidx.media3.datasource)
+
     implementation(libs.material)
     implementation(libs.composables.core)
 
-    implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(libs.google.android.gms.location)
 
@@ -53,13 +57,9 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.palette)
 
-    implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.media3.ui)
-    implementation(libs.androidx.media3.exoplayer.hls)
-    implementation(libs.androidx.media3.datasource)
     implementation(libs.google.android.gms.location)
 
-    implementation("com.codehong.library:kplayui:0.0.15-local")
+    implementation(codehonglibs.react.native.ui)
 
 
 
