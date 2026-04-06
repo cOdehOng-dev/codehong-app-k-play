@@ -8,7 +8,6 @@ import com.codehong.app.kplay.domain.model.performance.PerformanceInfoItem
 import com.codehong.app.kplay.domain.model.performance.detail.PerformanceDetail
 import com.codehong.app.kplay.domain.model.place.PlaceDetail
 import com.codehong.app.kplay.domain.repository.PerformanceRepository
-import com.codehong.library.debugtool.log.TimberUtil
 import com.codehong.library.network.CallStatus
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
@@ -81,21 +80,15 @@ class PerformanceRepositoryImpl @Inject constructor(
         genreCode: String?,
         area: String?
     ): Flow<CallStatus<List<BoxOfficeItem>?>> = flow {
-        TimberUtil.i("test here getRankList genreCode = $genreCode, startDate = $startDate, endDate = $endDate, area = $area")
         remote.getBoxOffice(serviceKey, startDate, endDate, genreCode, area)
             .onStart {
                 emit(CallStatus.Loading)
             }.catch { e ->
-                TimberUtil.e("test here getRankList error 11 = $e")
                 emit(CallStatus.Error(e))
             }.collect {
-                gson.toJson(it)?.let { json ->
-                    TimberUtil.d("test here getRankList json = $json")
-                }
                 emit(CallStatus.Success(it.boxOffices?.map { itemDto -> itemDto.asDomain() }))
             }
     }.catch { e ->
-        TimberUtil.e("test here getRankList error 11 = $e")
         emit(CallStatus.Error(e))
     }
 
@@ -121,9 +114,6 @@ class PerformanceRepositoryImpl @Inject constructor(
         }.catch { e ->
             emit(CallStatus.Error(e))
         }.collect {
-            gson.toJson(it)?.let { json ->
-                TimberUtil.d("test here getFestivalList json = $json")
-            }
             emit(CallStatus.Success(it.performances?.map { itemDto -> itemDto.asDomain() }))
         }
     }.catch { e ->

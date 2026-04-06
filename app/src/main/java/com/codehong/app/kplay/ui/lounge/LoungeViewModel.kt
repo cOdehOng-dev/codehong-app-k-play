@@ -21,8 +21,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-private const val TAG = "LoungeViewModel"
-
 @HiltViewModel
 class LoungeViewModel @Inject constructor(
     application: Application,
@@ -63,7 +61,7 @@ class LoungeViewModel @Inject constructor(
                     val alreadyResolved = lastResolvedRegionCode == currentSignGuCode
                     val hasVenues = state.value.performanceGroupList.isNotEmpty()
                     if (alreadyResolved && hasVenues) {
-                        TimberUtil.d("$TAG ▶ venue 이미 조회됨 (${currentSignGuCode.displayName}), skip")
+                        TimberUtil.d("venue 이미 조회됨 (${currentSignGuCode.displayName}), skip")
                     } else {
                         // 로딩 상태 선점 후 위치 권한 요청
                         setState { copy(apiLoading = apiLoading.copy(isPlaceGroupLoading = true)) }
@@ -266,7 +264,6 @@ class LoungeViewModel @Inject constructor(
                 startDate = startDate,
                 endDate = endDate
             ).collect { rankList ->
-
                 setState {
                     copy(
                         displayRankList = rankList ?: emptyList(),

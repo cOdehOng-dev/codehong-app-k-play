@@ -48,7 +48,9 @@ fun GenreListContent(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 rowItems.forEach { cateCode ->
-                    Box(modifier = Modifier.weight(1f)) {
+                    Box(
+                        modifier = Modifier.weight(1f)
+                    ) {
                         GenreContent(
                             genreCode = cateCode,
                             onClick = { onClickGenre(cateCode) }

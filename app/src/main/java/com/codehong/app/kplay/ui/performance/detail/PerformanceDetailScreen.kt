@@ -288,7 +288,7 @@ private fun InfoContent(
         }
 
         detail.facilityName?.takeIf { it.isNotBlank() }?.let {
-            PerformanceDetailInfoContent(label = "공연장", value = it, isDarkMode = isDarkMode)
+            PerformanceDetailInfoContent(label = "공  연  장", value = it, isDarkMode = isDarkMode)
         }
         detail.runtime?.takeIf { it.isNotBlank() && it != "0분" }?.let {
             PerformanceDetailInfoContent(label = "러닝타임", value = it, isDarkMode = isDarkMode)
